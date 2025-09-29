@@ -1,322 +1,429 @@
-(() => {
-  let fetched = false, fetching = false, waiting = false
-  let datas
-  const path = config.root + 'search.json'
-  const input = getElement('#search-input')
-  const nav = getElement('nav')
-  const activeHolder = config.search.activeHolder
-  const blurHolder = config.search.blurHolder
-  const noResult = config.search.noResult
-  const popup = getElement('.search-popup')
-  function fetechData() {
-    fetching = true
-    fetch(path)
-      .then(response => response.text())
-      .then(res => {
-        fetched = true
-        datas = JSON.parse(res)
-        if (waiting === true) {
-          inputEventFunction()
-        }
-      }).catch(() => fetching = false)
-  }
-  if (config.search.preload) {
-    fetechData()
-  }
-  function getIndexByWord(word, text, caseSensitive) {
-    let wordLen = word.length
-    if (wordLen === 0) return []
-    let startPosition = 0
-    let position = []
-    let index = []
-    if (!caseSensitive) {
-      text = text.toLowerCase()
-      word = word.toLowerCase()
-    }
-    while ((position = text.indexOf(word, startPosition)) > -1) {
-      index.push({
-        position: position,
-        word: word
-      })
-      startPosition = position + wordLen
-    }
-    return index
-  }
-  function mergeIntoSlice(start, end, index, searchText) {
-    let item = index[index.length - 1]
-    let position = item.position
-    let word = item.word
-    let hits = []
-    let searchTextCountInSlice = 0
-    while (position + word.length <= end && index.length !== 0) {
-      if (word === searchText) {
-        searchTextCountInSlice++
-      }
-      hits.push({
-        position: position,
-        length: word.length
-      })
-      let wordEnd = position + word.length
-      index.pop()
-      while (index.length !== 0) {
-        item = index[index.length - 1]
-        position = item.position
-        word = item.word
-        if (wordEnd > position) {
-          index.pop()
-        } else {
-          break
-        }
-      }
-    }
-    return {
-      hits: hits,
-      start: start,
-      end: end,
-      TextCount: searchTextCountInSlice
-    }
-  }
-  function highlightKeyword(text, slice) {
-    let result = ''
-    let prevEnd = slice.start
-    slice.hits.forEach(hit => {
-      result += text.substring(prevEnd, hit.position)
-      let end = hit.position + hit.length
-      result += `<nobr class="search-keyword">${text.substring(hit.position, end)}</nobr>`
-      prevEnd = end
-    })
-    result += text.substring(prevEnd, slice.end)
-    return result
-  }
-  function inLoading() {
-    getElement('#search-result').innerHTML = '<div id="loading"><div><p>Loading...</p></div></div>'
-  }
-  function onPopupClose() {
-    if (document.querySelector('.up') && document.querySelector('.closed')) {
-      getElement('.navBtn').classList.remove('expanded')
-    }
-    getElement('#search-result').querySelectorAll('a').
-      forEach((item) => item.setAttribute('tabindex', -1))
-    document.body.classList.remove('blur')
-    popup.classList.remove('open')
-  }
-  function proceedSearch() {
-    document.body.classList.add('blur')
-    if (document.querySelector('.up') && document.querySelector('.closed')) {
-      getElement('.navBtn').classList.add('expanded')
-    }
-    getElement('#search-result').removeAttribute('tabindex')
-    popup.classList.add('open')
-    if (fetched === true) {
-      popup.innerHTML = "<div id='search-result'></div>"
-      document.getElementById('search-result').innerHTML = ''
-    } else {
-      inLoading()
-    }
-  }
-  function inputEventFunction() {
-    let searchText = input.value.trim().toLowerCase()
-    if (!searchText.length) {
-      input.placeholder = activeHolder
-      onPopupClose()
-      return
-    }
-    proceedSearch()
-    if (fetched === false) {
-      return
-    }
-    let keywords = searchText.split(/[-\s]+/)
-    if (keywords.length > 1) {
-      keywords.push(searchText)
-    }
-    let resultItems = []
-    if (searchText.length > 0) {
-      datas.forEach(data => {
-        if (!data.title) {
-          return
-        }
-        let TextCount = 0, TitleCount = 0, ContentCount = 0
-        let title = data.title.trim()
-        let titleInLowerCase = title.toLowerCase()
-        let content = data.content ? data.content.trim().replace(/<[^>]+>/g, '') : ''
-        let contentInLowerCase = content.toLowerCase()
-        let articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/')
-        let indexOfTitle = []
-        let indexOfContent = []
-        keywords.forEach(keyword => {
-          let hitInTitle = getIndexByWord(keyword, titleInLowerCase, false)
-          let hitInContent = getIndexByWord(keyword, contentInLowerCase, false)
-          indexOfTitle = indexOfTitle.concat(hitInTitle)
-          indexOfContent = indexOfContent.concat(hitInContent)
-          if (hitInTitle.length > 0 || hitInContent.length > 0) {
-            TextCount++
-          }
-          if (hitInTitle.length > 0) {
-            TitleCount++
-          }
-          if (hitInTitle.length > 0 || hitInContent.length > 0) {
-            ContentCount++
-          }
-        })
-        if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
-          [indexOfTitle, indexOfContent].forEach(index => {
-            index.sort((itemLeft, itemRight) => {
-              if (itemRight.position !== itemLeft.position) {
-                return itemRight.position - itemLeft.position
-              }
-              return itemLeft.word.length - itemRight.word.length
-            })
-          })
+/**
+ * Search functionality for VSC4T theme
+ * Provides code editor style search experience
+ */
 
-          let slicesOfTitle = []
-          let slicesOfContent = []
-          if (indexOfTitle.length !== 0) {
-            let tmp = mergeIntoSlice(0, title.length, indexOfTitle, searchText)
-            slicesOfTitle.push(tmp)
-          }
-          let upperBound = parseInt(config.top_n_per_article, 10)
-          if (upperBound >= 0) {
-            slicesOfContent = slicesOfContent.slice(0, upperBound)
-          }
-          let resultItem = ''
-          if (slicesOfTitle.length !== 0) {
-            resultItem += `<a href="${articleUrl}" class="recent-post"><b class="search-result-title">${highlightKeyword(title, slicesOfTitle[0])}</b>`
-          } else {
-            resultItem += `<a href="${articleUrl}" class="recent-post"><b class="search-result-title">${title}</b>`
-          }
-          if (indexOfContent !== null && indexOfContent.length !== 0) {
-            let item = indexOfContent[indexOfContent.length - 1]
-            let position = item.position
-            let word = item.word
-            let start = position - 20
-            let end = position + 80
-            if (start < 0) {
-              start = 0
-            }
-            if (end < position + word.length) {
-              end = position + word.length
-            }
-            if (end > content.length) {
-              end = content.length
-            }
-            let tmp = mergeIntoSlice(start, end, indexOfContent, searchText)
-            resultItem += `<p class="search-result">${highlightKeyword(content, tmp)}...</p>`
-          } else {
-            resultItem += `<p class="search-result">${content}...</p>`
-          }
-          resultItem += '</a>'
-          resultItems.push({
-            item: resultItem,
-            TextCount: TextCount,
-            TitleCount: TitleCount,
-            ContentCount: ContentCount,
-            id: resultItems.length
-          })
-        }
-      })
+let searchData = [];
+let searchIndex = null;
+
+// Initialize search when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('vs-search-input');
+  const searchResults = document.getElementById('vs-search-results');
+  const searchContainer = document.getElementById('vs-search-container');
+  const searchCounter = document.getElementById('vs-search-counter');
+  const searchClearBtn = document.getElementById('vs-search-clear');
+  
+  // Filter checkboxes
+  const searchTitles = document.getElementById('search-titles');
+  const searchContent = document.getElementById('search-content');
+  const searchTags = document.getElementById('search-tags');
+  
+  if (!searchInput || !searchResults) return;
+
+  // Get translations
+  const noResultsText = window.HEXO_CONFIG ? (window.HEXO_CONFIG.search_no_results || 'No results found for') : 'No results found for';
+  const resultText = window.HEXO_CONFIG ? (window.HEXO_CONFIG.search_result || 'result') : 'result';
+  const resultsText = window.HEXO_CONFIG ? (window.HEXO_CONFIG.search_results || 'results') : 'results';
+  const loadingErrorText = window.HEXO_CONFIG ? (window.HEXO_CONFIG.search_error || 'Error loading search data') : 'Error loading search data';
+
+  // Recent searches storage
+  let recentSearches = [];
+  try {
+    const stored = localStorage.getItem('vs-recent-searches');
+    if (stored) {
+      recentSearches = JSON.parse(stored);
+      updateRecentSearches();
     }
-    popup.scroll({ top: 0, left: 0 })
-    let resultList = getElement('#search-result')
-    if (resultItems.length === 0) {
-      resultList.innerHTML =
-        `<div id="no-result"><p>${format(noResult, `<b>${input.value}</b>`)}</p></div>`
+  } catch (e) {
+    console.error('Error loading recent searches:', e);
+  }
+
+  // Get the correct root path for search.json
+  let rootPath = '/';
+  if (window.VSC4T_SEARCH && window.VSC4T_SEARCH.root) {
+    rootPath = window.VSC4T_SEARCH.root;
+  } else if (window.HEXO_CONFIG && window.HEXO_CONFIG.root) {
+    rootPath = window.HEXO_CONFIG.root;
+  }
+  
+  // Ensure the root path has a trailing slash
+  if (!rootPath.endsWith('/')) {
+    rootPath += '/';
+  }
+  
+  const searchJsonPath = `${rootPath}search.json`;
+  console.log('[VSC4T] Loading search index from:', searchJsonPath);
+
+  // Show loading state
+  searchResults.innerHTML = `<div class="vs-search-loading">
+    <i class="fas fa-spinner fa-spin"></i>
+    <span>Loading search data...</span>
+  </div>`;
+
+  // Load search data
+  fetch(searchJsonPath)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('[VSC4T] Search index loaded successfully, entries:', data.length);
+      searchData = data;
+      initSearch();
+      // Clear loading state and prepare for search
+      clearResults();
+    })
+    .catch(error => {
+      console.error('Error loading search data:', error, 'Path:', searchJsonPath);
+      searchResults.innerHTML = `<div class="vs-no-results">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>${loadingErrorText}</span>
+        <div class="vs-error-details">
+          Check that search.json is being generated correctly.<br>
+          Path: ${searchJsonPath}<br>
+          Error: ${error.message}
+        </div>
+      </div>`;
+    });
+
+  // Initialize search functionality
+  function initSearch() {
+    // Listen for input in search box
+    searchInput.addEventListener('input', performSearch);
+    
+    // Clear search
+    if (searchClearBtn) {
+      searchClearBtn.addEventListener('click', clearSearch);
+    }
+    
+    // Handle keyboard navigation
+    searchInput.addEventListener('keydown', navigateResults);
+    
+    // Filter changes
+    if (searchTitles) searchTitles.addEventListener('change', performSearch);
+    if (searchContent) searchContent.addEventListener('change', performSearch);
+    if (searchTags) searchTags.addEventListener('change', performSearch);
+  }
+  
+  // Perform search
+  function performSearch() {
+    const query = searchInput.value.trim().toLowerCase();
+    
+    if (!query) {
+      clearResults();
+      return;
+    }
+    
+    // Get filter options
+    const filterTitle = searchTitles ? searchTitles.checked : true;
+    const filterContent = searchContent ? searchContent.checked : true;
+    const filterTags = searchTags ? searchTags.checked : true;
+    
+    const results = searchData.filter(item => {
+      let match = false;
+      
+      // Match title
+      if (filterTitle && item.title && item.title.toLowerCase().includes(query)) {
+        match = true;
+      }
+      
+      // Match content
+      if (!match && filterContent && item.content && item.content.toLowerCase().includes(query)) {
+        match = true;
+      }
+      
+      // Match tags or categories
+      if (!match && filterTags) {
+        if (item.tags && item.tags.some(tag => tag.toLowerCase().includes(query))) {
+          match = true;
+        }
+        
+        if (!match && item.categories && item.categories.some(cat => cat.toLowerCase().includes(query))) {
+          match = true;
+        }
+      }
+      
+      return match;
+    });
+    
+    displayResults(results, query);
+    updateSearchCounter(results.length);
+    
+    // Save to recent searches (only if results found)
+    if (results.length > 0) {
+      saveRecentSearch(query);
+    }
+  }
+
+  // Save a query to recent searches
+  function saveRecentSearch(query) {
+    // Only save if it's not already in the list
+    if (!recentSearches.includes(query) && query.length >= 2) {
+      recentSearches.unshift(query); // Add to beginning
+      recentSearches = recentSearches.slice(0, 5); // Keep only 5 most recent
+      
+      // Store in localStorage
+      try {
+        localStorage.setItem('vs-recent-searches', JSON.stringify(recentSearches));
+      } catch (e) {
+        console.error('Error saving recent searches:', e);
+      }
+      
+      // Update UI
+      updateRecentSearches();
+    }
+  }
+  
+  // Update the recent searches UI
+  function updateRecentSearches() {
+    const recentSearchesList = document.getElementById('recent-searches');
+    if (!recentSearchesList) return;
+    
+    recentSearchesList.innerHTML = '';
+    
+    if (recentSearches.length === 0) {
+      recentSearchesList.innerHTML = '<div class="recent-search-empty">No recent searches</div>';
+      return;
+    }
+    
+    recentSearches.forEach(query => {
+      const searchItem = document.createElement('div');
+      searchItem.className = 'recent-search-item';
+      searchItem.innerHTML = `<i class="fas fa-history"></i> ${escapeHTML(query)}`;
+      searchItem.addEventListener('click', () => {
+        if (searchInput) {
+          searchInput.value = query;
+          searchInput.focus();
+          performSearch();
+        }
+      });
+      
+      recentSearchesList.appendChild(searchItem);
+    });
+  }
+  
+  // Display search results
+  function displayResults(results, query) {
+    searchResults.innerHTML = '';
+    
+    if (results.length === 0) {
+      searchResults.innerHTML = `<div class="vs-no-results">
+        <i class="fas fa-search"></i>
+        <span>${noResultsText} "${escapeHTML(query)}"</span>
+      </div>`;
+      return;
+    }
+    
+    results.forEach((item, index) => {
+      const resultItem = document.createElement('div');
+      resultItem.className = 'vs-result-item';
+      resultItem.dataset.index = index;
+      
+      // Highlight matched text
+      let titleHtml = highlightText(item.title || '', query);
+      let contentPreview = getContentPreview(item.content || '', query, 150);
+      let contentHtml = highlightText(contentPreview, query);
+      
+      // Create file icon based on categories or default
+      let fileIcon = 'fa-file-code';
+      if (item.categories && item.categories.length > 0) {
+        const category = item.categories[0].toLowerCase();
+        if (category.includes('javascript') || category.includes('js')) {
+          fileIcon = 'fa-file-code js-icon';
+        } else if (category.includes('css') || category.includes('style')) {
+          fileIcon = 'fa-file-code css-icon';
+        } else if (category.includes('html')) {
+          fileIcon = 'fa-file-code html-icon';
+        } else if (category.includes('markdown') || category.includes('md')) {
+          fileIcon = 'fa-file-alt md-icon';
+        }
+      }
+      
+      resultItem.innerHTML = `
+        <a href="${item.url}" class="vs-result-link">
+          <div class="vs-result-header">
+            <i class="fas ${fileIcon}"></i>
+            <span class="vs-result-title">${titleHtml}</span>
+          </div>
+          <div class="vs-result-preview">${contentHtml}</div>
+          <div class="vs-result-meta">
+            <span class="vs-result-date">
+              <i class="fas fa-calendar-alt"></i> 
+              ${item.date || ''}
+            </span>
+            ${item.tags && item.tags.length ? 
+              `<span class="vs-result-tags">
+                <i class="fas fa-tags"></i> 
+                ${item.tags.join(', ')}
+              </span>` : ''}
+          </div>
+        </a>
+      `;
+      
+      searchResults.appendChild(resultItem);
+    });
+    
+    // Add active state to first result
+    if (searchResults.children.length > 0) {
+      searchResults.children[0].classList.add('active');
+    }
+  }
+  
+  // Navigate search results with keyboard
+  function navigateResults(e) {
+    if (!searchResults.children.length || !['ArrowDown', 'ArrowUp', 'Enter'].includes(e.key)) {
+      return;
+    }
+    
+    const activeItem = searchResults.querySelector('.vs-result-item.active');
+    let activeIndex = activeItem ? parseInt(activeItem.dataset.index) : -1;
+    
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        if (activeIndex < searchResults.children.length - 1) {
+          if (activeItem) activeItem.classList.remove('active');
+          searchResults.children[activeIndex + 1].classList.add('active');
+          ensureVisible(searchResults.children[activeIndex + 1]);
+        }
+        break;
+        
+      case 'ArrowUp':
+        e.preventDefault();
+        if (activeIndex > 0) {
+          activeItem.classList.remove('active');
+          searchResults.children[activeIndex - 1].classList.add('active');
+          ensureVisible(searchResults.children[activeIndex - 1]);
+        }
+        break;
+        
+      case 'Enter':
+        e.preventDefault();
+        if (activeItem) {
+          const link = activeItem.querySelector('.vs-result-link');
+          if (link) window.location.href = link.href;
+        }
+        break;
+    }
+  }
+  
+  // Ensure the active element is visible in the scrollable container
+  function ensureVisible(element) {
+    const container = searchResults;
+    const containerTop = container.scrollTop;
+    const containerBottom = containerTop + container.clientHeight;
+    const elementTop = element.offsetTop;
+    const elementBottom = elementTop + element.clientHeight;
+    
+    if (elementTop < containerTop) {
+      container.scrollTop = elementTop;
+    } else if (elementBottom > containerBottom) {
+      container.scrollTop = elementBottom - container.clientHeight;
+    }
+  }
+  
+  // Clear search results
+  function clearResults() {
+    searchResults.innerHTML = '';
+    updateSearchCounter(0);
+  }
+  
+  // Clear search input and results
+  function clearSearch() {
+    searchInput.value = '';
+    clearResults();
+    searchInput.focus();
+  }
+  
+  // Update search counter
+  function updateSearchCounter(count) {
+    if (searchCounter) {
+      searchCounter.textContent = count > 0 ? 
+        `${count} ${count === 1 ? resultText : resultsText}` : 
+        '0 ' + resultsText;
+    }
+  }
+  
+  // Helper: Get content preview with context around the query
+  function getContentPreview(content, query, maxLength) {
+    if (!content) return '';
+    
+    const lowerContent = content.toLowerCase();
+    const index = lowerContent.indexOf(query.toLowerCase());
+    
+    if (index === -1) {
+      // Return beginning of content if query not found
+      return content.length > maxLength ? 
+        content.substring(0, maxLength) + '...' : 
+        content;
+    }
+    
+    // Calculate start and end points for preview with context
+    const contextLength = Math.floor((maxLength - query.length) / 2);
+    let start = Math.max(0, index - contextLength);
+    let end = Math.min(content.length, index + query.length + contextLength);
+    
+    // Adjust if we have room to show more context
+    if (start > 0 && end < content.length) {
+      // Preview is somewhere in the middle
+    } else if (start === 0) {
+      // Beginning of content, show more at the end
+      end = Math.min(content.length, maxLength);
     } else {
-      resultItems.sort((Left, Right) => {
-        if (Left.TextCount !== Right.TextCount) {
-          return Right.TextCount - Left.TextCount
-        } else if (Left.TitleCount !== Right.TitleCount) {
-          return Right.TitleCount - Left.TitleCount
-        } else if (Left.ContentCount !== Right.ContentCount) {
-          return Right.ContentCount - Left.ContentCount
-        }
-        return Right.id - Left.id
-      })
-      let searchResultList = ""
-      resultItems.forEach(result => {
-        searchResultList += result.item
-      })
-      resultList.innerHTML = searchResultList
+      // End of content, show more at the beginning
+      start = Math.max(0, content.length - maxLength);
     }
-    if (typeof pjax !== 'undefined') {
-      pjax.refresh(resultList)
-    }
+    
+    let preview = content.substring(start, end);
+    
+    // Add ellipsis if needed
+    if (start > 0) preview = '...' + preview;
+    if (end < content.length) preview = preview + '...';
+    
+    return preview;
   }
-  input.addEventListener('keypress', event => {
-    if (event.key === 13) {
-      inputEventFunction()
+  
+  // Highlight query text in content
+  function highlightText(text, query) {
+    if (!text) return '';
+    if (!query) return escapeHTML(text);
+    
+    const lowerText = text.toLowerCase();
+    const lowerQuery = query.toLowerCase();
+    let result = '';
+    let lastIndex = 0;
+    let index = lowerText.indexOf(lowerQuery);
+    
+    while (index !== -1) {
+      // Add text before match
+      result += escapeHTML(text.substring(lastIndex, index));
+      // Add highlighted match
+      result += `<span class="vs-highlight">${escapeHTML(text.substring(index, index + query.length))}</span>`;
+      
+      lastIndex = index + query.length;
+      index = lowerText.indexOf(lowerQuery, lastIndex);
     }
-  })
-  let lastEvent = 0
-  function StartSearch() {
-    nav.classList.add('search')
-    nav.classList.add('search-moving')
-    clearTimeout(lastEvent)
-    lastEvent = setTimeout(() => nav.classList.remove('search-moving'), 600)
-    header.closeAll()
-    if (document.querySelector('.up')) {
-      getElement('main').style.pointerEvents = 'none'
-    }
-    input.placeholder = activeHolder
-    if (!fetched) {
-      if (!fetching) {
-        fetechData()
+    
+    // Add remaining text
+    result += escapeHTML(text.substring(lastIndex));
+    
+    return result;
+  }
+  
+  // Escape HTML special characters
+  function escapeHTML(text) {
+    if (typeof text !== 'string') return '';
+    return text.replace(/[&<>"']/g, match => {
+      switch (match) {
+        case '&': return '&amp;';
+        case '<': return '&lt;';
+        case '>': return '&gt;';
+        case '"': return '&quot;';
+        case "'": return '&#39;';
       }
-      waiting = true
-    }
+    });
   }
-  function EscapeSearch() {
-    if (!nav.classList.contains('search')) {
-      return
-    }
-    nav.classList.remove('search')
-    nav.classList.add('search-moving')
-    clearTimeout(lastEvent)
-    lastEvent = setTimeout(() => nav.classList.remove('search-moving'), 600)
-    onPopupClose()
-    input.value = ''
-    input.placeholder = blurHolder
-    document.removeEventListener('mouseup', EscapeSearch)
-    waiting = false
-    getElement('main').style.pointerEvents = ''
-    input.blur()
-  }
-  input.addEventListener('keyup', () => {
-    nav.classList.add('search')
-    inputEventFunction()
-  })
-  input.addEventListener('focus', () => {
-    StartSearch()
-  })
-  input.addEventListener('blur', event => {
-    if (!event.relatedTarget ||
-      event.relatedTarget.parentElement !== getElement('#search-result')) {
-      EscapeSearch()
-    }
-  })
-  popup.addEventListener('focusout', event => {
-    if (!event.relatedTarget ||
-      (event.relatedTarget !== input &&
-        event.relatedTarget.parentElement !== getElement('#search-result'))) {
-      EscapeSearch()
-    }
-  })
-  document.addEventListener('keyup', event => {
-    if (event.key === 'Escape') {
-      EscapeSearch()
-    } else if (event.key === 'f' && 
-      !['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
-      if (!document.querySelector('.up')) {
-        getElement('.navBtn').classList.remove('hide')
-        header.open()
-      }
-      StartSearch()
-      input.focus()
-    }
-  })
-  document.addEventListener('click', event => {
-    if (event.target.tagName === 'A' ||
-      event.target.parentElement.tagName === 'A') {
-      EscapeSearch()
-    }
-  })
-})()
+});
