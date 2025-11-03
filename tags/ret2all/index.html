@@ -161,9 +161,9 @@
       </div>
       <div class="section-content">
         
-          <div class="tag-item active">
+          <div class="tag-item ">
             <i class="fas fa-tag"></i>
-            <a href="">heap</a>
+            <a href="../heap/">heap</a>
             <span class="count">(1)</span>
           </div>
         
@@ -173,9 +173,9 @@
             <span class="count">(1)</span>
           </div>
         
-          <div class="tag-item ">
+          <div class="tag-item active">
             <i class="fas fa-tag"></i>
-            <a href="../ret2all/">ret2all</a>
+            <a href="">ret2all</a>
             <span class="count">(1)</span>
           </div>
         
@@ -194,7 +194,7 @@
     <div class="tab-bar">
       <div class="tab active">
         <i class="fas fa-tag"></i>
-        <span>tag: heap.md</span>
+        <span>tag: ret2all.md</span>
       </div>
     </div>
     
@@ -202,7 +202,7 @@
       <div class="tag-header">
         <h1>
           <i class="fas fa-tag"></i>
-          Tag: heap
+          Tag: ret2all
         </h1>
         <span class="tag-count">1 posts</span>
       </div>
@@ -213,24 +213,31 @@
             <div class="post-header">
               <i class="fas fa-file-alt"></i>
               <span class="post-title">
-                <a href="../../2025/08/05/%E9%AB%98%E7%89%88%E6%9C%AClargebin-attack/">高版本largebin_attack</a>
+                <a href="../../2025/11/03/ret2all%E8%AF%A6%E7%BB%86%E5%88%86%E6%9E%90%E4%B8%8E%E6%80%BB%E7%BB%93/">ret2all详细分析与总结</a>
               </span>
             </div>
             
             <div class="post-meta">
               <span class="date">
                 <i class="fas fa-calendar-alt"></i>
-                2025-08-05
+                2025-11-03
               </span>
+              
+                <span class="category">
+                  <i class="fas fa-folder"></i>
+                  <a class="category-link" href="../../categories/stack/">stack</a>
+                </span>
               
             </div>
             
             <div class="post-excerpt">
-              利用源码123456789101112131415161718192021      /* maintain large bins in sorted order */      if (fwd != bck) # 检查large bin是否为空        &#123;          /* Or with inuse bit to speed comparisons */         ...
+              最近高本版only_read的题目很多，不管是有输出还是无输出，各种形式下。ret2all都能中的各种方法都能起到作用，因此复现一下这个手法。感谢YX-hueimie师傅出的那么棒的题目，在复现中温故而知新了许多知识了。
+这里就是给了rread函数的返回地址和保存的旧的rbp的值，后面mprotect限制不能修改这个rbp的值。开启沙箱。关闭标准错误。
+沙箱的话read和write的分支全禁，留下...
             </div>
             
             <div class="post-footer">
-              <a href="../../2025/08/05/%E9%AB%98%E7%89%88%E6%9C%AClargebin-attack/" class="read-more">
+              <a href="../../2025/11/03/ret2all%E8%AF%A6%E7%BB%86%E5%88%86%E6%9E%90%E4%B8%8E%E6%80%BB%E7%BB%93/" class="read-more">
                 <i class="fas fa-code"></i>
                 Read More
               </a>
