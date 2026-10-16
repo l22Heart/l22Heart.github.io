@@ -151,8 +151,5 @@ export const navbarShrink = {
 
   setNavigating(isNavigating) {
     navbarState.isNavigating = isNavigating;
-    if (isNavigating) {
-      document.body.classList.remove("navbar-shrink");
-    }
   },
 };

@@ -161,21 +161,6 @@
 .page-container .main-content-container {
   padding-top: 70px;
   position: relative;
-  transition: padding 0.2s ease;
-}
-.navbar-shrink .page-container .main-content-container {
-  padding-top: 50.4px;
-  transition: padding 0.2s ease;
-}
-@media (max-width: 768px) {
-  .navbar-shrink .page-container .main-content-container {
-    padding-top: 45.36px;
-  }
-}
-@media (max-width: 640px) {
-  .navbar-shrink .page-container .main-content-container {
-    padding-top: 40.32px;
-  }
 }
 @media (max-width: 768px) {
   .page-container .main-content-container {
@@ -245,7 +230,7 @@
   position: relative;
   box-sizing: border-box;
   width: 80%;
-  max-width: 1000px;
+  max-width: 1120px;
   height: 100%;
 }
 @media (max-width: 768px) {
@@ -259,7 +244,7 @@
   }
 }
 .page-container .main-content-container .main-content-body .main-content.has-toc {
-  max-width: 1200px !important;
+  max-width: 1344px !important;
 }
 .page-container .main-content-container .main-content-body .main-content-footer {
   width: 100%;

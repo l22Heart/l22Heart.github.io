@@ -32,7 +32,9 @@ const initSwupHooks = (swupInstance) => {
   }
 
   didInitSwupHooks = true;
-  swupInstance.hooks.on("page:view", (visit) => {
+  // Restore TOC width, font size and page handlers before Swup measures
+  // anchor positions or restores history. page:view runs after scrolling.
+  swupInstance.hooks.before("content:scroll", (visit) => {
     runCallbacks(pageViewCallbacks, visit);
   });
   swupInstance.hooks.on("visit:start", (visit) => {
