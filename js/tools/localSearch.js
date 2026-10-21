@@ -1,4 +1,5 @@
 let isFetched = false;
+let isFetching = false;
 let cachedData = [];
 let cachedPath = null;
 let isXml = true;
@@ -40,10 +41,11 @@ const normalizeData = (rawData) => {
 };
 
 const fetchData = () => {
-  if (isFetched || !cachedPath) {
+  if (isFetched || isFetching || !cachedPath) {
     return;
   }
 
+  isFetching = true;
   fetch(config.root + cachedPath)
     .then((response) => response.text())
     .then((res) => {
@@ -68,9 +70,13 @@ const fetchData = () => {
         noResultDom.innerHTML =
           '<i class="fa-solid fa-magnifying-glass fa-5x"></i>';
       }
+      renderSearchResult(document.querySelector(".search-input"));
     })
     .catch((error) => {
       console.error("Failed to load search data:", error);
+    })
+    .finally(() => {
+      isFetching = false;
     });
 };
 

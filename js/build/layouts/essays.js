@@ -1,2 +1,2 @@
-export default function initEssays(){const t=document.querySelectorAll(".essay-date");t.length&&t.forEach(t=>{const e=t.getAttribute("data-date"),n=config.language||"en",a=moment(e).locale(n).calendar();t.textContent=a})}
+export default function initEssays({signal:e}={}){const t=document.querySelectorAll(".essay-date");t.length&&(e?.aborted||("undefined"!=typeof moment?t.forEach(e=>{const t=e.getAttribute("data-date"),a=config.language||"en",n=moment(t).locale(a).calendar();e.textContent=n}):document.querySelector("[data-essay-date-library] script")?.addEventListener("load",()=>initEssays({signal:e}),{once:!0,signal:e})))}
 //# sourceMappingURL=essays.js.map

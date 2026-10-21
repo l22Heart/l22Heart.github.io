@@ -13,6 +13,7 @@
   ) return;
 
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const pointer = window.matchMedia('(hover: hover) and (pointer: fine)');
   const selectors = [
     '.home-article-item',
     '.eva-collection-card',
@@ -22,6 +23,7 @@
   const animations = new Set();
   let observer = null;
   let signature = null;
+  let lightCleanup = null;
   let viewReady = true;
   let pageHidden = false;
   // A restored position or fragment should be immediately readable, not re-opened.
@@ -38,6 +40,8 @@
   };
 
   const stop = () => {
+    lightCleanup?.();
+    lightCleanup = null;
     if (signature) {
       signature.removeAttribute('data-signature-intro');
       signature = null;
@@ -54,11 +58,44 @@
     animations.clear();
   };
 
+  // Event-driven light, never a perpetual render loop. Only the decorative layer moves.
+  const bindLight = (hero) => {
+    if (!hero || lightCleanup || !pointer.matches) return;
+    const scope = new AbortController();
+    let frame = 0;
+    let x = 0;
+    let y = 0;
+    const reset = () => {
+      cancelAnimationFrame(frame);
+      frame = 0;
+      hero.style.removeProperty('--light-x');
+      hero.style.removeProperty('--light-y');
+    };
+    hero.addEventListener('pointermove', (event) => {
+      x = event.clientX;
+      y = event.clientY;
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        const bounds = hero.getBoundingClientRect();
+        hero.style.setProperty('--light-x', `${Math.max(-1, Math.min(1, (x - bounds.left) / bounds.width * 2 - 1)) * 24}px`);
+        hero.style.setProperty('--light-y', `${Math.max(-1, Math.min(1, (y - bounds.top) / bounds.height * 2 - 1)) * 12}px`);
+      });
+    }, { signal: scope.signal, passive: true });
+    hero.addEventListener('pointerleave', reset, { signal: scope.signal });
+    lightCleanup = () => {
+      scope.abort();
+      reset();
+    };
+  };
+
   const bind = () => {
-    if (observer || !viewReady || pageHidden || skipView || motion.matches || isChanging()) return;
+    if (!viewReady || pageHidden || motion.matches || isChanging()) return;
+    const hero = document.querySelector('.home-banner-container');
+    bindLight(hero);
+    if (observer || skipView) return;
 
     const viewportHeight = document.documentElement.clientHeight;
-    const hero = document.querySelector('.home-banner-container');
     if (hero && !revealed.has(hero)) {
       revealed.add(hero);
       // Restored/offscreen signatures stay still, just like restored article rows.
@@ -146,6 +183,11 @@
     motion.addListener(syncPreference);
   }
 
+  if (typeof pointer.addEventListener === 'function') {
+    pointer.addEventListener('change', syncPreference);
+  } else if (typeof pointer.addListener === 'function') {
+    pointer.addListener(syncPreference);
+  }
   window.addEventListener('pagehide', () => {
     pageHidden = true;
     stop();
@@ -156,6 +198,7 @@
       // BFCache restores the same nodes and scroll; never restart their entrance.
       skipView = true;
       stop();
+      bind();
       return;
     }
     bind();

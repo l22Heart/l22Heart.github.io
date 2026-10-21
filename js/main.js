@@ -128,9 +128,7 @@ const initPage = () => {
   });
 
   safeRun("essays", () => {
-    if (typeof moment !== "undefined") {
-      initEssays();
-    }
+    initEssays({ signal: pageSignal });
   });
 
   safeRun("pangu", () => {
