@@ -210,9 +210,39 @@
 .eva-directory .eva-record-tags a { display: inline-block; color: var(--third-text-color); font: .68rem/1.8 var(--mono-font, monospace); text-decoration: none; }
 .eva-directory .eva-record-tags a:hover { color: var(--eva-signal); text-decoration: underline; text-underline-offset: 4px; }
 
-/* Profile intentionally contains only the ID (page heading) and email. */
+/* A compact profile using the same tonal surfaces as the reading directories. */
 .eva-about { margin: 0 0 40px; }
-.eva-about .eva-about-email { display: inline-block; padding: 6px 0; font: 400 1rem/1.8 var(--mono-font, monospace); text-underline-offset: 5px; }
+.eva-about-profile {
+  padding: clamp(24px, 4vw, 40px);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  background: radial-gradient(ellipse at 100% 0, var(--hero-violet), transparent 62%), var(--surface);
+}
+.eva-about-identity { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.eva-about .eva-about-eyebrow {
+  margin: 0;
+  color: var(--third-text-color);
+  font: 500 .65rem/1.8 var(--mono-font, monospace);
+  letter-spacing: .04em;
+}
+.markdown-body .eva-about .eva-about-name {
+  margin: 12px 0 8px !important;
+  padding: 0;
+  border: 0;
+  color: var(--first-text-color);
+  font: 600 clamp(1.6rem, 4vw, 2rem)/1.4 var(--display-font);
+  letter-spacing: -.035em;
+}
+.eva-about img.eva-about-avatar { flex: none; width: 80px; height: 80px; margin: 0; border-radius: 50%; object-fit: cover; }
+.eva-about .eva-about-intro { max-width: 36em; margin: 28px 0; font-size: 1rem; line-height: 2; }
+.eva-about-intro strong { color: var(--first-text-color); font-weight: 550; }
+.eva-about .eva-about-teams { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 24px; padding: 20px 0; border-top: 1px solid var(--border-color); }
+.eva-about .eva-about-teams p { margin: 0; font-size: .9rem; }
+.eva-about-contact { display: flex; align-items: baseline; flex-wrap: wrap; gap: 12px 24px; padding-top: 20px; border-top: 1px solid var(--border-color); }
+.eva-about-contact-links { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 24px; min-width: 0; }
+.eva-about-qq { font: 400 .8rem/1.8 var(--mono-font, monospace); }
+.eva-about .eva-about-link { display: inline-flex; align-items: center; gap: 12px; padding: 6px 0; color: var(--eva-signal); font: 400 .8rem/1.8 var(--mono-font, monospace); text-decoration: none; }
+.eva-about-link:hover { text-decoration: underline; text-underline-offset: 5px; }
 .eva-directory .eva-visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 @media (max-width: 640px) {
   .eva-directory { padding-top: 0; }
@@ -227,6 +257,9 @@
   .eva-directory .eva-record-year-heading h2 { font-size: 1.7rem; margin-bottom: 0; }
   .eva-record-item > article { grid-template-columns: 48px minmax(0, 1fr); gap: 14px; padding: 20px 0; }
   .eva-directory .eva-collection-notes > li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .eva-about-identity { align-items: flex-start; gap: 16px; }
+  .eva-about img.eva-about-avatar { width: 56px; height: 56px; }
+  .eva-about .eva-about-intro { font-size: .95rem; margin: 24px 0; }
 }
 @media (max-width: 420px) {
   .eva-directory-prompt .eva-directory-total { flex-basis: 100%; margin: 0; }
