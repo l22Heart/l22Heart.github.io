@@ -9,9 +9,10 @@ const ensureObserver = () => {
     return;
   }
 
+  // Start fetching well before an image scrolls in so it is decoded on arrival.
   const options = {
-    rootMargin: "0px",
-    threshold: 0.1,
+    rootMargin: "600px 0px",
+    threshold: 0,
   };
 
   lazyloadObserver = new IntersectionObserver((entries, observer) => {
@@ -22,7 +23,14 @@ const ensureObserver = () => {
 
       const img = entry.target;
       const dataSrc = img.getAttribute("data-src");
-      if (dataSrc) {
+      if (dataSrc && img.getAttribute("src") !== dataSrc) {
+        // `data-lazy` lets CSS fade the real image in once it has decoded.
+        img.dataset.lazy = "pending";
+        const settle = () => {
+          img.dataset.lazy = "done";
+        };
+        img.addEventListener("load", settle, { once: true });
+        img.addEventListener("error", settle, { once: true });
         img.src = dataSrc;
       }
 

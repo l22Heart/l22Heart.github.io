@@ -122,6 +122,10 @@
     
 
     
+        
+        <link rel="preload" href="/fonts/Geist/GeistVF.woff2" as="font" type="font/woff2" crossorigin>
+    
+    
 <link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
 
     
@@ -165,7 +169,7 @@
     
             
                 
-                    <link rel="stylesheet" href="/css/eva-theme.css?v=4b1fd415aef9">
+                    <link rel="stylesheet" href="/css/eva-theme.css?v=7ac62a56299d">
                 
     
             
@@ -197,7 +201,7 @@
         <a class="home-avatar" href="/about/" aria-label="了解 heart22">
             <img src="/images/head.jpg" alt="heart22 的头像" width="64" height="64" fetchpriority="high" decoding="async">
         </a>
-        <h1 class="home-author-id">heart22</h1>
+        <h1 class="home-author-id" aria-label="heart22"><span class="home-author-letter" aria-hidden="true" style="--i: 0">h</span><span class="home-author-letter" aria-hidden="true" style="--i: 1">e</span><span class="home-author-letter" aria-hidden="true" style="--i: 2">a</span><span class="home-author-letter" aria-hidden="true" style="--i: 3">r</span><span class="home-author-letter" aria-hidden="true" style="--i: 4">t</span><span class="home-author-letter" aria-hidden="true" style="--i: 5">2</span><span class="home-author-letter" aria-hidden="true" style="--i: 6">2</span></h1>
     </div>
 </section>
 
@@ -705,7 +709,7 @@
                 
 
                     
-                        <script data-swup-reload-script src="/js/site-motion.js" defer></script>
+                        <script data-swup-reload-script src="/js/site-motion.js?v=495b5020e352" defer></script>
                     
         
         
@@ -844,7 +848,14 @@
                 animateScroll: false,
                 offset: 80,
             }),
-            new SwupPreloadPlugin(),
+            new SwupPreloadPlugin({
+                // Article links entering the viewport are fetched while idle, so a tap
+                // swaps instantly. Skipped on Save-Data or 2G links.
+                preloadVisibleLinks: !(navigator.connection?.saveData || /2g/.test(navigator.connection?.effectiveType || "")) && {
+                    delay: 300,
+                    containers: [".main-content-body"],
+                },
+            }),
         ],
         containers: ["#swup"],
         animateHistoryBrowsing: false,

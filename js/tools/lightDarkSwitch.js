@@ -151,9 +151,46 @@ export const ModeToggle = {
       return;
     }
 
-    const handler = () => {
+    const handler = (event) => {
       const isDark = document.body.classList.contains("dark-mode");
-      isDark ? this.enableLightMode() : this.enableDarkMode();
+      const toggle = () => (isDark ? this.enableLightMode() : this.enableDarkMode());
+      if (
+        typeof document.startViewTransition !== "function" ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ) {
+        toggle();
+        return;
+      }
+
+      // The new theme grows as a circle from the button, as in Apple/Google settings.
+      const bounds = this.modeToggleButton_dom.getBoundingClientRect();
+      const x = event.clientX || bounds.left + bounds.width / 2;
+      const y = event.clientY || bounds.top + bounds.height / 2;
+      const radius = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y),
+      );
+      const root = document.documentElement;
+      root.dataset.themeReveal = "";
+      const transition = document.startViewTransition(toggle);
+      transition.ready
+        .then(() => {
+          root.animate(
+            {
+              clipPath: [
+                `circle(0px at ${x}px ${y}px)`,
+                `circle(${radius}px at ${x}px ${y}px)`,
+              ],
+            },
+            {
+              duration: 560,
+              easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+              pseudoElement: "::view-transition-new(root)",
+            },
+          );
+        })
+        .catch(() => {});
+      transition.finished.finally(() => delete root.dataset.themeReveal);
     };
 
     if (signal) {

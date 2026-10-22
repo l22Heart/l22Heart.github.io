@@ -176,18 +176,19 @@ a:focus-visible, button:focus-visible, .icon-item:focus-visible { outline: 2px s
   background: var(--surface) !important; box-shadow: none !important;
   transition: border-color 200ms ease, box-shadow 200ms ease;
 }
+/* A soft light follows the pointer inside the card (--spot-x/y set by site-motion.js). */
 .home-article-list .home-article-item::before {
   content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0;
-  background: linear-gradient(115deg, transparent 20%, color-mix(in srgb, var(--primary-color) 7%, transparent) 50%, transparent 80%);
-  transform: translateX(-18%);
-  transition: opacity 240ms ease, transform 650ms cubic-bezier(.16,1,.3,1);
+  background: radial-gradient(420px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+              color-mix(in srgb, var(--primary-color) 9%, transparent), transparent 70%);
+  transition: opacity 320ms ease;
 }
 .home-content-container .home-article-list .home-article-item:hover,
 .home-article-list .home-article-item:focus-within {
   transform: none !important; border-color: color-mix(in srgb, var(--primary-color) 28%, var(--border-color));
   box-shadow: var(--redefine-box-shadow) !important;
 }
-.home-article-item:hover::before, .home-article-item:focus-within::before { opacity: .8; transform: translateX(18%); }
+.home-article-item:hover::before, .home-article-item:focus-within::before { opacity: 1; }
 .home-article-item > .article-card-body {
   position: relative; min-height: 0; gap: 15px !important;
   padding: 30px 110px 32px 34px !important;
@@ -296,6 +297,46 @@ a:focus-visible, button:focus-visible, .icon-item:focus-visible { outline: 2px s
 .nf-home-link { display: inline-flex; gap: 14px; align-items: center; padding: 13px 20px; background: var(--first-text-color); color: var(--surface) !important; border-radius: 24px; font-weight: 600; }
 .nf-home-link:hover { opacity: .85; }
 .nf-home-link i { color: inherit !important; }
+
+/* Motion layer. Springs settle quickly and only transform/opacity/clip-path animate,
+   so every effect stays on the compositor. */
+:root { --ease-spring: cubic-bezier(.34,1.36,.5,1); --ease-out-expo: cubic-bezier(.16,1,.3,1); }
+
+/* Navigation pill: one element glides to the hovered link, then back to the active one. */
+.navbar-container .navbar-list { position: relative; gap: 4px !important; }
+.navbar-container .navbar-item:not(.search) > a { position: relative; z-index: 1; padding: 6px 13px !important; border-radius: 999px; }
+.navbar-container .navbar-list:has(> .nav-pill) .navbar-item > a::after { display: none !important; }
+.navbar-container .nav-pill {
+  position: absolute; top: 0; left: 0; z-index: 0; pointer-events: none; opacity: 0;
+  border-radius: 999px; background: color-mix(in srgb, var(--first-text-color) 7%, transparent);
+  transition: transform 460ms var(--ease-spring), width 460ms var(--ease-spring), opacity 200ms ease;
+}
+
+/* Hero: letters are revealed by site-motion.js; scrolling gently recedes the signature. */
+.home-author-letter { display: inline-block; }
+@supports (animation-timeline: scroll()) {
+  .home-banner-container .content {
+    animation: hero-recede linear both; animation-timeline: scroll(root); animation-range: 0 300px;
+  }
+  @keyframes hero-recede { to { opacity: 0; transform: translateY(-36px) scale(.94); } }
+}
+
+/* Press feedback: surfaces dip slightly under the finger, then spring back. */
+.home-content-container .home-article-list .home-article-item { transition: border-color 200ms ease, box-shadow 200ms ease, transform 420ms var(--ease-spring); }
+.home-content-container .home-article-list .home-article-item:active { transform: scale(.988) !important; transition-duration: 200ms, 200ms, 120ms; }
+.eva-collection-card, .eva-tag-card { transition: border-color 180ms ease, box-shadow 180ms ease, transform 420ms var(--ease-spring); }
+.eva-collection-card:active, .eva-tag-card:active { transform: scale(.985); transition-duration: 180ms, 180ms, 120ms; }
+.right-bottom-tools, .navbar-container .navbar-item > a, .article-read-link, .nf-home-link { transition: transform 380ms var(--ease-spring), background-color 180ms ease, color 180ms ease, border-color 180ms ease; }
+.right-bottom-tools:active, .navbar-container .navbar-item > a:active, .article-read-link:active, .nf-home-link:active { transform: scale(.92); transition-duration: 100ms; }
+
+/* Lazy images fade and sharpen in once decoded instead of popping. */
+img[data-lazy] { transition: opacity 600ms var(--ease-out-expo), filter 600ms var(--ease-out-expo); }
+img[data-lazy="pending"] { opacity: 0; filter: blur(12px); }
+
+/* Theme switch: the new palette expands as a circle (lightDarkSwitch.js drives clip-path). */
+html[data-theme-reveal]::view-transition-old(root),
+html[data-theme-reveal]::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+html[data-theme-reveal] * { transition: none !important; }
 @media (max-width: 900px) {
   .navbar-container .navbar-content { max-width: none; }
   .home-article-item > .article-card-body { padding: 28px 90px 28px 28px !important; }
@@ -330,6 +371,11 @@ a:focus-visible, button:focus-visible, .icon-item:focus-visible { outline: 2px s
   .home-article-list .home-article-item, .home-article-item::before,
   .article-read-link, .navbar-container .navbar-item a, .home-author-id { transition: none !important; }
   .home-banner-container::before { transition: none !important; transform: translateX(-50%); }
+  .home-banner-container .content { animation: none !important; }
+  .navbar-container .nav-pill, img[data-lazy] { transition: none !important; }
+  img[data-lazy="pending"] { opacity: 1; filter: none; }
+  .home-content-container .home-article-list .home-article-item:active, .eva-collection-card:active, .eva-tag-card:active,
+  .right-bottom-tools:active, .navbar-container .navbar-item > a:active, .article-read-link:active, .nf-home-link:active { transform: none !important; }
 }
 @media (prefers-reduced-transparency: reduce) {
   .navbar-container { background: var(--background-color) !important; -webkit-backdrop-filter: none; backdrop-filter: none; }

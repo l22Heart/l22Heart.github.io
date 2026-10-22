@@ -124,6 +124,10 @@
     
 
     
+        
+        <link rel="preload" href="/fonts/Geist/GeistVF.woff2" as="font" type="font/woff2" crossorigin>
+    
+    
 <link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
 
     
@@ -167,7 +171,7 @@
     
             
                 
-                    <link rel="stylesheet" href="/css/eva-theme.css?v=4b1fd415aef9">
+                    <link rel="stylesheet" href="/css/eva-theme.css?v=7ac62a56299d">
                 
     
             
@@ -598,7 +602,7 @@
                 
 
                     
-                        <script data-swup-reload-script src="/js/site-motion.js" defer></script>
+                        <script data-swup-reload-script src="/js/site-motion.js?v=495b5020e352" defer></script>
                     
         
         
@@ -737,7 +741,14 @@
                 animateScroll: false,
                 offset: 80,
             }),
-            new SwupPreloadPlugin(),
+            new SwupPreloadPlugin({
+                // Article links entering the viewport are fetched while idle, so a tap
+                // swaps instantly. Skipped on Save-Data or 2G links.
+                preloadVisibleLinks: !(navigator.connection?.saveData || /2g/.test(navigator.connection?.effectiveType || "")) && {
+                    delay: 300,
+                    containers: [".main-content-body"],
+                },
+            }),
         ],
         containers: ["#swup"],
         animateHistoryBrowsing: false,

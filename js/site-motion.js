@@ -58,6 +58,61 @@
     animations.clear();
   };
 
+  // One delegated listener for every card on every route: the document survives Swup
+  // swaps, so nothing is rebound. Only two custom properties change per frame.
+  let spotFrame = 0;
+  let spotEvent = null;
+  document.addEventListener('pointermove', (event) => {
+    if (!pointer.matches || motion.matches) return;
+    spotEvent = event;
+    if (spotFrame) return;
+    spotFrame = requestAnimationFrame(() => {
+      spotFrame = 0;
+      const card = spotEvent.target instanceof Element && spotEvent.target.closest(selectors);
+      if (!card) return;
+      const bounds = card.getBoundingClientRect();
+      card.style.setProperty('--spot-x', `${spotEvent.clientX - bounds.left}px`);
+      card.style.setProperty('--spot-y', `${spotEvent.clientY - bounds.top}px`);
+    });
+  }, { passive: true });
+
+  // A single pill glides between navigation items and settles back on the active one.
+  const bindNavPill = () => {
+    const list = document.querySelector('.navbar-container .navbar-list');
+    if (!list || list.querySelector(':scope > .nav-pill')) return;
+    const pill = document.createElement('li');
+    pill.className = 'nav-pill';
+    pill.setAttribute('aria-hidden', 'true');
+    list.prepend(pill);
+    const place = (link, instant) => {
+      if (!link) {
+        pill.style.opacity = '0';
+        return;
+      }
+      if (instant) pill.style.transition = 'none';
+      pill.style.opacity = '1';
+      // Items are positioned, so offsetLeft is item-relative; measure against the list.
+      const from = list.getBoundingClientRect();
+      const to = link.getBoundingClientRect();
+      pill.style.width = `${to.width}px`;
+      pill.style.height = `${to.height}px`;
+      pill.style.transform = `translate(${to.left - from.left}px, ${to.top - from.top}px)`;
+      if (instant) {
+        pill.getBoundingClientRect();
+        pill.style.removeProperty('transition');
+      }
+    };
+    const active = () => list.querySelector('.navbar-item > a.active');
+    place(active(), true);
+    list.addEventListener('pointerover', (event) => {
+      const link = event.target instanceof Element && event.target.closest('.navbar-item:not(.search) > a');
+      if (link) place(link, false);
+    });
+    list.addEventListener('pointerleave', () => place(active(), false));
+    // Web fonts change link widths after first paint.
+    document.fonts?.ready.then(() => place(active(), true));
+  };
+
   // Event-driven light, never a perpetual render loop. Only the decorative layer moves.
   const bindLight = (hero) => {
     if (!hero || lightCleanup || !pointer.matches) return;
@@ -90,6 +145,7 @@
   };
 
   const bind = () => {
+    bindNavPill();
     if (!viewReady || pageHidden || motion.matches || isChanging()) return;
     const hero = document.querySelector('.home-banner-container');
     bindLight(hero);
@@ -102,14 +158,26 @@
       if (hero.getBoundingClientRect().bottom > 0) {
         signature = hero;
         signature.setAttribute('data-signature-intro', '');
-        signature.querySelectorAll('.home-avatar, .home-author-id').forEach((element, index) => {
-          track(element.animate([
-            { opacity: 0.25, transform: 'translateY(12px)' },
-            { opacity: 1, transform: 'translateY(0)' },
+        const avatar = signature.querySelector('.home-avatar');
+        if (avatar) {
+          track(avatar.animate([
+            { opacity: 0, transform: 'scale(0.86)' },
+            { opacity: 1, transform: 'scale(1)' },
           ], {
-            duration: index ? 880 : 720,
-            delay: index ? 110 : 0,
-            easing: 'cubic-bezier(0.2, 0.7, 0.3, 1)',
+            duration: 760,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            fill: 'backwards',
+          }));
+        }
+        // Each letter rises out of a soft blur, staggered like a camera pulling focus.
+        signature.querySelectorAll('.home-author-letter').forEach((letter, index) => {
+          track(letter.animate([
+            { opacity: 0, filter: 'blur(10px)', transform: 'translateY(0.32em)' },
+            { opacity: 1, filter: 'blur(0)', transform: 'translateY(0)' },
+          ], {
+            duration: 900,
+            delay: 140 + index * 48,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
             fill: 'backwards',
           }));
         });
@@ -132,6 +200,8 @@
     observer = new IntersectionObserver((entries, currentObserver) => {
       // Disconnected observers can still have a queued delivery from the old view.
       if (currentObserver !== observer || !viewReady || pageHidden || motion.matches) return;
+      // Cards arriving in the same frame cascade instead of moving as one slab.
+      let batch = 0;
       for (const entry of entries) {
         if (!entry.isIntersecting) continue;
         const element = entry.target;
@@ -142,12 +212,13 @@
         if (isChanging()) continue;
 
         const animation = element.animate([
-          { opacity: 0, transform: 'translateY(10px)' },
-          { opacity: 1, transform: 'translateY(0)' },
+          { opacity: 0, transform: 'translateY(28px) scale(0.985)' },
+          { opacity: 1, transform: 'translateY(0) scale(1)' },
         ], {
-          duration: 380,
-          easing: 'cubic-bezier(0.2, 0.7, 0.3, 1)',
-          fill: 'none',
+          duration: 720,
+          delay: Math.min(batch++, 4) * 70,
+          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+          fill: 'backwards',
         });
         track(animation);
       }
